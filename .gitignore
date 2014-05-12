@@ -1,0 +1,10 @@
+/bin/
+/gen/
+/ant.properties
+/local.properties
+/project.properties
+/.idea/
+/proguard-project.txt
+/private/
+/out/
+/Lucky Lanka Native Android.iml
