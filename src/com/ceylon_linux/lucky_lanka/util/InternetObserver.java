@@ -18,8 +18,8 @@ import android.net.NetworkInfo;
  */
 public class InternetObserver {
 
-	private final ConnectivityManager connectivityManager;
 	private static InternetObserver instance;
+	private final ConnectivityManager connectivityManager;
 
 	private InternetObserver(Context context) {
 		connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

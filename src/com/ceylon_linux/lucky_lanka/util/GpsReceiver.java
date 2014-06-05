@@ -13,6 +13,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,23 +26,23 @@ import java.util.logging.Logger;
  */
 public class GpsReceiver extends Service {
 
-	private volatile static Location lastKnownLocation;
 	private static final long MINIMUM_DISTANCE_CHANGE = 0;
 	private static final long MINIMUM_TIME_DIFFERENCE = 0;
 	protected static LocationManager locationManager;
+	private volatile static Location lastKnownLocation;
 	private volatile static GpsReceiver gpsReceiver;
+
+	private GpsReceiver(Context applicationContext) {
+		locationManager = (LocationManager) applicationContext.getSystemService(Context.LOCATION_SERVICE);
+		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, new LocationListenerImpl());
+	}
 
 	public synchronized static GpsReceiver getGpsReceiver(Context applicationContext) {
 		if (gpsReceiver == null) {
 			gpsReceiver = new GpsReceiver(applicationContext);
 		}
 		return gpsReceiver;
-	}
-
-	private GpsReceiver(Context applicationContext) {
-		locationManager = (LocationManager) applicationContext.getSystemService(Context.LOCATION_SERVICE);
-		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, new LocationListenerImpl());
 	}
 
 	public synchronized Location getHighAccurateLocation() {
@@ -76,6 +77,11 @@ public class GpsReceiver extends Service {
 		return lastKnownLocation;
 	}
 
+	@Override
+	public IBinder onBind(Intent arg0) {
+		return null;
+	}
+
 	private static class LocationListenerImpl implements LocationListener {
 
 		@Override
@@ -94,11 +100,6 @@ public class GpsReceiver extends Service {
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
-	}
-
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return null;
 	}
 
 }

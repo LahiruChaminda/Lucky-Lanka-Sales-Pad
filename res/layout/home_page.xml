@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Welcome"
+            android:layout_gravity="center_horizontal"
+            android:padding="5dp"
+            android:textSize="30dp" android:gravity="center_horizontal"/>
+    <TableLayout
+            style="@style/table">
+        <TableRow
+                style="@style/table.tr">
+            <TextView
+                    android:text="Name"
+                    style="@style/table.td.td1"/>
+            <TextView
+                    android:text="Name Goes Here"
+                    android:id="@+id/txtHomeName"
+                    style="@style/table.td.td2"/>
+        </TableRow>
+        <TableRow
+                style="@style/table.tr">
+            <TextView
+                    android:text="Address"
+                    style="@style/table.td.td1"/>
+            <TextView
+                    android:text="Address Goes Here"
+                    android:id="@+id/txtHomeAddress"
+                    style="@style/table.td.td2"/>
+        </TableRow>
+        <TableRow
+                style="@style/table.tr">
+            <TextView
+                    android:text="User Name"
+                    style="@style/table.td.td1"/>
+            <TextView
+                    android:text="User Name Goes Here"
+                    android:id="@+id/txtHomeUserName"
+                    style="@style/table.td.td2"/>
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
