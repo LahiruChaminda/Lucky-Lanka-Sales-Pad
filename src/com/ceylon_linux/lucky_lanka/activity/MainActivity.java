@@ -6,6 +6,7 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import com.ceylon_linux.lucky_lanka.R;
 
@@ -27,6 +28,19 @@ public class MainActivity extends Activity {
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
 	private void initialize() {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				Intent loginActivity = new Intent(MainActivity.this, LoginActivity.class);
+				startActivity(loginActivity);
+				finish();
+			}
+		}.start();
 	}
 	// </editor-fold>
 
