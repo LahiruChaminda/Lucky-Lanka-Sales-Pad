@@ -1,45 +1,54 @@
-drop table if exists tbl_item;
-drop table if exists tbl_category;
-drop table if exists tbl_outlet;
-drop table if exists tbl_order_detail;
-drop table if exists tbl_order;
+DROP TABLE IF EXISTS tbl_item;
+DROP TABLE IF EXISTS tbl_category;
+DROP TABLE IF EXISTS tbl_outlet;
+DROP TABLE IF EXISTS tbl_order_detail;
+DROP TABLE IF EXISTS tbl_order;
 
-create table tbl_category(
-	categoryId integer primary key,
-	categoryDescription text not null
+CREATE TABLE tbl_category (
+  categoryId          INTEGER PRIMARY KEY,
+  categoryDescription TEXT NOT NULL
 );
-create table tbl_item(
-	itemId integer primary key,
-	categoryId integer not null references tbl_category(categoryId) on update cascade,
-	itemCode text,
-	itemDescription text check(itemDescription!=''),
-	wholeSalePrice real,
-	retailPrice real,
-	availableQuantity int,
-	loadedQuantity int,
-	freeIssueAvailability int default 0,
+CREATE TABLE tbl_item (
+  itemId                INTEGER PRIMARY KEY,
+  categoryId            INTEGER NOT NULL REFERENCES tbl_category(categoryId) ON UPDATE CASCADE,
+  itemCode              TEXT,
+  itemDescription       TEXT CHECK (itemDescription != ''),
+  wholeSalePrice        REAL,
+  retailPrice           REAL,
+  availableQuantity     INT,
+  loadedQuantity        INT,
+  sixPlusOneAvailability INT DEFAULT 0,
+  minimumFreeIssueQuantity INT DEFAULT 0,
+  freeIssueQuantity INT DEFAULT 0
 );
-create table tbl_outlet(
-	outletId integer not null primary key,
-	outletName text not null,
-	outletAddress text not null,
-	outletType int not null default 0,
-	outletDiscount real default 0 check (outletDiscount >= 0 && outletDiscount<=100)
+CREATE TABLE tbl_route (
+  routeId       INTEGER NOT NULL PRIMARY KEY,
+  routeName     TEXT    NOT NULL
 );
-create table tbl_order(
-	orderId integer not null primary key autoincrement,
-	outletId integer references tbl_outlet(outletId) on update cascade,
-	orderDate long,
-	total real,
-	batteryLevel integer not null,
-	longitude real not null,
-	latitude real not null
+CREATE TABLE tbl_outlet (
+  outletId       INTEGER NOT NULL PRIMARY KEY,
+  routeId INTEGER NOT NULL REFERENCES tbl_route(routeId) ON UPDATE CASCADE ON DELETE CASCADE,
+  outletName     TEXT    NOT NULL,
+  outletAddress  TEXT    NOT NULL,
+  outletType     INT     NOT NULL DEFAULT 0,
+  outletDiscount REAL DEFAULT 0 CHECK (outletDiscount >= 0 AND outletDiscount <= 100)
 );
-create table tbl_order_detail(
-	orderId integer not null references tbl_order(orderId) on update cascade on delete cascade,
-	itemId integer not null references tbl_item(itemId) on update cascade,
-	price real not null,
-	discount real,
-	quantity int,
-	freeQuantity int default 0
+CREATE TABLE tbl_order (
+  orderId  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  outletId INTEGER REFERENCES tbl_outlet( outletId) ON UPDATE cascade,
+  routeId INTEGER NOT NULL,
+  positionId INTEGER NOT NULL,
+  invoiceTime long,
+  total REAL,
+  batteryLevel INTEGER NOT NULL,
+  longitude REAL NOT NULL,
+  latitude REAL NOT NULL
+);
+CREATE TABLE tbl_order_detail (
+  orderId      INTEGER NOT NULL REFERENCES tbl_order(orderId) ON UPDATE CASCADE ON DELETE CASCADE,
+  itemId       INTEGER NOT NULL REFERENCES tbl_item(itemId) ON UPDATE CASCADE,
+  price        REAL    NOT NULL,
+  discount     REAL,
+  quantity     INT,
+  freeQuantity INT DEFAULT 0
 );
