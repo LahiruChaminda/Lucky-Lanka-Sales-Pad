@@ -12,19 +12,26 @@ import android.os.Bundle;
 import com.ceylon_linux.lucky_lanka.R;
 
 /**
- * MainActivity - Entry point of the Lucky Lanka Sales Pad
+ * SplashActivity - Entry point of the Lucky Lanka Sales Pad
  *
  * @author Supun Lakshan Wanigarathna Dissanayake
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class MainActivity extends Activity {
+public class SplashActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.splash_screen);
 		initialize();
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		finish();
+		System.exit(0);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
@@ -33,11 +40,11 @@ public class MainActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				Intent loginActivity = new Intent(MainActivity.this, LoginActivity.class);
+				Intent loginActivity = new Intent(SplashActivity.this, LoginActivity.class);
 				startActivity(loginActivity);
 				finish();
 			}
