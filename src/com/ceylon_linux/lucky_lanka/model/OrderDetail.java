@@ -3,7 +3,12 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 8:21:21 PM
  */
+
 package com.ceylon_linux.lucky_lanka.model;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -11,6 +16,7 @@ package com.ceylon_linux.lucky_lanka.model;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class OrderDetail {
+
 	private int itemId;
 	private String itemDescription;
 	private int quantity;
@@ -47,22 +53,29 @@ public class OrderDetail {
 		this.price = price;
 	}
 
-	public static OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity) {
+	public static final OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity) {
 		int freeIssue = 0;
 		double discountPercentage = 0;
-		if (!item.isFreeIssueAvailability() && quantity >= 216) {
-			switch (outlet.getOutletType()) {
-				case Outlet.NORMAL_OUTLET:
-					freeIssue = quantity / 36;
-					break;
-				case Outlet.SIX_PLUS_ONE_OUTLET:
-					freeIssue = quantity / 6;
-					break;
-				case Outlet.SUPER_MARKET:
-					discountPercentage = outlet.getOutletDiscount();
-					break;
-			}
+		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
+		int freeIssueRatio = item.getFreeIssueQuantity();
+		switch (outlet.getOutletType()) {
+			case Outlet.NORMAL_OUTLET:
+				if (quantity >= minimumFreeIssueQuantity) {
+					freeIssue = ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
+				}
+				break;
+			case Outlet.SIX_PLUS_ONE_OUTLET:
+				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
+					freeIssue = ((int) (quantity / 216)) * 36;
+				} else if (quantity >= minimumFreeIssueQuantity) {
+					freeIssue = ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
+				}
+				break;
+			case Outlet.SUPER_MARKET:
+				discountPercentage = outlet.getOutletDiscount();
+				break;
 		}
+
 		if (outlet.getOutletType() == Outlet.SUPER_MARKET) {
 			return new OrderDetail(item, quantity, discountPercentage);
 		} else {
@@ -108,5 +121,19 @@ public class OrderDetail {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+
+	public JSONObject getOrderDetailAsJson() {
+		HashMap<String, Object> orderDetailsParams = new HashMap<String, Object>();
+		orderDetailsParams.put("itemId", itemId);
+		orderDetailsParams.put("quantity", quantity);
+		orderDetailsParams.put("free", freeIssue);
+		orderDetailsParams.put("unitPrice", price);
+		return new JSONObject(orderDetailsParams);
+	}
+
+	@Override
+	public String toString() {
+		return itemDescription;
 	}
 }

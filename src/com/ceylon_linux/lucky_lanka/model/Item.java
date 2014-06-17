@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 7, 2014, 11:06:25 AM
  */
+
 package com.ceylon_linux.lucky_lanka.model;
 
 import org.json.JSONException;
@@ -18,6 +19,7 @@ import java.io.Serializable;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class Item implements Serializable {
+
 	private int itemId;
 	private String itemCode;
 	private String itemDescription;
@@ -25,27 +27,22 @@ public class Item implements Serializable {
 	private int loadedQuantity;
 	private double wholeSalePrice;
 	private double retailSalePrice;
-	private boolean freeIssueAvailability;
+	private boolean sixPlusOneAvailability;
+	private int minimumFreeIssueQuantity;
+	private int freeIssueQuantity;
+	private boolean selected;
 
-	public Item(int itemId, String itemDescription, int availableQuantity, int loadedQuantity, double retailSalePrice, double wholeSalePrice, boolean freeIssueAvailability) {
-		this.setItemId(itemId);
-		this.setItemDescription(itemDescription);
-		this.setAvailableQuantity(availableQuantity);
-		this.setLoadedQuantity(loadedQuantity);
-		this.setRetailSalePrice(retailSalePrice);
-		this.setWholeSalePrice(wholeSalePrice);
-		this.setFreeIssueAvailability(freeIssueAvailability);
-	}
-
-	public Item(int itemId, String itemCode, String itemDescription, int loadedQuantity, int availableQuantity, double wholeSalePrice, double retailSalePrice, boolean freeIssueAvailability) {
-		this.setItemId(itemId);
-		this.setItemCode(itemCode);
-		this.setItemDescription(itemDescription);
-		this.setLoadedQuantity(loadedQuantity);
-		this.setAvailableQuantity(availableQuantity);
-		this.setWholeSalePrice(wholeSalePrice);
-		this.setRetailSalePrice(retailSalePrice);
-		this.setFreeIssueAvailability(freeIssueAvailability);
+	public Item(int itemId, String itemCode, String itemDescription, int availableQuantity, int loadedQuantity, double wholeSalePrice, double retailSalePrice, boolean sixPlusOneAvailability, int minimumFreeIssueQuantity, int freeIssueQuantity) {
+		this.itemId = itemId;
+		this.itemCode = itemCode;
+		this.itemDescription = itemDescription;
+		this.availableQuantity = availableQuantity;
+		this.loadedQuantity = loadedQuantity;
+		this.wholeSalePrice = wholeSalePrice;
+		this.retailSalePrice = retailSalePrice;
+		this.sixPlusOneAvailability = sixPlusOneAvailability;
+		this.minimumFreeIssueQuantity = minimumFreeIssueQuantity;
+		this.freeIssueQuantity = freeIssueQuantity;
 	}
 
 	public static final Item parseItem(JSONObject itemJsonInstance) throws JSONException {
@@ -53,14 +50,16 @@ public class Item implements Serializable {
 			return null;
 		}
 		return new Item(
-				itemJsonInstance.getInt("itemId"),
-				itemJsonInstance.getString("itemCode"),
-				itemJsonInstance.getString("itemDescription"),
-				itemJsonInstance.getInt("availableQuantity"),
-				itemJsonInstance.getInt("loadedQuantity"),
-				itemJsonInstance.getDouble("wholeSalePrice"),
-				itemJsonInstance.getDouble("retailSalePrice"),
-				itemJsonInstance.getBoolean("freeIssueAvailability")
+			itemJsonInstance.getInt("iditem"),//int itemId
+			itemJsonInstance.getString("itemCode"),//int itemCode
+			itemJsonInstance.getString("itemName"),//itemDescription
+			itemJsonInstance.getInt("sst_qty"),//avilableQuantity
+			itemJsonInstance.getInt("sst_qty"),//loadedQuantity
+			itemJsonInstance.getDouble("ip_whole_price"),//wholeSalePrice
+			itemJsonInstance.getDouble("ip_price_visible"),//retailSalePrice
+			itemJsonInstance.getBoolean("af_sixone_status"), //sixPlusOneAvailability
+			itemJsonInstance.getInt("minim"),//minimumFreeIssueQuantity
+			itemJsonInstance.getInt("freeq")//freeIssueQuantity
 		);
 	}
 
@@ -120,11 +119,57 @@ public class Item implements Serializable {
 		this.retailSalePrice = retailSalePrice;
 	}
 
-	public boolean isFreeIssueAvailability() {
-		return freeIssueAvailability;
+	public boolean isSixPlusOneAvailability() {
+		return sixPlusOneAvailability;
 	}
 
-	public void setFreeIssueAvailability(boolean freeIssueAvailability) {
-		this.freeIssueAvailability = freeIssueAvailability;
+	public void setSixPlusOneAvailability(boolean sixPlusOneAvailability) {
+		this.sixPlusOneAvailability = sixPlusOneAvailability;
+	}
+
+	public int getMinimumFreeIssueQuantity() {
+		return minimumFreeIssueQuantity;
+	}
+
+	public void setMinimumFreeIssueQuantity(int minimumFreeIssueQuantity) {
+		this.minimumFreeIssueQuantity = minimumFreeIssueQuantity;
+	}
+
+	public int getFreeIssueQuantity() {
+		return freeIssueQuantity;
+	}
+
+	public void setFreeIssueQuantity(int freeIssueQuantity) {
+		this.freeIssueQuantity = freeIssueQuantity;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+
+	@Override
+	public String toString() {
+		return itemDescription;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Item item = (Item) o;
+		return (itemId == item.itemId);
+	}
+
+	@Override
+	public int hashCode() {
+		return itemId;
 	}
 }

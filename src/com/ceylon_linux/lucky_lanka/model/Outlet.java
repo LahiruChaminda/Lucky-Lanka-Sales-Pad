@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 7:26:46 PM
  */
+
 package com.ceylon_linux.lucky_lanka.model;
 
 import org.json.JSONException;
@@ -16,17 +17,20 @@ import java.io.Serializable;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class Outlet implements Serializable {
-	public static final int NORMAL_OUTLET = 0;
-	public static final int SIX_PLUS_ONE_OUTLET = 1;
-	public static final int SUPER_MARKET = 2;
+
+	public static final int NORMAL_OUTLET = 3;
+	public static final int SIX_PLUS_ONE_OUTLET = 0;
+	public static final int SUPER_MARKET = 1;
 	private int outletId;
+	private int routeId;
 	private String outletName;
 	private String outletAddress;
 	private int outletType;
 	private double outletDiscount;
 
-	public Outlet(int outletId, String outletName, String outletAddress, int outletType, double outletDiscount) {
+	public Outlet(int outletId, int routeId, String outletName, String outletAddress, int outletType, double outletDiscount) {
 		this.outletId = outletId;
+		this.routeId = routeId;
 		this.outletName = outletName;
 		this.outletAddress = outletAddress;
 		this.outletType = outletType;
@@ -37,12 +41,26 @@ public class Outlet implements Serializable {
 		if (outletJsonInstance == null) {
 			return null;
 		}
+		int outletType = 0;
+		switch (outletJsonInstance.getInt("plus")) {
+			case 0:
+				outletType = Outlet.SIX_PLUS_ONE_OUTLET;
+				break;
+			case 1:
+				if (outletJsonInstance.getInt("idoutlet_category") == Outlet.SUPER_MARKET) {
+					outletType = Outlet.SUPER_MARKET;
+				} else {
+					outletType = Outlet.NORMAL_OUTLET;
+				}
+				break;
+		}
 		return new Outlet(
-				outletJsonInstance.getInt("outletId"),
-				outletJsonInstance.getString("outletName"),
-				outletJsonInstance.getString("outletAddress"),
-				outletJsonInstance.getInt("outletType"),
-				outletJsonInstance.getDouble("outletDiscount")
+			outletJsonInstance.getInt("outletId"),
+			outletJsonInstance.getInt("routeId"),
+			outletJsonInstance.getString("outlet"),
+			outletJsonInstance.getString("o_address"),
+			outletType,
+			outletJsonInstance.getDouble("oltdis")
 		);
 	}
 
@@ -84,5 +102,18 @@ public class Outlet implements Serializable {
 
 	public void setOutletDiscount(double outletDiscount) {
 		this.outletDiscount = outletDiscount;
+	}
+
+	public int getRouteId() {
+		return routeId;
+	}
+
+	public void setRouteId(int routeId) {
+		this.routeId = routeId;
+	}
+
+	@Override
+	public String toString() {
+		return outletName;
 	}
 }

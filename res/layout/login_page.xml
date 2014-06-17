@@ -21,13 +21,13 @@
             android:layout_gravity="center_horizontal"
             android:padding="5dp"
             android:hint="User Name"
+            android:text="arz9@nishantha"
             android:textSize="25dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"/>
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Password"
             android:padding="5dp"
             android:textSize="25dp"
@@ -38,10 +38,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/inputPassword"
             android:hint="Password"
+            android:text="1234"
             android:padding="5dp"
             android:textSize="25dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginRight="5dp" android:inputType="textPassword"/>
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

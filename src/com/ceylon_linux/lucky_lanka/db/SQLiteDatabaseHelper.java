@@ -3,6 +3,7 @@
  * Copyright (c) 2013, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 9:19:37 AM
  */
+
 package com.ceylon_linux.lucky_lanka.db;
 
 import android.content.Context;

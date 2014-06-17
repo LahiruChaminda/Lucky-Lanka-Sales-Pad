@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : May 9, 2014, 10:10:54 PM
  */
+
 package com.ceylon_linux.lucky_lanka.util;
 
 import android.app.Service;
@@ -13,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +37,7 @@ public class GpsReceiver extends Service {
 	private GpsReceiver(Context applicationContext) {
 		locationManager = (LocationManager) applicationContext.getSystemService(Context.LOCATION_SERVICE);
 		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, new LocationListenerImpl());
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, new LocationListenerImpl(), Looper.getMainLooper());
 	}
 
 	public synchronized static GpsReceiver getGpsReceiver(Context applicationContext) {
@@ -78,7 +80,7 @@ public class GpsReceiver extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent arg0) {
+	public IBinder onBind(Intent intent) {
 		return null;
 	}
 

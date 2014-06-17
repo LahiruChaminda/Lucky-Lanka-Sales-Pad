@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : May 9, 2014, 10:26:12 PM
  */
+
 package com.ceylon_linux.lucky_lanka.controller;
 
 import android.content.Context;
@@ -40,7 +41,7 @@ abstract class AbstractController extends WebServiceURL {
 		if (InternetObserver.isConnectedToInternet(context)) {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost postRequest = new HttpPost(url);
-			// Uncomment following line use gzip
+			// Uncomment following line to use gzip
 			// postRequest.addHeader("Accept-Encoding", "gzip");
 			if (parameters != null) {
 				MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
@@ -69,7 +70,7 @@ abstract class AbstractController extends WebServiceURL {
 				if ((content = response.getEntity().getContent()) == null) {
 					return null;
 				}
-				// Uncomment following line use gzip
+				// Uncomment following line to use gzip
 				// bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(content)));
 				bufferedReader = new BufferedReader(new InputStreamReader(content));
 				String currentLine;
@@ -90,7 +91,7 @@ abstract class AbstractController extends WebServiceURL {
 		if (InternetObserver.isConnectedToInternet(context)) {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost postRequest = new HttpPost(url);
-			// Uncomment following line use gzip
+			// Uncomment following line to use gzip
 			// postRequest.addHeader("Accept-Encoding", "gzip");
 			if (parameters != null) {
 				MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
@@ -119,7 +120,7 @@ abstract class AbstractController extends WebServiceURL {
 				if ((content = response.getEntity().getContent()) == null) {
 					return null;
 				}
-				// Uncomment following line use gzip
+				// Uncomment following line to use gzip
 				// bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(content)));
 				bufferedReader = new BufferedReader(new InputStreamReader(content));
 				String currentLine;

@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 12:27:01 PM
  */
+
 package com.ceylon_linux.lucky_lanka.model;
 
 import org.json.JSONArray;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class Category {
+
 	private ArrayList<Item> items;
 	private String categoryDescription;
 	private int categoryId;
@@ -46,9 +48,9 @@ public class Category {
 			}
 		}
 		return (items.size() == 0) ? null : new Category(
-				categoryJsonInstance.getInt("categoryId"),
-				categoryJsonInstance.getString("categoryDescription"),
-				items
+			categoryJsonInstance.getInt("iditem_category_type"),
+			categoryJsonInstance.getString("ict_name"),
+			items
 		);
 	}
 
@@ -74,5 +76,10 @@ public class Category {
 
 	public void setCategoryId(int categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	@Override
+	public String toString() {
+		return categoryDescription;
 	}
 }
