@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:padding="5dp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:gravity="center"
+                        android:text="New Invoice"
+                        android:textSize="25dp"
+                        android:layout_weight="1" android:background="#65aaff"/>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent" android:padding="5dp"
+                        android:layout_weight="1"
+                        android:weightSum="5.5"
+                        android:layout_height="0dp">
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:text="Date"
+                            android:textSize="25dp"/>
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:textSize="25dp"
+                            android:layout_height="wrap_content"
+                            android:text="Date"
+                            android:id="@+id/txtDate"/>
+                </LinearLayout>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent" android:padding="5dp"
+                        android:weightSum="5.5"
+                        android:layout_weight="1"
+                        android:layout_height="0dp">
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:text="Time"
+                            android:textSize="25dp"/>
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:textSize="25dp"
+                            android:layout_height="wrap_content"
+                            android:text="Time"
+                            android:id="@+id/txtTime"/>
+                </LinearLayout>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent" android:padding="5dp"
+                        android:weightSum="5.5"
+                        android:layout_weight="1"
+                        android:layout_height="0dp">
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:text="Routine ID"
+                            android:textSize="25dp"/>
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:textSize="25dp"
+                            android:layout_height="wrap_content"
+                            android:text="Routine ID"
+                            android:id="@+id/txtRoutine"/>
+                </LinearLayout>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:weightSum="5.5" android:padding="5dp"
+                        android:layout_height="0dp">
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:text="Route"
+                            android:textSize="25dp"/>
+                    <AutoCompleteTextView
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:textSize="25dp"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/routeAuto"/>
+                </LinearLayout>
+                <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:weightSum="5.5" android:padding="5dp"
+                        android:layout_height="0dp">
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:text="Outlet"
+                            android:textSize="25dp"/>
+                    <AutoCompleteTextView
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:textSize="25dp"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/outletAuto"/>
+                </LinearLayout>
+                <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:gravity="center"
+                        android:text="Pending Details"
+                        android:textSize="25dp"
+                        android:layout_weight="1" android:background="#65aaff"/>
+                <include android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         layout="@layout/pending_details_item" android:layout_gravity="center_horizontal"/>
+                <LinearLayout
+                        android:orientation="vertical"
+                        android:id="@+id/pendingDetailsTable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:id="@+id/btnNext"
+            android:clickable="true"
+            android:textSize="25dp"/>
+</LinearLayout>
