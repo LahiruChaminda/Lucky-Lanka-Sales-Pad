@@ -60,7 +60,7 @@ public class Outlet implements Serializable {
 			outletJsonInstance.getString("outlet"),
 			outletJsonInstance.getString("o_address"),
 			outletType,
-			0
+			outletJsonInstance.getDouble("dis_pre")
 		);
 	}
 

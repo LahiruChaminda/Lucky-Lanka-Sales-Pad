@@ -38,7 +38,7 @@ public class User implements Serializable {
 	}
 
 	public static User parseUser(JSONObject userJsonInstance) throws JSONException {
-		if (!userJsonInstance.getBoolean("result")) {
+		if (userJsonInstance == null || !userJsonInstance.getBoolean("result")) {
 			return null;
 		}
 		return new User(
