@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 11:04:59 AM
@@ -91,8 +91,6 @@ public class LoginActivity extends Activity {
 						UserController.setAuthorizedUser(LoginActivity.this, user);
 						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
-						//download items
-						//download routes and outlets
 					}
 
 				} catch (IOException e) {

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 12:20:23 PM
@@ -8,7 +8,9 @@ package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,8 +21,10 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.ItemController;
+import com.ceylon_linux.lucky_lanka.controller.OrderController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.*;
+import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -200,13 +204,50 @@ public class SelectItemActivity extends Activity {
 		finishButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), new Date().getTime(), orderDetails);
-				Log.i("json", order.getOrderAsJson().toString());
+				final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), new Date().getTime(), orderDetails);
+				Log.i("json",order.getOrderAsJson().toString());
+				new AsyncTask<Order, Void, Boolean>() {
+					ProgressDialog progressDialog;
+
+					@Override
+					protected void onPreExecute() {
+						super.onPreExecute();
+						progressDialog = ProgressDialogGenerator.generateProgressDialog(SelectItemActivity.this, "Sync Order", false);
+						progressDialog.show();
+					}
+
+					@Override
+					protected Boolean doInBackground(Order... params) {
+						Order order = params[0];
+						try {
+							return OrderController.syncOrder(SelectItemActivity.this, order.getOrderAsJson());
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						return false;
+					}
+
+					@Override
+					protected void onPostExecute(Boolean aBoolean) {
+						if (progressDialog != null && progressDialog.isShowing()) {
+							progressDialog.dismiss();
+						}
+						if (aBoolean) {
+							Toast.makeText(SelectItemActivity.this, "Order Syncked Successfully", Toast.LENGTH_LONG).show();
+						} else {
+							Toast.makeText(SelectItemActivity.this, "Unable To Sync Order", Toast.LENGTH_LONG).show();
+							OrderController.saveOrderToDb(SelectItemActivity.this, order);
+						}
+					}
+				}.execute(order);
 			}
 		});
 	}
 
-	// <editor-fold defaultstate="collapsed" desc="Initialize">
+		// <editor-fold defaultstate="collapsed" desc="Initialize">
+
 	private void initialize() {
 		itemList = (ExpandableListView) findViewById(R.id.itemList);
 		finishButton = (Button) findViewById(R.id.finishButton);

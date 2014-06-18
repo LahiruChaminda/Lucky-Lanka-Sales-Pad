@@ -1,10 +1,12 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : May 9, 2014, 10:23:39 PM
  */
 
 package com.ceylon_linux.lucky_lanka.controller;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -56,5 +58,17 @@ abstract class WebServiceURL {
 		}
 
 		public static final String GET_OUTLETS = webServiceURL + "getRouteAndOutlets";
+	}
+
+	protected static final class OrderURLPack {
+
+		public static final HashMap<String, Object> getParameters(JSONObject orderJson,int positionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("jsonString", orderJson);
+			parameters.put("position_id", positionId);
+			return parameters;
+		}
+
+		public static final String INSERT_ORDER = webServiceURL + "insert_order";
 	}
 }

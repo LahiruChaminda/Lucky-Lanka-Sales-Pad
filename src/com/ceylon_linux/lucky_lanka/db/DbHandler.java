@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 11, 2014, 8:19:33 PM

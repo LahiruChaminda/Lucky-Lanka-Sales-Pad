@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 7:26:46 PM
@@ -60,7 +60,7 @@ public class Outlet implements Serializable {
 			outletJsonInstance.getString("outlet"),
 			outletJsonInstance.getString("o_address"),
 			outletType,
-			outletJsonInstance.getDouble("oltdis")
+			0
 		);
 	}
 

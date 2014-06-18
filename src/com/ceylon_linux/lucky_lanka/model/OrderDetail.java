@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 8:21:21 PM
@@ -125,10 +125,10 @@ public class OrderDetail {
 
 	public JSONObject getOrderDetailAsJson() {
 		HashMap<String, Object> orderDetailsParams = new HashMap<String, Object>();
-		orderDetailsParams.put("itemId", itemId);
-		orderDetailsParams.put("quantity", quantity);
+		orderDetailsParams.put("id_item", itemId);
+		orderDetailsParams.put("qty", quantity);
 		orderDetailsParams.put("free", freeIssue);
-		orderDetailsParams.put("unitPrice", price);
+		orderDetailsParams.put("price", price);
 		return new JSONObject(orderDetailsParams);
 	}
 

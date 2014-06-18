@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 17, 2014, 4:35:16 PM
@@ -14,7 +14,10 @@ import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Order;
 import com.ceylon_linux.lucky_lanka.model.OrderDetail;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +50,6 @@ public class OrderController extends AbstractController {
 			});
 			SQLiteStatement orderDetailInsertStatement = database.compileStatement(orderDetailInsertSQL);
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
-				//orderId, itemId, price, discount, quantity, freeQuantity
 				DbHandler.performExecuteInsert(orderDetailInsertStatement, new Object[]{
 					orderId,
 					orderDetail.getItemId(),
@@ -64,6 +66,11 @@ public class OrderController extends AbstractController {
 			database.endTransaction();
 		}
 		return true;
+	}
+
+	public static boolean syncOrder(Context context, JSONObject orderJson) throws IOException, JSONException {
+		JSONObject responseJson = getJsonObject(OrderURLPack.INSERT_ORDER, OrderURLPack.getParameters(orderJson, UserController.getAuthorizedUser(context).getPositionId()), context);
+		return responseJson.getBoolean("result");
 	}
 
 }

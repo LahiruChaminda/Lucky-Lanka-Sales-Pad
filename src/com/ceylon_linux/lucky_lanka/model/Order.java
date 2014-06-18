@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 10, 2014, 8:20:35 PM
@@ -26,6 +26,9 @@ public class Order {
 	private int positionId;
 	private int routeId;
 	private long invoiceTime;
+	private double longitude;
+	private double latitude;
+	private int batteryLevel;
 	private ArrayList<OrderDetail> orderDetails;
 
 	public Order(int outletId, int positionId, int routeId, long invoiceTime, ArrayList<OrderDetail> orderDetails, String outletDescription) {
@@ -99,20 +102,28 @@ public class Order {
 	}
 
 	public JSONObject getOrderAsJson() {
+		HashMap<String,Object> orderJsonParams = new HashMap<String, Object>();
+
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		simpleDateFormat.applyPattern("yyyy-MM-dd");
 		Date invoiceDate = new Date(invoiceTime);
-		HashMap<String, Object> orderParams = new HashMap<String, Object>();
-		orderParams.put("outletId", outletId);
-		orderParams.put("routeId", routeId);
-		orderParams.put("date", simpleDateFormat.format(invoiceDate));
+		HashMap<String, Object> invoiceParams = new HashMap<String, Object>();
+		invoiceParams.put("outletid", outletId);
+		invoiceParams.put("routeid", routeId);
+		invoiceParams.put("invtype", 0);
+		invoiceParams.put("invDate", simpleDateFormat.format(invoiceDate));
 		simpleDateFormat.applyPattern("HH:mm:ss");
-		orderParams.put("time", simpleDateFormat.format(invoiceDate));
+		invoiceParams.put("invtime", simpleDateFormat.format(invoiceDate));
+		invoiceParams.put("lon", longitude);
+		invoiceParams.put("lat", latitude);
+		invoiceParams.put("bat", batteryLevel);
+
 		JSONArray orderDetailsJsonArray = new JSONArray();
 		for (OrderDetail orderDetail : orderDetails) {
 			orderDetailsJsonArray.put(orderDetail.getOrderDetailAsJson());
 		}
-		orderParams.put("items", orderDetailsJsonArray);
-		return new JSONObject(orderParams);
+		orderJsonParams.put("invitems", orderDetailsJsonArray);
+		orderJsonParams.put("Invoice",new JSONObject(invoiceParams));
+		return new JSONObject(orderJsonParams);
 	}
 }

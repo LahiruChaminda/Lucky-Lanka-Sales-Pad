@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 7, 2014, 11:06:25 AM
@@ -51,8 +51,8 @@ public class Item implements Serializable {
 		}
 		return new Item(
 			itemJsonInstance.getInt("iditem"),//int itemId
-			itemJsonInstance.getString("itemCode"),//int itemCode
-			itemJsonInstance.getString("itemName"),//itemDescription
+			itemJsonInstance.getString("item_code"),//int itemCode
+			itemJsonInstance.getString("item_name"),//itemDescription
 			itemJsonInstance.getInt("sst_qty"),//avilableQuantity
 			itemJsonInstance.getInt("sst_qty"),//loadedQuantity
 			itemJsonInstance.getDouble("ip_whole_price"),//wholeSalePrice
@@ -158,14 +158,10 @@ public class Item implements Serializable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+		if (this == o) return true;
 		Item item = (Item) o;
-		return (itemId == item.itemId);
+		if (itemId != item.itemId) return false;
+		return true;
 	}
 
 	@Override
