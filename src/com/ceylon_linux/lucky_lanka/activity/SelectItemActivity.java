@@ -7,8 +7,10 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -146,107 +148,73 @@ public class SelectItemActivity extends Activity {
 		});
 		itemList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			@Override
-			public boolean onChildClick(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
-				final Dialog dialog = new Dialog(SelectItemActivity.this);
-				dialog.setCanceledOnTouchOutside(false);
-				dialog.setTitle("Please Insert Quantity");
-				dialog.setContentView(R.layout.quantity_insert_page);
-				Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
-				TextView txtItemDescription = (TextView) dialog.findViewById(R.id.txtItemDescription);
-				final EditText inputRequestedQuantity = (EditText) dialog.findViewById(R.id.inputRequestedQuantity);
-				final Item item = categories.get(groupPosition).getItems().get(childPosition);
-				final TextView txtFreeQuantity = (TextView) dialog.findViewById(R.id.txtFreeQuantity);
-				final TextView txtDiscount = (TextView) dialog.findViewById(R.id.txtDiscount);
-				Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
-				txtItemDescription.setText(item.getItemDescription());
-				Log.i("Six Item", Boolean.toString(item.isSixPlusOneAvailability()));
-				Log.i("Six Outlet", Integer.toString(outlet.getOutletType()));
-				inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
-					@Override
-					public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-					}
-
-					@Override
-					public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-					}
-
-					@Override
-					public void afterTextChanged(Editable editable) {
-						String requestedQuantityString = inputRequestedQuantity.getText().toString();
-						int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-						OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
-						txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
-						txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
-					}
-				});
-				btnOk.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						String requestedQuantityString = inputRequestedQuantity.getText().toString();
-						int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-						OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
-						orderDetails.add(orderDetail);
-						item.setSelected(true);
-						itemList.collapseGroup(groupPosition);
-						itemList.expandGroup(groupPosition);
-						dialog.dismiss();
-					}
-				});
-				btnCancel.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						dialog.dismiss();
-					}
-				});
-				dialog.show();
-				return true;
+			public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long id) {
+				return itemListOnChildClicked(expandableListView, view, groupPosition, childPosition, id);
 			}
 		});
 		finishButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
-				Log.i("json", order.getOrderAsJson().toString());
-				new AsyncTask<Order, Void, Boolean>() {
-					ProgressDialog progressDialog;
-
-					@Override
-					protected void onPreExecute() {
-						super.onPreExecute();
-						progressDialog = ProgressDialogGenerator.generateProgressDialog(SelectItemActivity.this, "Sync Order", false);
-						progressDialog.show();
-					}
-
-					@Override
-					protected Boolean doInBackground(Order... params) {
-						Order order = params[0];
-						try {
-							return OrderController.syncOrder(SelectItemActivity.this, order.getOrderAsJson());
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						return false;
-					}
-
-					@Override
-					protected void onPostExecute(Boolean aBoolean) {
-						if (progressDialog != null && progressDialog.isShowing()) {
-							progressDialog.dismiss();
-						}
-						if (aBoolean) {
-							Toast.makeText(SelectItemActivity.this, "Order Syncked Successfully", Toast.LENGTH_LONG).show();
-						} else {
-							OrderController.saveOrderToDb(SelectItemActivity.this, order);
-							Toast.makeText(SelectItemActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
-						}
-					}
-				}.execute(order);
+				finishButtonClicked(view);
 			}
 		});
 	}
 
+	private boolean itemListOnChildClicked(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
+		final Dialog dialog = new Dialog(SelectItemActivity.this);
+		dialog.setCanceledOnTouchOutside(false);
+		dialog.setTitle("Please Insert Quantity");
+		dialog.setContentView(R.layout.quantity_insert_page);
+		Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
+		TextView txtItemDescription = (TextView) dialog.findViewById(R.id.txtItemDescription);
+		final EditText inputRequestedQuantity = (EditText) dialog.findViewById(R.id.inputRequestedQuantity);
+		final Item item = categories.get(groupPosition).getItems().get(childPosition);
+		final TextView txtFreeQuantity = (TextView) dialog.findViewById(R.id.txtFreeQuantity);
+		final TextView txtDiscount = (TextView) dialog.findViewById(R.id.txtDiscount);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
+		txtItemDescription.setText(item.getItemDescription());
+		Log.i("Six Item", Boolean.toString(item.isSixPlusOneAvailability()));
+		Log.i("Six Outlet", Integer.toString(outlet.getOutletType()));
+		inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+				String requestedQuantityString = inputRequestedQuantity.getText().toString();
+				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
+				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
+				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
+			}
+		});
+		btnOk.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				String requestedQuantityString = inputRequestedQuantity.getText().toString();
+				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
+				orderDetails.add(orderDetail);
+				item.setSelected(true);
+				itemList.collapseGroup(groupPosition);
+				itemList.expandGroup(groupPosition);
+				dialog.dismiss();
+			}
+		});
+		btnCancel.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				dialog.dismiss();
+			}
+		});
+		dialog.show();
+		return true;
+	}
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
 
 	private void initialize() {
@@ -255,6 +223,64 @@ public class SelectItemActivity extends Activity {
 		orderDetails = new ArrayList<OrderDetail>();
 	}
 	// </editor-fold>
+
+	private void finishButtonClicked(View view) {
+		if (orderDetails.size() == 0) {
+			final AlertDialog.Builder alert = new AlertDialog.Builder(SelectItemActivity.this);
+			alert.setTitle(R.string.app_name);
+			alert.setMessage("Please select at least one item");
+			alert.setPositiveButton("Ok", null);
+			alert.show();
+			return;
+		}
+		final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
+		new AsyncTask<Order, Void, Boolean>() {
+			ProgressDialog progressDialog;
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				progressDialog = ProgressDialogGenerator.generateProgressDialog(SelectItemActivity.this, "Sync Order", false);
+				progressDialog.show();
+			}
+
+			@Override
+			protected Boolean doInBackground(Order... params) {
+				Order order = params[0];
+				try {
+					return OrderController.syncOrder(SelectItemActivity.this, order.getOrderAsJson());
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+
+			@Override
+			protected void onPostExecute(Boolean aBoolean) {
+				if (progressDialog != null && progressDialog.isShowing()) {
+					progressDialog.dismiss();
+				}
+				if (aBoolean) {
+					Toast.makeText(SelectItemActivity.this, "Order Synced Successfully", Toast.LENGTH_LONG).show();
+				} else {
+					OrderController.saveOrderToDb(SelectItemActivity.this, order);
+					Toast.makeText(SelectItemActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
+				}
+				Intent homeActivity = new Intent(SelectItemActivity.this, HomeActivity.class);
+				startActivity(homeActivity);
+				finish();
+			}
+		}.execute(order);
+	}
+
+	@Override
+	public void onBackPressed() {
+		Intent loadAddInvoiceActivity = new Intent(SelectItemActivity.this, LoadAddInvoiceActivity.class);
+		startActivity(loadAddInvoiceActivity);
+		finish();
+	}
 
 	private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item) {
 		for (OrderDetail orderDetail : orderDetails) {

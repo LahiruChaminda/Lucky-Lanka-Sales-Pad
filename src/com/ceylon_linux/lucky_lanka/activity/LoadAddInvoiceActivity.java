@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -77,7 +76,6 @@ public class LoadAddInvoiceActivity extends Activity {
 						txtDate.setText(simpleDateFormat.format(date));
 						simpleDateFormat.applyPattern("hh:mm:ss aa");
 						txtTime.setText(simpleDateFormat.format(date));
-						Log.i("running", "still running");
 					}
 				});
 			}
@@ -114,6 +112,14 @@ public class LoadAddInvoiceActivity extends Activity {
 		});
 	}
 	// </editor-fold>
+
+
+	@Override
+	public void onBackPressed() {
+		Intent homeActivity = new Intent(LoadAddInvoiceActivity.this, HomeActivity.class);
+		startActivity(homeActivity);
+		finish();
+	}
 
 	private void routeAutoItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
 		Route route = (Route) adapterView.getAdapter().getItem(position);
