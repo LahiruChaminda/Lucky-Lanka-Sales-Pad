@@ -24,6 +24,7 @@ import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import com.ceylon_linux.lucky_lanka.controller.OrderController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.*;
+import com.ceylon_linux.lucky_lanka.util.BatteryUtility;
 import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
 import org.json.JSONException;
 
@@ -204,8 +205,8 @@ public class SelectItemActivity extends Activity {
 		finishButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), new Date().getTime(), orderDetails);
-				Log.i("json",order.getOrderAsJson().toString());
+				final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
+				Log.i("json", order.getOrderAsJson().toString());
 				new AsyncTask<Order, Void, Boolean>() {
 					ProgressDialog progressDialog;
 
@@ -237,8 +238,8 @@ public class SelectItemActivity extends Activity {
 						if (aBoolean) {
 							Toast.makeText(SelectItemActivity.this, "Order Syncked Successfully", Toast.LENGTH_LONG).show();
 						} else {
-							Toast.makeText(SelectItemActivity.this, "Unable To Sync Order", Toast.LENGTH_LONG).show();
 							OrderController.saveOrderToDb(SelectItemActivity.this, order);
+							Toast.makeText(SelectItemActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
 						}
 					}
 				}.execute(order);
@@ -246,7 +247,7 @@ public class SelectItemActivity extends Activity {
 		});
 	}
 
-		// <editor-fold defaultstate="collapsed" desc="Initialize">
+	// <editor-fold defaultstate="collapsed" desc="Initialize">
 
 	private void initialize() {
 		itemList = (ExpandableListView) findViewById(R.id.itemList);

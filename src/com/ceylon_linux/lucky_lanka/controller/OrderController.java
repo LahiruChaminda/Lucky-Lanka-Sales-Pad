@@ -37,14 +37,14 @@ public class OrderController extends AbstractController {
 		try {
 			database.beginTransaction();
 			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude) values(?,?,?,?,?,?,?,?)";
-			String orderDetailInsertSQL = "insert into tbl_order(orderId, itemId, price, discount, quantity, freeQuantity) values(?,?,?,?,?,?)";
+			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity) values(?,?,?,?,?,?)";
 			long orderId = DbHandler.performExecuteInsert(database, orderInsertSQL, new Object[]{
 				order.getOutletId(),
 				order.getRouteId(),
 				order.getPositionId(),
 				order.getInvoiceTime(),
+				0,//total
 				0,
-				100,
 				80,
 				6
 			});

@@ -34,7 +34,6 @@ import java.util.HashMap;
 abstract class AbstractController extends WebServiceURL {
 
 	protected AbstractController() {
-
 	}
 
 	protected final static JSONObject getJsonObject(String url, HashMap<String, Object> parameters, Context context) throws IOException, JSONException {

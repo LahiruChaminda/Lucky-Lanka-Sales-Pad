@@ -21,6 +21,7 @@ import java.util.HashMap;
  */
 public class Order {
 
+	private long orderId;
 	private int outletId;
 	private String outletDescription;
 	private int positionId;
@@ -31,21 +32,62 @@ public class Order {
 	private int batteryLevel;
 	private ArrayList<OrderDetail> orderDetails;
 
-	public Order(int outletId, int positionId, int routeId, long invoiceTime, ArrayList<OrderDetail> orderDetails, String outletDescription) {
+	public Order(int outletId, int positionId, int routeId, int batteryLevel, long invoiceTime, double longitude, double latitude, ArrayList<OrderDetail> orderDetails) {
 		this.setOutletId(outletId);
 		this.setPositionId(positionId);
 		this.setRouteId(routeId);
+		this.setBatteryLevel(batteryLevel);
 		this.setInvoiceTime(invoiceTime);
+		this.setLongitude(longitude);
+		this.setLatitude(latitude);
 		this.setOrderDetails(orderDetails);
-		this.setOutletDescription(outletDescription);
 	}
 
-	public Order(int outletId, int positionId, int routeId, long invoiceTime, ArrayList<OrderDetail> orderDetails) {
+	public Order(long orderId, int outletId, String outletDescription, int positionId, int routeId, long invoiceTime, double longitude, double latitude, int batteryLevel, ArrayList<OrderDetail> orderDetails) {
+		this.setOrderId(orderId);
 		this.setOutletId(outletId);
+		this.setOutletDescription(outletDescription);
 		this.setPositionId(positionId);
 		this.setRouteId(routeId);
 		this.setInvoiceTime(invoiceTime);
+		this.setLongitude(longitude);
+		this.setLatitude(latitude);
+		this.setBatteryLevel(batteryLevel);
 		this.setOrderDetails(orderDetails);
+	}
+
+	public JSONObject getOrderAsJson() {
+		HashMap<String, Object> orderJsonParams = new HashMap<String, Object>();
+
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
+		simpleDateFormat.applyPattern("yyyy-MM-dd");
+		Date invoiceDate = new Date(getInvoiceTime());
+		HashMap<String, Object> invoiceParams = new HashMap<String, Object>();
+		invoiceParams.put("outletid", getOutletId());
+		invoiceParams.put("routeid", getRouteId());
+		invoiceParams.put("invtype", 0);
+		invoiceParams.put("invDate", simpleDateFormat.format(invoiceDate));
+		simpleDateFormat.applyPattern("HH:mm:ss");
+		invoiceParams.put("invtime", simpleDateFormat.format(invoiceDate));
+		invoiceParams.put("lon", getLongitude());
+		invoiceParams.put("lat", getLatitude());
+		invoiceParams.put("bat", getBatteryLevel());
+
+		JSONArray orderDetailsJsonArray = new JSONArray();
+		for (OrderDetail orderDetail : getOrderDetails()) {
+			orderDetailsJsonArray.put(orderDetail.getOrderDetailAsJson());
+		}
+		orderJsonParams.put("invitems", orderDetailsJsonArray);
+		orderJsonParams.put("Invoice", new JSONObject(invoiceParams));
+		return new JSONObject(orderJsonParams);
+	}
+
+	public long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(long orderId) {
+		this.orderId = orderId;
 	}
 
 	public int getOutletId() {
@@ -88,6 +130,30 @@ public class Order {
 		this.invoiceTime = invoiceTime;
 	}
 
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public int getBatteryLevel() {
+		return batteryLevel;
+	}
+
+	public void setBatteryLevel(int batteryLevel) {
+		this.batteryLevel = batteryLevel;
+	}
+
 	public ArrayList<OrderDetail> getOrderDetails() {
 		return orderDetails;
 	}
@@ -101,29 +167,20 @@ public class Order {
 		return outletDescription;
 	}
 
-	public JSONObject getOrderAsJson() {
-		HashMap<String,Object> orderJsonParams = new HashMap<String, Object>();
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
-		simpleDateFormat.applyPattern("yyyy-MM-dd");
-		Date invoiceDate = new Date(invoiceTime);
-		HashMap<String, Object> invoiceParams = new HashMap<String, Object>();
-		invoiceParams.put("outletid", outletId);
-		invoiceParams.put("routeid", routeId);
-		invoiceParams.put("invtype", 0);
-		invoiceParams.put("invDate", simpleDateFormat.format(invoiceDate));
-		simpleDateFormat.applyPattern("HH:mm:ss");
-		invoiceParams.put("invtime", simpleDateFormat.format(invoiceDate));
-		invoiceParams.put("lon", longitude);
-		invoiceParams.put("lat", latitude);
-		invoiceParams.put("bat", batteryLevel);
+		Order order = (Order) o;
 
-		JSONArray orderDetailsJsonArray = new JSONArray();
-		for (OrderDetail orderDetail : orderDetails) {
-			orderDetailsJsonArray.put(orderDetail.getOrderDetailAsJson());
-		}
-		orderJsonParams.put("invitems", orderDetailsJsonArray);
-		orderJsonParams.put("Invoice",new JSONObject(invoiceParams));
-		return new JSONObject(orderJsonParams);
+		if (orderId != order.orderId) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) (orderId ^ (orderId >>> 32));
 	}
 }
