@@ -105,7 +105,7 @@ public class HomeActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		//
+		//todo ask logout confirmation dialog
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
