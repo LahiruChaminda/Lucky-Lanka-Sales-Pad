@@ -44,7 +44,7 @@ public class UserController extends AbstractController {
 		}
 		Date lastLoginDate = new Date(loginTime);
 		Date currentDate = new Date();
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("y-M-d");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		if (!simpleDateFormat.format(lastLoginDate).equalsIgnoreCase(simpleDateFormat.format(currentDate))) {
 			return null;
 		}

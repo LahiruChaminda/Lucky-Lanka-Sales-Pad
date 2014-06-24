@@ -38,8 +38,8 @@ public class LoadAddInvoiceActivity extends Activity {
 	private TextView txtDate;
 	private TextView txtTime;
 	private TextView txtRoutine;
-	private AutoCompleteTextView routeAuto;
-	private AutoCompleteTextView outletAuto;
+	private Spinner routeAuto;
+	private Spinner outletAuto;
 	private ArrayList<Route> routes;
 	private Handler handler;
 	private Timer timer;
@@ -52,7 +52,7 @@ public class LoadAddInvoiceActivity extends Activity {
 		setContentView(R.layout.load_add_invoice_page);
 		initialize();
 		routes = OutletController.loadRoutesFromDb(LoadAddInvoiceActivity.this);
-		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, android.R.layout.simple_dropdown_item_1line, routes) {
+		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, routes) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View view = super.getView(position, convertView, parent);
@@ -60,6 +60,7 @@ public class LoadAddInvoiceActivity extends Activity {
 				return view;
 			}
 		};
+		routeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		routeAuto.setAdapter(routeAdapter);
 		handler = new Handler();
 
@@ -90,24 +91,34 @@ public class LoadAddInvoiceActivity extends Activity {
 		txtDate = (TextView) findViewById(R.id.txtDate);
 		txtTime = (TextView) findViewById(R.id.txtTime);
 		txtRoutine = (TextView) findViewById(R.id.txtRoutine);
-		routeAuto = (AutoCompleteTextView) findViewById(R.id.routeAuto);
-		outletAuto = (AutoCompleteTextView) findViewById(R.id.outletAuto);
+		routeAuto = (Spinner) findViewById(R.id.routeAuto);
+		outletAuto = (Spinner) findViewById(R.id.outletAuto);
 		btnNext.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				btnNextClicked(view);
 			}
 		});
-		routeAuto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		routeAuto.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				routeAutoItemClicked(adapterView, view, position, id);
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				routeAutoItemClicked(parent, view, position, id);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
 			}
 		});
-		outletAuto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		outletAuto.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				outletAutoItemClicked(adapterView, view, position, id);
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				outletAutoItemClicked(parent, view, position, id);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
 			}
 		});
 	}
@@ -123,7 +134,7 @@ public class LoadAddInvoiceActivity extends Activity {
 
 	private void routeAutoItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
 		Route route = (Route) adapterView.getAdapter().getItem(position);
-		ArrayAdapter<Outlet> outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, android.R.layout.simple_list_item_1, route.getOutlets()) {
+		ArrayAdapter<Outlet> outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, route.getOutlets()) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View view = super.getView(position, convertView, parent);
@@ -131,9 +142,8 @@ public class LoadAddInvoiceActivity extends Activity {
 				return view;
 			}
 		};
+		outletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		outlet = null;
-		outletAuto.clearListSelection();
-		outletAuto.setText("");
 		outletAuto.setAdapter(outletAdapter);
 		outletAuto.requestFocus();
 	}
@@ -150,7 +160,7 @@ public class LoadAddInvoiceActivity extends Activity {
 			alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialogInterface, int i) {
-					if (routeAuto.getText().toString().isEmpty()) {
+					if (routeAuto.getSelectedItem() == null) {
 						routeAuto.requestFocus();
 					} else {
 						outletAuto.requestFocus();

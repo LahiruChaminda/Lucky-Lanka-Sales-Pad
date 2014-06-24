@@ -94,7 +94,6 @@ public class LoginActivity extends Activity {
 						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
 					}
-
 				} catch (IOException e) {
 					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 				} catch (JSONException e) {

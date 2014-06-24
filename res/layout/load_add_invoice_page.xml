@@ -95,7 +95,7 @@
                             android:layout_height="wrap_content"
                             android:text="Route"
                             android:textSize="25dp"/>
-                    <AutoCompleteTextView
+                    <Spinner
                             android:layout_width="0dp"
                             android:layout_weight="4"
                             android:textSize="25dp"
@@ -114,7 +114,7 @@
                             android:layout_height="wrap_content"
                             android:text="Outlet"
                             android:textSize="25dp"/>
-                    <AutoCompleteTextView
+                    <Spinner
                             android:layout_width="0dp"
                             android:layout_weight="4"
                             android:textSize="25dp"

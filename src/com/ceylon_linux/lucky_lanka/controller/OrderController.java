@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Order;
@@ -41,7 +40,7 @@ public class OrderController extends AbstractController {
 		try {
 			database.beginTransaction();
 			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude) values(?,?,?,?,?,?,?,?)";
-			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity) values(?,?,?,?,?,?)";
+			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity, returnQuantity, replaceQuantity, sampleQuantity) values(?,?,?,?,?,?,?,?,?)";
 			long orderId = DbHandler.performExecuteInsert(database, orderInsertSQL, new Object[]{
 				order.getOutletId(),
 				order.getRouteId(),
@@ -60,7 +59,10 @@ public class OrderController extends AbstractController {
 					orderDetail.getPrice(),
 					0,
 					orderDetail.getQuantity(),
-					orderDetail.getFreeIssue()
+					orderDetail.getFreeIssue(),
+					orderDetail.getReturnQuantity(),
+					orderDetail.getReplaceQuantity(),
+					orderDetail.getSampleQuantity()
 				});
 			}
 			database.setTransactionSuccessful();
@@ -82,7 +84,7 @@ public class OrderController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
 			String orderSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId";
-			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
+			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription, tbl_order_detail.returnQuantity, tbl_order_detail.replaceQuantity, tbl_order_detail.sampleQuantity from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
 			Cursor orderCursor = DbHandler.performRawQuery(database, orderSelectSql, null);
 			ArrayList<Order> orders = new ArrayList<Order>();
 			for (orderCursor.moveToFirst(); !orderCursor.isAfterLast(); orderCursor.moveToNext()) {
@@ -102,17 +104,19 @@ public class OrderController extends AbstractController {
 				Cursor orderDetailsCursor = DbHandler.performRawQuery(database, orderDetailSelectSql, new Object[]{orderId});
 				for (orderDetailsCursor.moveToFirst(); !orderDetailsCursor.isAfterLast(); orderDetailsCursor.moveToNext()) {
 					int itemId = orderDetailsCursor.getInt(0);
-					Log.i("Order", orderId + " -> " + itemId);
 					double price = orderDetailsCursor.getDouble(1);
 					//double discount = orderDetailsCursor.getDouble(2);
 					int quantity = orderDetailsCursor.getInt(3);
 					int freeQuantity = orderDetailsCursor.getInt(4);
 					String itemDescription = orderDetailsCursor.getString(5);
+					int returnQuantity = orderDetailsCursor.getInt(6);
+					int replaceQuantity = orderDetailsCursor.getInt(7);
+					int sampleQuantity = orderDetailsCursor.getInt(8);
 					OrderDetail orderDetail;
 					if (outletType == Outlet.SUPER_MARKET) {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, price);
+						orderDetail = new OrderDetail(itemId, itemDescription, quantity, price, returnQuantity, replaceQuantity, sampleQuantity);
 					} else {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, freeQuantity, price);
+						orderDetail = new OrderDetail(itemId, itemDescription, quantity, freeQuantity, price, returnQuantity, replaceQuantity, sampleQuantity);
 					}
 					orderDetails.add(orderDetail);
 				}

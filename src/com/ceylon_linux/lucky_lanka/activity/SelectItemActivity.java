@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -168,13 +167,15 @@ public class SelectItemActivity extends Activity {
 		Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
 		TextView txtItemDescription = (TextView) dialog.findViewById(R.id.txtItemDescription);
 		final EditText inputRequestedQuantity = (EditText) dialog.findViewById(R.id.inputRequestedQuantity);
+		final EditText inputReturnQuantity = (EditText) dialog.findViewById(R.id.inputReturnQuantity);
+		final EditText inputReplaceQuantity = (EditText) dialog.findViewById(R.id.inputReplaceQuantity);
+		final EditText inputSampleQuantity = (EditText) dialog.findViewById(R.id.inputSampleQuantity);
 		final Item item = categories.get(groupPosition).getItems().get(childPosition);
 		final TextView txtFreeQuantity = (TextView) dialog.findViewById(R.id.txtFreeQuantity);
 		final TextView txtDiscount = (TextView) dialog.findViewById(R.id.txtDiscount);
 		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
 		txtItemDescription.setText(item.getItemDescription());
-		Log.i("Six Item", Boolean.toString(item.isSixPlusOneAvailability()));
-		Log.i("Six Outlet", Integer.toString(outlet.getOutletType()));
+		;
 		inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -187,8 +188,14 @@ public class SelectItemActivity extends Activity {
 			@Override
 			public void afterTextChanged(Editable editable) {
 				String requestedQuantityString = inputRequestedQuantity.getText().toString();
+				String returnQuantityString = inputReturnQuantity.getText().toString();
+				String replaceQuantityString = inputReplaceQuantity.getText().toString();
+				String sampleQuantityString = inputSampleQuantity.getText().toString();
 				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
+				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
 				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
 				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
 			}
@@ -197,8 +204,17 @@ public class SelectItemActivity extends Activity {
 			@Override
 			public void onClick(View view) {
 				String requestedQuantityString = inputRequestedQuantity.getText().toString();
+				String returnQuantityString = inputReturnQuantity.getText().toString();
+				String replaceQuantityString = inputReplaceQuantity.getText().toString();
+				String sampleQuantityString = inputSampleQuantity.getText().toString();
 				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity);
+				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
+				if (orderDetails.contains(orderDetail)) {
+					orderDetails.remove(orderDetail);
+				}
 				orderDetails.add(orderDetail);
 				item.setSelected(true);
 				itemList.collapseGroup(groupPosition);
@@ -215,8 +231,8 @@ public class SelectItemActivity extends Activity {
 		dialog.show();
 		return true;
 	}
-	// <editor-fold defaultstate="collapsed" desc="Initialize">
 
+	// <editor-fold defaultstate="collapsed" desc="Initialize">
 	private void initialize() {
 		itemList = (ExpandableListView) findViewById(R.id.itemList);
 		finishButton = (Button) findViewById(R.id.finishButton);

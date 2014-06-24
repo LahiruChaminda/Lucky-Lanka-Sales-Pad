@@ -22,38 +22,53 @@ public class OrderDetail {
 	private int quantity;
 	private int freeIssue;
 	private double price;
+	private int returnQuantity;
+	private int replaceQuantity;
+	private int sampleQuantity;
 
-	private OrderDetail(Item item, int quantity, int freeIssue) {
+	private OrderDetail(Item item, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity) {
 		this.itemId = item.getItemId();
 		this.itemDescription = item.getItemDescription();
 		this.quantity = quantity;
 		this.freeIssue = freeIssue;
 		this.price = item.getWholeSalePrice();
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
 	}
 
-	private OrderDetail(Item item, int quantity, double discountPercentage) {
+	private OrderDetail(Item item, int quantity, double discountPercentage, int returnQuantity, int replaceQuantity, int sampleQuantity) {
 		this.itemId = item.getItemId();
 		this.itemDescription = item.getItemDescription();
 		this.quantity = quantity;
 		this.price = item.getRetailSalePrice() * (100 - discountPercentage) / 100;
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
 	}
 
-	public OrderDetail(int itemId, String itemDescription, int quantity, int freeIssue, double price) {
+	public OrderDetail(int itemId, String itemDescription, int quantity, int freeIssue, double price, int returnQuantity, int replaceQuantity, int sampleQuantity) {
 		this.itemId = itemId;
 		this.itemDescription = itemDescription;
 		this.quantity = quantity;
 		this.freeIssue = freeIssue;
 		this.price = price;
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
 	}
 
-	public OrderDetail(int itemId, String itemDescription, int quantity, double price) {
+	public OrderDetail(int itemId, String itemDescription, int quantity, double price, int returnQuantity, int replaceQuantity, int sampleQuantity) {
 		this.itemId = itemId;
 		this.itemDescription = itemDescription;
 		this.quantity = quantity;
 		this.price = price;
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
 	}
 
-	public static final OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity) {
+	public static final OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity, int returnQuantity, int replaceQuantity, int sampleQuantity) {
 		int freeIssue = 0;
 		double discountPercentage = 0;
 		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
@@ -77,9 +92,9 @@ public class OrderDetail {
 		}
 
 		if (outlet.getOutletType() == Outlet.SUPER_MARKET) {
-			return new OrderDetail(item, quantity, discountPercentage);
+			return new OrderDetail(item, quantity, discountPercentage, returnQuantity, replaceQuantity, sampleQuantity);
 		} else {
-			return new OrderDetail(item, quantity, freeIssue);
+			return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity);
 		}
 	}
 
@@ -123,6 +138,30 @@ public class OrderDetail {
 		this.price = price;
 	}
 
+	public int getReturnQuantity() {
+		return returnQuantity;
+	}
+
+	public void setReturnQuantity(int returnQuantity) {
+		this.returnQuantity = returnQuantity;
+	}
+
+	public int getReplaceQuantity() {
+		return replaceQuantity;
+	}
+
+	public void setReplaceQuantity(int replaceQuantity) {
+		this.replaceQuantity = replaceQuantity;
+	}
+
+	public int getSampleQuantity() {
+		return sampleQuantity;
+	}
+
+	public void setSampleQuantity(int sampleQuantity) {
+		this.sampleQuantity = sampleQuantity;
+	}
+
 	public JSONObject getOrderDetailAsJson() {
 		HashMap<String, Object> orderDetailsParams = new HashMap<String, Object>();
 		orderDetailsParams.put("id_item", itemId);
@@ -135,5 +174,22 @@ public class OrderDetail {
 	@Override
 	public String toString() {
 		return itemDescription;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		OrderDetail that = (OrderDetail) o;
+
+		if (itemId != that.itemId) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return itemId;
 	}
 }

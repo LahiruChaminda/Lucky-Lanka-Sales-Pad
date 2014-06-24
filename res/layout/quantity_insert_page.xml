@@ -38,6 +38,63 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:weightSum="2"
+            android:layout_weight="1"
+            android:padding="3dp"
+            android:orientation="horizontal">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textSize="25dp"
+                android:text="Return" android:gravity="center_vertical"/>
+        <EditText
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:textSize="25dp" android:id="@+id/inputReturnQuantity" android:inputType="number"/>
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:weightSum="2"
+            android:layout_weight="1"
+            android:padding="3dp"
+            android:orientation="horizontal">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textSize="25dp"
+                android:text="Replace" android:gravity="center_vertical"/>
+        <EditText
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:textSize="25dp" android:id="@+id/inputReplaceQuantity" android:inputType="number"/>
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:weightSum="2"
+            android:layout_weight="1"
+            android:padding="3dp"
+            android:orientation="horizontal">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textSize="25dp"
+                android:text="Sample" android:gravity="center_vertical"/>
+        <EditText
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:textSize="25dp" android:id="@+id/inputSampleQuantity" android:inputType="number"/>
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:padding="3dp"
             android:layout_weight="1"
             android:weightSum="2"

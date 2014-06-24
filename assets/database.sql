@@ -50,5 +50,8 @@ CREATE TABLE tbl_order_detail (
   price        REAL    NOT NULL,
   discount     REAL,
   quantity     INT,
-  freeQuantity INT DEFAULT 0
+  freeQuantity INT DEFAULT 0,
+  returnQuantity INT DEFAULT 0,
+  replaceQuantity INT DEFAULT 0,
+  sampleQuantity INT DEFAULT 0
 );

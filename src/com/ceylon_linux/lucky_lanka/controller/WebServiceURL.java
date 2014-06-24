@@ -62,7 +62,7 @@ abstract class WebServiceURL {
 
 	protected static final class OrderURLPack {
 
-		public static final HashMap<String, Object> getParameters(JSONObject orderJson,int positionId) {
+		public static final HashMap<String, Object> getParameters(JSONObject orderJson, int positionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("jsonString", orderJson);
 			parameters.put("position_id", positionId);
