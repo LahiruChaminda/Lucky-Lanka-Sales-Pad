@@ -10,11 +10,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
@@ -34,6 +32,7 @@ import java.util.TimerTask;
  */
 public class LoadAddInvoiceActivity extends Activity {
 
+	private final ArrayList<Outlet> outlets = new ArrayList<Outlet>();
 	private Button btnNext;
 	private TextView txtDate;
 	private TextView txtTime;
@@ -43,7 +42,7 @@ public class LoadAddInvoiceActivity extends Activity {
 	private ArrayList<Route> routes;
 	private Handler handler;
 	private Timer timer;
-
+	private ArrayAdapter<Outlet> outletAdapter;
 	private Outlet outlet;
 
 	@Override
@@ -52,18 +51,14 @@ public class LoadAddInvoiceActivity extends Activity {
 		setContentView(R.layout.load_add_invoice_page);
 		initialize();
 		routes = OutletController.loadRoutesFromDb(LoadAddInvoiceActivity.this);
-		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, routes) {
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View view = super.getView(position, convertView, parent);
-				view.setBackgroundColor((position % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-				return view;
-			}
-		};
+		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, routes);
 		routeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		routeAuto.setAdapter(routeAdapter);
-		handler = new Handler();
 
+		outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, outlets);
+		outletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		handler = new Handler();
 		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -134,17 +129,11 @@ public class LoadAddInvoiceActivity extends Activity {
 
 	private void routeAutoItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
 		Route route = (Route) adapterView.getAdapter().getItem(position);
-		ArrayAdapter<Outlet> outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, route.getOutlets()) {
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View view = super.getView(position, convertView, parent);
-				view.setBackgroundColor((position % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-				return view;
-			}
-		};
-		outletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		outlet = null;
+		outlets.clear();
+		outlets.addAll(route.getOutlets());
+		outletAdapter.notifyDataSetChanged();
 		outletAuto.setAdapter(outletAdapter);
+		outlet = null;
 		outletAuto.requestFocus();
 	}
 
