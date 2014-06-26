@@ -127,6 +127,9 @@ public class SelectItemActivity extends Activity {
 					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
 					childViewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 					childViewHolder.txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
+					childViewHolder.txtReturnQuantity = (TextView) view.findViewById(R.id.txtReturnQuantity);
+					childViewHolder.txtReplaceQuantity = (TextView) view.findViewById(R.id.txtReplaceQuantity);
+					childViewHolder.txtSampleQuantity = (TextView) view.findViewById(R.id.txtSampleQuantity);
 					view.setTag(childViewHolder);
 				} else {
 					childViewHolder = (ChildViewHolder) view.getTag();
@@ -175,7 +178,6 @@ public class SelectItemActivity extends Activity {
 		final TextView txtDiscount = (TextView) dialog.findViewById(R.id.txtDiscount);
 		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
 		txtItemDescription.setText(item.getItemDescription());
-		;
 		inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -192,9 +194,9 @@ public class SelectItemActivity extends Activity {
 				String replaceQuantityString = inputReplaceQuantity.getText().toString();
 				String sampleQuantityString = inputSampleQuantity.getText().toString();
 				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
+				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
+				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
 				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
 				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
 				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
@@ -208,9 +210,9 @@ public class SelectItemActivity extends Activity {
 				String replaceQuantityString = inputReplaceQuantity.getText().toString();
 				String sampleQuantityString = inputSampleQuantity.getText().toString();
 				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : requestedQuantityString);
+				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
+				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
+				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
 				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
 				if (orderDetails.contains(orderDetail)) {
 					orderDetails.remove(orderDetail);
@@ -303,11 +305,17 @@ public class SelectItemActivity extends Activity {
 			if (orderDetail.getItemId() == item.getItemId()) {
 				childViewHolder.txtFreeIssue.setText(Integer.toString(orderDetail.getFreeIssue()));
 				childViewHolder.txtQuantity.setText(Integer.toString(orderDetail.getQuantity()));
+				childViewHolder.txtReturnQuantity.setText(Integer.toString(orderDetail.getReturnQuantity()));
+				childViewHolder.txtReplaceQuantity.setText(Integer.toString(orderDetail.getReplaceQuantity()));
+				childViewHolder.txtSampleQuantity.setText(Integer.toString(orderDetail.getSampleQuantity()));
 				return childViewHolder;
 			}
 		}
 		childViewHolder.txtFreeIssue.setText("0");
 		childViewHolder.txtQuantity.setText("0");
+		childViewHolder.txtReturnQuantity.setText("0");
+		childViewHolder.txtReplaceQuantity.setText("0");
+		childViewHolder.txtSampleQuantity.setText("0");
 		return childViewHolder;
 	}
 
@@ -323,5 +331,8 @@ public class SelectItemActivity extends Activity {
 		TextView txtQuantity;
 		TextView txtFreeIssue;
 		TextView txtEachDiscount;
+		TextView txtReturnQuantity;
+		TextView txtReplaceQuantity;
+		TextView txtSampleQuantity;
 	}
 }

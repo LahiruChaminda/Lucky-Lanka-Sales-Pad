@@ -34,7 +34,8 @@ public class UserController extends AbstractController {
 
 	public static User getAuthorizedUser(Context context) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
-		Integer positionId;
+		int positionId;
+		int routineId;
 		String userName;
 		String name;
 		String address;
@@ -51,6 +52,9 @@ public class UserController extends AbstractController {
 		if ((positionId = userData.getInt("userId", -1)) == -1) {
 			return null;
 		}
+		if ((routineId = userData.getInt("routineId", -1)) == -1) {
+			return null;
+		}
 		if ((userName = userData.getString("userName", "")).isEmpty()) {
 			return null;
 		}
@@ -60,13 +64,14 @@ public class UserController extends AbstractController {
 		if ((address = userData.getString("address", "")).isEmpty()) {
 			return null;
 		}
-		return new User(positionId, name, address, userName, loginTime);
+		return new User(positionId, name, address, userName, loginTime, routineId);
 	}
 
 	public static boolean setAuthorizedUser(Context context, User user) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = userData.edit();
 		editor.putInt("userId", user.getPositionId());
+		editor.putInt("routineId", user.getRoutineId());
 		editor.putString("userName", user.getUserName());
 		editor.putString("name", user.getName());
 		editor.putString("address", user.getAddress());
@@ -96,6 +101,7 @@ public class UserController extends AbstractController {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = userData.edit();
 		editor.putInt("userId", -1);
+		editor.putInt("routineId", -1);
 		editor.putString("userName", "");
 		editor.putString("name", "");
 		editor.putString("address", "");

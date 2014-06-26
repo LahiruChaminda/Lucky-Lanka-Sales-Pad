@@ -98,9 +98,8 @@
                     <Spinner
                             android:layout_width="0dp"
                             android:layout_weight="4"
-                            android:textSize="25dp"
                             android:layout_height="wrap_content"
-                            android:id="@+id/routeAuto"/>
+                            android:id="@+id/routeAuto" android:spinnerMode="dialog"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
@@ -117,9 +116,8 @@
                     <Spinner
                             android:layout_width="0dp"
                             android:layout_weight="4"
-                            android:textSize="25dp"
                             android:layout_height="wrap_content"
-                            android:id="@+id/outletAuto"/>
+                            android:id="@+id/outletAuto" android:spinnerMode="dialog"/>
                 </LinearLayout>
                 <TextView
                         android:layout_width="match_parent"

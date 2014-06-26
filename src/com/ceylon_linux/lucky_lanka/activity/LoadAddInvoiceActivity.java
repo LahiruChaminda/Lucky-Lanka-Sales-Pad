@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
+import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
 import com.ceylon_linux.lucky_lanka.model.Route;
 
@@ -50,13 +51,15 @@ public class LoadAddInvoiceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.load_add_invoice_page);
 		initialize();
+
+		txtRoutine.setText(Integer.toString(UserController.getAuthorizedUser(LoadAddInvoiceActivity.this).getRoutineId()));
 		routes = OutletController.loadRoutesFromDb(LoadAddInvoiceActivity.this);
-		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, routes);
-		routeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, R.layout.spinner_layout, routes);
+		routeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_layout);
 		routeAuto.setAdapter(routeAdapter);
 
-		outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, android.R.layout.simple_spinner_item, outlets);
-		outletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		outletAdapter = new ArrayAdapter<Outlet>(LoadAddInvoiceActivity.this, R.layout.spinner_layout, outlets);
+		outletAdapter.setDropDownViewResource(R.layout.spinner_dropdown_layout);
 
 		handler = new Handler();
 		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat();

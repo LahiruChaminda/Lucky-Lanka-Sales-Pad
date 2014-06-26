@@ -7,7 +7,9 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -105,7 +107,19 @@ public class HomeActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		//
+		AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+		builder.setTitle(R.string.app_name);
+		builder.setMessage("You are about to sign out from sales pad\nIf you continue your un-synced data will be lost");
+		builder.setPositiveButton("Sign out", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				UserController.clearAuthentication(HomeActivity.this);
+				Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
+				startActivity(loginActivity);
+				finish();
+			}
+		});
+		builder.setNegativeButton("Cancel", null);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
@@ -137,5 +151,6 @@ public class HomeActivity extends Activity {
 	}
 
 	private void btnSignOutClicked(View view) {
+		onBackPressed();
 	}
 }

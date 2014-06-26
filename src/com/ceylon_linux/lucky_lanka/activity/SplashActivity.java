@@ -10,6 +10,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import com.ceylon_linux.lucky_lanka.R;
+import com.ceylon_linux.lucky_lanka.controller.UserController;
+import com.ceylon_linux.lucky_lanka.model.User;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * SplashActivity - Entry point of the Lucky Lanka Sales Pad
@@ -40,13 +45,20 @@ public class SplashActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					Thread.sleep(100);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					Logger.getLogger(SplashActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 				}
-				Intent loginActivity = new Intent(SplashActivity.this, LoginActivity.class);
-				startActivity(loginActivity);
-				finish();
+				User authorizedUser = UserController.getAuthorizedUser(SplashActivity.this);
+				if (authorizedUser != null) {
+					Intent homeActivity = new Intent(SplashActivity.this, HomeActivity.class);
+					startActivity(homeActivity);
+					finish();
+				} else {
+					Intent loginActivity = new Intent(SplashActivity.this, LoginActivity.class);
+					startActivity(loginActivity);
+					finish();
+				}
 			}
 		}.start();
 	}

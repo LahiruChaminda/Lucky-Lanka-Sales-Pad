@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
@@ -71,7 +72,7 @@ public class LoginActivity extends Activity {
 	}
 
 	private void btnLoginClicked(View view) {
-		new AsyncTask<Void, Integer, Boolean>() {
+		new AsyncTask<Void, String, Boolean>() {
 			private ProgressDialog progressDialog;
 
 			@Override
@@ -88,11 +89,15 @@ public class LoginActivity extends Activity {
 			protected Boolean doInBackground(Void... voids) {
 				User user = null;
 				try {
+					publishProgress("Authenticating...");
 					user = UserController.authenticate(LoginActivity.this, inputUserName.getText().toString().trim(), inputPassword.getText().toString().trim());
 					if (user != null) {
 						UserController.setAuthorizedUser(LoginActivity.this, user);
+						publishProgress("Authenticated");
 						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
+						publishProgress("Outlets Downloaded Successfully");
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
+						publishProgress("Items Downloaded Successfully");
 					}
 				} catch (IOException e) {
 					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
@@ -100,6 +105,12 @@ public class LoginActivity extends Activity {
 					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 				}
 				return null;
+			}
+
+			@Override
+			protected void onProgressUpdate(String... values) {
+				super.onProgressUpdate(values);
+				Toast.makeText(LoginActivity.this, values[0], Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
