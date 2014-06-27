@@ -120,6 +120,7 @@ public class HomeActivity extends Activity {
 			}
 		});
 		builder.setNegativeButton("Cancel", null);
+		builder.show();
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
