@@ -25,9 +25,15 @@ public class User implements Serializable {
 	private String userName;
 	private Long loginTime;
 	private int routineId;
+	private boolean validUser;
+
+	private User(boolean validUser) {
+		this.validUser = validUser;
+	}
 
 	public User(int positionId) {
 		this.setPositionId(positionId);
+		this.validUser = true;
 	}
 
 	public User(int positionId, String name, String address, String userName, Long loginTime, int routineId) {
@@ -37,11 +43,14 @@ public class User implements Serializable {
 		this.userName = userName;
 		this.loginTime = loginTime;
 		this.routineId = routineId;
+		this.validUser = true;
 	}
 
 	public static User parseUser(JSONObject userJsonInstance) throws JSONException {
-		if (userJsonInstance == null || !userJsonInstance.getBoolean("result")) {
+		if (userJsonInstance == null) {
 			return null;
+		} else if (!userJsonInstance.getBoolean("result")) {
+			return new User(false);
 		}
 		return new User(
 			userJsonInstance.getInt("position_id"),
@@ -99,5 +108,9 @@ public class User implements Serializable {
 
 	public void setRoutineId(int routineId) {
 		this.routineId = routineId;
+	}
+
+	public boolean isValidUser() {
+		return validUser;
 	}
 }

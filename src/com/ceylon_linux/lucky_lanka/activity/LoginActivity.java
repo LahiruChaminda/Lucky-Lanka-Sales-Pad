@@ -7,6 +7,7 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -72,7 +73,7 @@ public class LoginActivity extends Activity {
 	}
 
 	private void btnLoginClicked(View view) {
-		new AsyncTask<Void, String, Boolean>() {
+		new AsyncTask<Void, String, User>() {
 			private ProgressDialog progressDialog;
 
 			@Override
@@ -86,12 +87,12 @@ public class LoginActivity extends Activity {
 			}
 
 			@Override
-			protected Boolean doInBackground(Void... voids) {
+			protected User doInBackground(Void... voids) {
 				User user = null;
 				try {
 					publishProgress("Authenticating...");
 					user = UserController.authenticate(LoginActivity.this, inputUserName.getText().toString().trim(), inputPassword.getText().toString().trim());
-					if (user != null) {
+					if (user != null && user.isValidUser()) {
 						UserController.setAuthorizedUser(LoginActivity.this, user);
 						publishProgress("Authenticated");
 						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
@@ -99,6 +100,7 @@ public class LoginActivity extends Activity {
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
 						publishProgress("Items Downloaded Successfully");
 					}
+					return user;
 				} catch (IOException e) {
 					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 				} catch (JSONException e) {
@@ -114,14 +116,28 @@ public class LoginActivity extends Activity {
 			}
 
 			@Override
-			protected void onPostExecute(Boolean response) {
-				super.onPostExecute(response);
+			protected void onPostExecute(User user) {
+				super.onPostExecute(user);
 				if (progressDialog != null && progressDialog.isShowing()) {
 					progressDialog.dismiss();
 				}
-				Intent homeActivity = new Intent(LoginActivity.this, HomeActivity.class);
-				startActivity(homeActivity);
-				finish();
+				if (user == null) {
+					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+					alertDialogBuilder.setTitle(R.string.app_name);
+					alertDialogBuilder.setMessage("No Active Internet Connection Found");
+					alertDialogBuilder.setPositiveButton("Ok", null);
+					alertDialogBuilder.show();
+				} else if (user.isValidUser()) {
+					Intent homeActivity = new Intent(LoginActivity.this, HomeActivity.class);
+					startActivity(homeActivity);
+					finish();
+				} else {
+					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+					alertDialogBuilder.setTitle(R.string.app_name);
+					alertDialogBuilder.setMessage("Incorrect UserName Password Combination");
+					alertDialogBuilder.setPositiveButton("Ok", null);
+					alertDialogBuilder.show();
+				}
 			}
 		}.execute();
 	}
