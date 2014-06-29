@@ -8,4 +8,4 @@ SalesPad is an android application especially designed for sales representatives
 
 ### Prerequisites
 * [Android SDK v4.0.3](http://developer.android.com/sdk/)
-* [Java SE v1.7](http://www.oracle.com/technetwork/java/javase/downloads/)
+* [Java SE v1.7 or above](http://www.oracle.com/technetwork/java/javase/downloads/)
