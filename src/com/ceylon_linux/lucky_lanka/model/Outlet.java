@@ -136,6 +136,14 @@ public class Outlet implements Serializable {
 		this.routeId = routeId;
 	}
 
+	public ArrayList<Invoice> getInvoices() {
+		return invoices;
+	}
+
+	public void setInvoices(ArrayList<Invoice> invoices) {
+		this.invoices = invoices;
+	}
+
 	@Override
 	public String toString() {
 		return outletName;

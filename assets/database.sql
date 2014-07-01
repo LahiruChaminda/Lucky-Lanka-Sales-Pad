@@ -56,14 +56,17 @@ CREATE TABLE tbl_order_detail (
   sampleQuantity INT DEFAULT 0
 );
 create table tbl_invoice(
-  invoiceId INTEGER NOT NULL,
+  invoiceId INTEGER NOT NULL primary key,
+  outletId INTEGER NOT NULL REFERENCES tbl_outlet(outletId) ON UPDATE CASCADE ON DELETE CASCADE,
   invoiceDate long not null,
   amount decimal(10,2) default 0
 );
 create table tbl_payment(
- paymentId INT NOT NULL,
+ paymentId INT NOT NULL auto_increment,
+ invoiceId int not null references tbl_invoice(invoiceId) ON UPDATE CASCADE ON DELETE CASCADE,
  paymentDate long not null,
  amount decimal(20,2) not null check(amount > 0),
  chequeDate long default 0,
- chequeNo Text default ''
+ chequeNo Text default '',
+ status int default 0
 );

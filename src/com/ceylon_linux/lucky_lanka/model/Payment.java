@@ -23,14 +23,15 @@ public class Payment {
 	private double amount;
 	private Date chequeDate;
 	private String chequeNo;
+	private boolean synced;
 
-	public Payment(long paymentId, Date paymentDate, double amount) {
+	public Payment(long paymentId, Date paymentDate, double amount, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
 	}
 
-	public Payment(long paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo) {
+	public Payment(long paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
@@ -45,7 +46,8 @@ public class Payment {
 			simpleDateFormat.parse(jsonInstance.getString("pm_date")),
 			jsonInstance.getDouble("pm_amount"),
 			simpleDateFormat.parse(jsonInstance.getString("pc_date")),
-			jsonInstance.getString("pc_no")
+			jsonInstance.getString("pc_no"),
+			true
 		);
 	}
 
@@ -54,7 +56,8 @@ public class Payment {
 		return new Payment(
 			jsonInstance.getLong("idpayment"),
 			simpleDateFormat.parse(jsonInstance.getString("pm_date")),
-			jsonInstance.getDouble("pm_amount")
+			jsonInstance.getDouble("pm_amount"),
+			true
 		);
 	}
 
@@ -96,5 +99,13 @@ public class Payment {
 
 	public void setChequeNo(String chequeNo) {
 		this.chequeNo = chequeNo;
+	}
+
+	public boolean isSynced() {
+		return synced;
+	}
+
+	public void setSynced(boolean synced) {
+		this.synced = synced;
 	}
 }
