@@ -39,7 +39,7 @@ CREATE TABLE tbl_order (
   routeId INTEGER NOT NULL,
   positionId INTEGER NOT NULL,
   invoiceTime long,
-  total REAL,
+  total decimal(20,2) default 0.00,
   batteryLevel INTEGER NOT NULL,
   longitude REAL NOT NULL,
   latitude REAL NOT NULL
@@ -47,11 +47,23 @@ CREATE TABLE tbl_order (
 CREATE TABLE tbl_order_detail (
   orderId      INTEGER NOT NULL REFERENCES tbl_order(orderId) ON UPDATE CASCADE ON DELETE CASCADE,
   itemId       INTEGER NOT NULL REFERENCES tbl_item(itemId) ON UPDATE CASCADE,
-  price        REAL    NOT NULL,
-  discount     REAL,
+  price        decimal(20,2) default 0.00 NOT NULL,
+  discount     decimal(20,2) default 0.00,
   quantity     INT,
   freeQuantity INT DEFAULT 0,
   returnQuantity INT DEFAULT 0,
   replaceQuantity INT DEFAULT 0,
   sampleQuantity INT DEFAULT 0
+);
+create table tbl_invoice(
+  invoiceId INTEGER NOT NULL,
+  invoiceDate long not null,
+  amount decimal(10,2) default 0
+);
+create table tbl_payment(
+ paymentId INT NOT NULL,
+ paymentDate long not null,
+ amount decimal(20,2) not null check(amount > 0),
+ chequeDate long default 0,
+ chequeNo Text default ''
 );

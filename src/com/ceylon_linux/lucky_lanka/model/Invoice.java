@@ -1,0 +1,92 @@
+/*
+ * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
+ * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
+ * Created on : Jul 01, 2014, 10:25 AM
+ */
+package com.ceylon_linux.lucky_lanka.model;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+/**
+ * @author Supun Lakshan Wanigarathna Dissanayake
+ * @mobile +94711290392
+ * @email supunlakshan.xfinity@gmail.com
+ */
+public class Invoice {
+	private long invoiceId;
+	private Date date;
+	private double amount;
+	private ArrayList<Payment> payments;
+
+	public Invoice(long invoiceId, long date, double amount, ArrayList<Payment> payments) {
+		this.invoiceId = invoiceId;
+		this.date = new Date(date);
+		this.amount = amount;
+		this.payments = payments;
+	}
+
+	public Invoice(long invoiceId, String dateTime, double amount, ArrayList<Payment> payments) throws ParseException {
+		this.invoiceId = invoiceId;
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		this.date = simpleDateFormat.parse(dateTime);
+		this.amount = amount;
+		this.payments = payments;
+	}
+
+	public static Invoice parseInvoice(JSONObject jsonInstance) throws JSONException, ParseException {
+		JSONArray cashArray = jsonInstance.getJSONArray("cash");
+		JSONArray chequeArray = jsonInstance.getJSONArray("cheque");
+		ArrayList<Payment> payments = new ArrayList<Payment>();
+		for (int i = 0; i < cashArray.length(); i++) {
+			payments.add(Payment.parseCashPayment(cashArray.getJSONObject(i)));
+		}
+		for (int i = 0; i < chequeArray.length(); i++) {
+			payments.add(Payment.parseChequePayment(chequeArray.getJSONObject(i)));
+		}
+		return new Invoice(
+			jsonInstance.getLong("idinvoice"),
+			jsonInstance.getString("i_date") + " " + jsonInstance.getString("i_time"),
+			jsonInstance.getDouble("amount"),
+			payments
+		);
+	}
+
+	public long getInvoiceId() {
+		return invoiceId;
+	}
+
+	public void setInvoiceId(long invoiceId) {
+		this.invoiceId = invoiceId;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(double amount) {
+		this.amount = amount;
+	}
+
+	public ArrayList<Payment> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(ArrayList<Payment> payments) {
+		this.payments = payments;
+	}
+}

@@ -19,7 +19,7 @@ import java.util.HashMap;
  */
 abstract class WebServiceURL {
 
-	private static final String webServiceURL = "http://gateway.ceylonlinux.com/CL_DISTRIBUTOR/android_service/";
+	private static final String webServiceURL = "http://192.168.1.60/kukku_serv/android_service/";
 	//private static final String webServiceURL = "http://220.247.234.226/CL_DISTRIBUTOR/native/";
 
 	protected WebServiceURL() {

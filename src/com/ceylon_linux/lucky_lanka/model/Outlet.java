@@ -6,10 +6,13 @@
 
 package com.ceylon_linux.lucky_lanka.model;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -27,6 +30,7 @@ public class Outlet implements Serializable {
 	private String outletAddress;
 	private int outletType;
 	private double outletDiscount;
+	private ArrayList<Invoice> invoices;
 
 	public Outlet(int outletId, int routeId, String outletName, String outletAddress, int outletType, double outletDiscount) {
 		this.outletId = outletId;
@@ -35,6 +39,16 @@ public class Outlet implements Serializable {
 		this.outletAddress = outletAddress;
 		this.outletType = outletType;
 		this.outletDiscount = outletDiscount;
+	}
+
+	private Outlet(int outletId, int routeId, String outletName, String outletAddress, int outletType, double outletDiscount, ArrayList<Invoice> invoices) {
+		this.outletId = outletId;
+		this.routeId = routeId;
+		this.outletName = outletName;
+		this.outletAddress = outletAddress;
+		this.outletType = outletType;
+		this.outletDiscount = outletDiscount;
+		this.invoices = invoices;
 	}
 
 	public final static Outlet parseOutlet(JSONObject outletJsonInstance) throws JSONException {
@@ -54,13 +68,23 @@ public class Outlet implements Serializable {
 				}
 				break;
 		}
+		ArrayList<Invoice> invoices = new ArrayList<Invoice>();
+		JSONArray invoicesJson = outletJsonInstance.getJSONArray("invs");
+		for (int i = 0; i < invoicesJson.length(); i++) {
+			try {
+				invoices.add(Invoice.parseInvoice(invoicesJson.getJSONObject(i)));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 		return new Outlet(
 			outletJsonInstance.getInt("outletId"),
 			outletJsonInstance.getInt("routeId"),
 			outletJsonInstance.getString("outlet"),
 			outletJsonInstance.getString("o_address"),
 			outletType,
-			outletJsonInstance.getDouble("dis_pre")
+			outletJsonInstance.getDouble("dis_pre"),
+			invoices
 		);
 	}
 
