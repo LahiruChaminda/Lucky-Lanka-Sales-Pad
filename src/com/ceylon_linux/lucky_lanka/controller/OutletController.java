@@ -10,6 +10,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Invoice;
@@ -50,19 +51,25 @@ public class OutletController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		String routeSql = "replace into tbl_route(routeId, routeName) values (?,?)";
 		String outletSql = "replace into tbl_outlet(outletId, routeId, outletName, outletAddress, outletType, outletDiscount) values (?,?,?,?,?,?)";
-		String invoiceDeleteUrl = "delete from tbl_invoice";
-		String invoiceInsertUrl = "insert into tbl_invoice( invoiceId, outletId, invoiceDate, amount) values(?,?,?,?)";
+		String invoiceDeleteSql = "delete from tbl_invoice";
+		String invoiceInsertSql = "insert into tbl_invoice( invoiceId, outletId, invoiceDate, amount) values(?,?,?,?)";
+		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values(?,?,?,?,?,?)";
+
+		SQLiteStatement routeInsertSqlStatement = database.compileStatement(routeSql);
+		SQLiteStatement outletInsertSqlStatement = database.compileStatement(outletSql);
+		SQLiteStatement invoiceInsertSqlStatement = database.compileStatement(invoiceInsertSql);
+		SQLiteStatement paymentInsertSqlStatement = database.compileStatement(paymentInsertSql);
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			database.beginTransaction();
-			DbHandler.performExecute(database, invoiceDeleteUrl, null);
+			DbHandler.performExecute(database, invoiceDeleteSql, null);
 			for (Route route : routes) {
-				DbHandler.performExecuteInsert(database, routeSql, new Object[]{
+				DbHandler.performExecuteInsert(routeInsertSqlStatement, new Object[]{
 					route.getRouteId(),
 					route.getRouteName()
 				});
 				for (Outlet outlet : route.getOutlets()) {
-					DbHandler.performExecuteInsert(database, outletSql, new Object[]{
+					DbHandler.performExecuteInsert(outletInsertSqlStatement, new Object[]{
 						outlet.getOutletId(),
 						outlet.getRouteId(),
 						outlet.getOutletName(),
@@ -71,14 +78,22 @@ public class OutletController extends AbstractController {
 						outlet.getOutletDiscount()
 					});
 					for (Invoice invoice : outlet.getInvoices()) {
-						DbHandler.performExecuteInsert(database, invoiceInsertUrl, new Object[]{
+						DbHandler.performExecuteInsert(invoiceInsertSqlStatement, new Object[]{
 							invoice.getInvoiceId(),
 							outlet.getOutletId(),
 							simpleDateFormat.format(invoice.getDate()),
 							invoice.getAmount()
 						});
-						ArrayList<Payment> paymentsList = invoice.getPayments();
-						addPayment(invoice.getInvoiceId(), database, paymentsList.toArray(new Payment[paymentsList.size()]));
+						for (Payment payment : invoice.getPayments()) {
+							DbHandler.performExecuteInsert(paymentInsertSqlStatement, new Object[]{
+								invoice.getInvoiceId(),
+								simpleDateFormat.format(payment.getPaymentDate()),
+								payment.getAmount(),
+								simpleDateFormat.format(payment.getChequeDate()),
+								payment.getChequeNo(),
+								payment.isSynced() ? 1 : 0
+							});
+						}
 					}
 				}
 			}
@@ -91,20 +106,7 @@ public class OutletController extends AbstractController {
 		}
 	}
 
-	public static boolean addPayment(long invoiceId, SQLiteDatabase database, Payment... payments) {
-		/*
-		 paymentId INT NOT NULL auto_increment,
- invoiceId int not null references tbl_invoice(invoiceId) ON UPDATE CASCADE ON DELETE CASCADE,
- paymentDate long not null,
- amount decimal(20,2) not null check(amount > 0),
- chequeDate long default 0,
- chequeNo Text default '',
- status
-		 */
-		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values()";
-		for (Payment payment : payments) {
-
-		}
+	public static boolean addPayment(long invoiceId, Context context, Payment... payments) {
 		return false;
 	}
 
