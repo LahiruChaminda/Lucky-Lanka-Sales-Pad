@@ -21,8 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +59,6 @@ public class OutletController extends AbstractController {
 		SQLiteStatement outletInsertSqlStatement = database.compileStatement(outletSql);
 		SQLiteStatement invoiceInsertSqlStatement = database.compileStatement(invoiceInsertSql);
 		SQLiteStatement paymentInsertSqlStatement = database.compileStatement(paymentInsertSql);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			database.beginTransaction();
 			DbHandler.performExecute(database, invoiceDeleteSql, null);
@@ -77,19 +76,19 @@ public class OutletController extends AbstractController {
 						outlet.getOutletType(),
 						outlet.getOutletDiscount()
 					});
-					for (Invoice invoice : outlet.getInvoices()) {
+					for (Invoice invoice : outlet.getInvoices(context)) {
 						DbHandler.performExecuteInsert(invoiceInsertSqlStatement, new Object[]{
 							invoice.getInvoiceId(),
 							outlet.getOutletId(),
-							simpleDateFormat.format(invoice.getDate()),
+							invoice.getDate().getTime(),
 							invoice.getAmount()
 						});
 						for (Payment payment : invoice.getPayments()) {
 							DbHandler.performExecuteInsert(paymentInsertSqlStatement, new Object[]{
 								invoice.getInvoiceId(),
-								simpleDateFormat.format(payment.getPaymentDate()),
+								(payment.getPaymentDate() != null) ? payment.getPaymentDate().getTime() : 0,
 								payment.getAmount(),
-								simpleDateFormat.format(payment.getChequeDate()),
+								(payment.getChequeDate() != null) ? payment.getChequeDate().getTime() : 0,
 								payment.getChequeNo(),
 								payment.isSynced() ? 1 : 0
 							});
@@ -138,5 +137,35 @@ public class OutletController extends AbstractController {
 		routeCursor.close();
 		databaseHelper.close();
 		return routes;
+	}
+
+	public static ArrayList<Invoice> loadInvoicesFromDb(Context context, int outletId) {
+		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+		String invoiceSql = "select invoiceId, invoiceDate, amount from tbl_invoice where outletId=?";
+		String paymentsSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, status from tbl_payment where invoiceId=?";
+		ArrayList<Invoice> invoices = new ArrayList<Invoice>();
+		Cursor invoiceCursor = DbHandler.performRawQuery(database, invoiceSql, new Object[]{outletId});
+		for (invoiceCursor.moveToFirst(); !invoiceCursor.isAfterLast(); invoiceCursor.moveToNext()) {
+			int invoiceId = invoiceCursor.getInt(0);
+			long date = invoiceCursor.getLong(1);
+			double amount = invoiceCursor.getDouble(2);
+			ArrayList<Payment> payments = new ArrayList<Payment>();
+			Cursor paymentCursor = DbHandler.performRawQuery(database, paymentsSql, new Object[]{invoiceId});
+			for (paymentCursor.moveToFirst(); !paymentCursor.isAfterLast(); paymentCursor.moveToNext()) {
+				payments.add(new Payment(
+					paymentCursor.getInt(0),
+					new Date(paymentCursor.getLong(1)),
+					paymentCursor.getDouble(2),
+					new Date(paymentCursor.getLong(3)),
+					paymentCursor.getString(4),
+					paymentCursor.getInt(5) == 0
+				));
+			}
+			invoices.add(new Invoice(invoiceId, date, amount, payments));
+		}
+		invoiceCursor.close();
+		databaseHelper.close();
+		return invoices;
 	}
 }

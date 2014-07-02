@@ -62,7 +62,7 @@ create table tbl_invoice(
   amount decimal(10,2) default 0
 );
 create table tbl_payment(
- paymentId INT NOT NULL auto_increment,
+ paymentId INTEGER NOT NULL primary key AUTOINCREMENT,
  invoiceId int not null references tbl_invoice(invoiceId) ON UPDATE CASCADE ON DELETE CASCADE,
  paymentDate long not null,
  amount decimal(20,2) not null check(amount > 0),

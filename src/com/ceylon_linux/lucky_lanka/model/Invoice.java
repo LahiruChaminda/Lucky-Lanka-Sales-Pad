@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,20 +20,20 @@ import java.util.Date;
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class Invoice {
-	private long invoiceId;
+public class Invoice implements Serializable {
+	private int invoiceId;
 	private Date date;
 	private double amount;
 	private ArrayList<Payment> payments;
 
-	public Invoice(long invoiceId, long date, double amount, ArrayList<Payment> payments) {
+	public Invoice(int invoiceId, long date, double amount, ArrayList<Payment> payments) {
 		this.invoiceId = invoiceId;
 		this.date = new Date(date);
 		this.amount = amount;
 		this.payments = payments;
 	}
 
-	public Invoice(long invoiceId, String dateTime, double amount, ArrayList<Payment> payments) throws ParseException {
+	public Invoice(int invoiceId, String dateTime, double amount, ArrayList<Payment> payments) throws ParseException {
 		this.invoiceId = invoiceId;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		this.date = simpleDateFormat.parse(dateTime);
@@ -51,7 +52,7 @@ public class Invoice {
 			payments.add(Payment.parseChequePayment(chequeArray.getJSONObject(i)));
 		}
 		return new Invoice(
-			jsonInstance.getLong("idinvoice"),
+			jsonInstance.getInt("idinvoice"),
 			jsonInstance.getString("i_date") + " " + jsonInstance.getString("i_time"),
 			jsonInstance.getDouble("amount"),
 			payments
@@ -62,7 +63,7 @@ public class Invoice {
 		return invoiceId;
 	}
 
-	public void setInvoiceId(long invoiceId) {
+	public void setInvoiceId(int invoiceId) {
 		this.invoiceId = invoiceId;
 	}
 
@@ -88,5 +89,29 @@ public class Invoice {
 
 	public void setPayments(ArrayList<Payment> payments) {
 		this.payments = payments;
+	}
+
+	public double getPaidValue() {
+		if (payments == null || payments.size() == 0) {
+			return 0;
+		} else {
+			double paidValue = 0;
+			for (Payment payment : payments) {
+				paidValue += payment.getAmount();
+			}
+			return paidValue;
+		}
+	}
+
+	public double getBalanceValue() {
+		if (payments == null || payments.size() == 0) {
+			return amount;
+		} else {
+			double paidValue = 0;
+			for (Payment payment : payments) {
+				paidValue += payment.getAmount();
+			}
+			return amount - paidValue;
+		}
 	}
 }

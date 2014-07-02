@@ -8,49 +8,52 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_weight="1"
-            android:weightSum="7" android:padding="5dp"
+            android:weightSum="6" android:padding="5dp"
             android:layout_height="0dp">
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Invoice No"
-                android:textSize="25dp"/>
-        <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Bill No"
-                android:textSize="25dp"/>
+                android:textSize="25dp"
+                android:id="@+id/txtInvoiceNo"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Date"
+                android:id="@+id/txtDate"
                 android:textSize="25dp"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Time"
+                android:id="@+id/txtTime"
                 android:textSize="25dp"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Invoice Amount"
+                android:gravity="right"
+                android:text="Amount"
+                android:id="@+id/txtAmount"
                 android:textSize="25dp"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Paid"
+                android:id="@+id/txtPaid"
+                android:gravity="right"
                 android:textSize="25dp"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Balance"
+                android:id="@+id/txtBalance"
+                android:gravity="right"
                 android:textSize="25dp"/>
     </LinearLayout>
 </LinearLayout>

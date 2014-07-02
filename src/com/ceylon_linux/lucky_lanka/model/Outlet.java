@@ -6,6 +6,8 @@
 
 package com.ceylon_linux.lucky_lanka.model;
 
+import android.content.Context;
+import com.ceylon_linux.lucky_lanka.controller.OutletController;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -136,8 +138,15 @@ public class Outlet implements Serializable {
 		this.routeId = routeId;
 	}
 
-	public ArrayList<Invoice> getInvoices() {
+	public ArrayList<Invoice> getInvoices(Context context, boolean freshCopy) {
+		if (invoices == null || freshCopy) {
+			invoices = OutletController.loadInvoicesFromDb(context, this.outletId);
+		}
 		return invoices;
+	}
+
+	public ArrayList<Invoice> getInvoices(Context context) {
+		return getInvoices(context, false);
 	}
 
 	public void setInvoices(ArrayList<Invoice> invoices) {

@@ -12,11 +12,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
+import com.ceylon_linux.lucky_lanka.model.Invoice;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
 import com.ceylon_linux.lucky_lanka.model.Route;
 
@@ -45,6 +47,7 @@ public class LoadAddInvoiceActivity extends Activity {
 	private Timer timer;
 	private ArrayAdapter<Outlet> outletAdapter;
 	private Outlet outlet;
+	private LinearLayout pendingDetailsTable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,7 @@ public class LoadAddInvoiceActivity extends Activity {
 		txtRoutine = (TextView) findViewById(R.id.txtRoutine);
 		routeAuto = (Spinner) findViewById(R.id.routeAuto);
 		outletAuto = (Spinner) findViewById(R.id.outletAuto);
+		pendingDetailsTable = (LinearLayout) findViewById(R.id.pendingDetailsTable);
 		btnNext.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -137,11 +141,34 @@ public class LoadAddInvoiceActivity extends Activity {
 		outletAdapter.notifyDataSetChanged();
 		outletAuto.setAdapter(outletAdapter);
 		outlet = null;
+		pendingDetailsTable.removeAllViews();
 		outletAuto.requestFocus();
 	}
 
 	private void outletAutoItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
 		outlet = (Outlet) adapterView.getAdapter().getItem(position);
+		pendingDetailsTable.removeAllViews();
+		ArrayList<Invoice> invoices = outlet.getInvoices(LoadAddInvoiceActivity.this);
+		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+		for (Invoice invoice : invoices) {
+			View pendingDetailsItemView = layoutInflater.inflate(R.layout.pending_details_item, null);
+			TextView txtInvoiceNo = (TextView) pendingDetailsItemView.findViewById(R.id.txtInvoiceNo);
+			TextView txtDate = (TextView) pendingDetailsItemView.findViewById(R.id.txtDate);
+			TextView txtTime = (TextView) pendingDetailsItemView.findViewById(R.id.txtTime);
+			TextView txtAmount = (TextView) pendingDetailsItemView.findViewById(R.id.txtAmount);
+			TextView txtPaid = (TextView) pendingDetailsItemView.findViewById(R.id.txtPaid);
+			TextView txtBalance = (TextView) pendingDetailsItemView.findViewById(R.id.txtBalance);
+
+			txtInvoiceNo.setText(String.valueOf(invoice.getInvoiceId()));
+			txtDate.setText(dateFormat.format(invoice.getDate()));
+			txtTime.setText(timeFormat.format(invoice.getDate()));
+			txtAmount.setText(String.valueOf(invoice.getAmount()));
+			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
+			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
+			pendingDetailsTable.addView(pendingDetailsItemView);
+		}
 	}
 
 	private void btnNextClicked(View view) {

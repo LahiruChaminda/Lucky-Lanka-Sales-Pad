@@ -8,6 +8,7 @@ package com.ceylon_linux.lucky_lanka.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,21 +18,21 @@ import java.util.Date;
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class Payment {
-	private long paymentId;
+public class Payment implements Serializable {
+	private int paymentId;
 	private Date paymentDate;
 	private double amount;
 	private Date chequeDate;
 	private String chequeNo;
 	private boolean synced;
 
-	public Payment(long paymentId, Date paymentDate, double amount, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
 	}
 
-	public Payment(long paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
@@ -42,7 +43,7 @@ public class Payment {
 	public static Payment parseChequePayment(JSONObject jsonInstance) throws JSONException, ParseException {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return new Payment(
-			jsonInstance.getLong("idpayment"),
+			jsonInstance.getInt("idpayment"),
 			simpleDateFormat.parse(jsonInstance.getString("pm_date")),
 			jsonInstance.getDouble("pm_amount"),
 			simpleDateFormat.parse(jsonInstance.getString("pc_date")),
@@ -54,7 +55,7 @@ public class Payment {
 	public static Payment parseCashPayment(JSONObject jsonInstance) throws JSONException, ParseException {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return new Payment(
-			jsonInstance.getLong("idpayment"),
+			jsonInstance.getInt("idpayment"),
 			simpleDateFormat.parse(jsonInstance.getString("pm_date")),
 			jsonInstance.getDouble("pm_amount"),
 			true
@@ -65,7 +66,7 @@ public class Payment {
 		return paymentId;
 	}
 
-	public void setPaymentId(long paymentId) {
+	public void setPaymentId(int paymentId) {
 		this.paymentId = paymentId;
 	}
 
