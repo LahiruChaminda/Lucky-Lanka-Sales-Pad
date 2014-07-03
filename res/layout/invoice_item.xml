@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:weightSum="3"
+              android:layout_height="wrap_content">
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" android:weightSum="3" android:paddingLeft="50dp">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Invoice No"
+                android:layout_weight="1"
+                android:id="@+id/txtInvoiceNo" android:textSize="25dp" android:gravity="center_vertical"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Total"
+                android:layout_weight="1"
+                android:id="@+id/txtTotal" android:textSize="25dp" android:gravity="center_vertical"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="20dp"
+                android:gravity="right"
+                android:text="Monday, 18 June, 2014"
+                android:id="@+id/txtDate"/>
+    </LinearLayout>
+</LinearLayout>

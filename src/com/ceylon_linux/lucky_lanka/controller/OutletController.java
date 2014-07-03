@@ -49,16 +49,12 @@ public class OutletController extends AbstractController {
 	private static void saveOutletsToDb(ArrayList<Route> routes, Context context) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
-		String routeSql = "replace into tbl_route(routeId, routeName) values (?,?)";
-		String outletSql = "replace into tbl_outlet(outletId, routeId, outletName, outletAddress, outletType, outletDiscount) values (?,?,?,?,?,?)";
 		String invoiceDeleteSql = "delete from tbl_invoice";
-		String invoiceInsertSql = "insert into tbl_invoice( invoiceId, outletId, invoiceDate, amount) values(?,?,?,?)";
-		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values(?,?,?,?,?,?)";
 
-		SQLiteStatement routeInsertSqlStatement = database.compileStatement(routeSql);
-		SQLiteStatement outletInsertSqlStatement = database.compileStatement(outletSql);
-		SQLiteStatement invoiceInsertSqlStatement = database.compileStatement(invoiceInsertSql);
-		SQLiteStatement paymentInsertSqlStatement = database.compileStatement(paymentInsertSql);
+		SQLiteStatement routeInsertSqlStatement = database.compileStatement("replace into tbl_route(routeId, routeName) values (?,?)");
+		SQLiteStatement outletInsertSqlStatement = database.compileStatement("replace into tbl_outlet(outletId, routeId, outletName, outletAddress, outletType, outletDiscount) values (?,?,?,?,?,?)");
+		SQLiteStatement invoiceInsertSqlStatement = database.compileStatement("insert into tbl_invoice( invoiceId, outletId, invoiceDate, amount) values(?,?,?,?)");
+		SQLiteStatement paymentInsertSqlStatement = database.compileStatement("insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values(?,?,?,?,?,?)");
 		try {
 			database.beginTransaction();
 			DbHandler.performExecute(database, invoiceDeleteSql, null);
@@ -167,5 +163,26 @@ public class OutletController extends AbstractController {
 		invoiceCursor.close();
 		databaseHelper.close();
 		return invoices;
+	}
+
+	public static ArrayList<Outlet> loadOutletsFromDb(Context context) {
+		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+		String outletSql = "select outletId, routeId, outletName, outletAddress, outletType, outletDiscount from tbl_outlet where routeId=?";
+		ArrayList<Outlet> outlets = new ArrayList<Outlet>();
+		Cursor outletCursor = DbHandler.performRawQuery(database, outletSql, null);
+		for (outletCursor.moveToFirst(); !outletCursor.isAfterLast(); outletCursor.moveToNext()) {
+			outlets.add(new Outlet(
+				outletCursor.getInt(0),
+				outletCursor.getInt(1),
+				outletCursor.getString(2),
+				outletCursor.getString(3),
+				outletCursor.getInt(4),
+				outletCursor.getDouble(5)
+			));
+		}
+		outletCursor.close();
+		databaseHelper.close();
+		return outlets;
 	}
 }

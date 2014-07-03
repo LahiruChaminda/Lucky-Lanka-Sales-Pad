@@ -3,14 +3,32 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jun 19, 2014, 4:23:10 PM
  */
+
 package com.ceylon_linux.lucky_lanka.activity;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.*;
+import com.ceylon_linux.lucky_lanka.R;
+import com.ceylon_linux.lucky_lanka.controller.OutletController;
+import com.ceylon_linux.lucky_lanka.model.Invoice;
+import com.ceylon_linux.lucky_lanka.model.Outlet;
+
+import java.util.ArrayList;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-/*public class PaymentActivity extends Activity {
+public class PaymentActivity extends Activity {
+
 	private AutoCompleteTextView outletAuto;
 	private ExpandableListView invoiceList;
 	private ArrayList<Outlet> outlets;
@@ -25,7 +43,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 		setContentView(R.layout.pending_invoices_page);
 		initialize();
 
-		outlets = OutletController.getOutletsWithInvoices(PaymentActivity.this);
+		outlets = OutletController.loadOutletsFromDb(PaymentActivity.this);
 		outletAuto.setAdapter(new ArrayAdapter<Outlet>(this, android.R.layout.simple_dropdown_item_1line, outlets));
 
 		outletAuto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -38,7 +56,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 		adapter = new BaseExpandableListAdapter() {
 			@Override
 			public int getGroupCount() {
-				return selectedOutlet.getPendingInvoices().size();
+				return selectedOutlet.getInvoices(PaymentActivity.this).size();
 			}
 
 			@Override
@@ -48,7 +66,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 
 			@Override
 			public Invoice getGroup(int groupPosition) {
-				return selectedOutlet.getPendingInvoices().get(groupPosition);
+				return selectedOutlet.getInvoices(PaymentActivity.this).get(groupPosition);
 			}
 
 			@Override
@@ -86,9 +104,6 @@ package com.ceylon_linux.lucky_lanka.activity;
 					categoryViewHolder = (CategoryViewHolder) convertView.getTag();
 				}
 				Invoice invoice = getGroup(groupPosition);
-				categoryViewHolder.txtInvoiceNo.setText(invoice.getDistributorCode());
-				categoryViewHolder.txtTotal.setText(Double.toString(invoice.getPendingAmount()));
-				categoryViewHolder.txtDate.setText(invoice.getDate());
 				return convertView;
 			}
 
@@ -101,53 +116,6 @@ package com.ceylon_linux.lucky_lanka.activity;
 				LinearLayout justMadePaymentList = (LinearLayout) convertView.findViewById(R.id.madePayments);
 				TextView txtPendingAmount = (TextView) convertView.findViewById(R.id.txtPendingAmount);
 				boolean colorize = true;
-				for (Payment payment : invoice.getPayments()) {
-					if (payment.getPaymentMethod().equalsIgnoreCase(Payment.CASH_PAYMENT)) {
-						View cashPaymentDetail = inflater.inflate(R.layout.cash_payment_details_page, viewGroup, false);
-						TextView txtPaidValue = (TextView) cashPaymentDetail.findViewById(R.id.txtPaidValue);
-						TextView txtPaidDate = (TextView) cashPaymentDetail.findViewById(R.id.txtPaidDate);
-						txtPaidDate.setText(payment.getPaidDate());
-						txtPaidValue.setText(Double.toString(payment.getPaidValue()));
-						cashPaymentDetail.setBackgroundColor((colorize) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-						donePaymentList.addView(cashPaymentDetail);
-					} else {
-						View chequePaymentDetail = inflater.inflate(R.layout.cheque_payment_detail_page, viewGroup, false);
-						TextView txtPaidValue = (TextView) chequePaymentDetail.findViewById(R.id.txtPaidValue);
-						TextView txtPaidDate = (TextView) chequePaymentDetail.findViewById(R.id.txtPaidDate);
-						TextView txtChequeNo = (TextView) chequePaymentDetail.findViewById(R.id.txtChequeNo);
-						txtPaidDate.setText(payment.getPaidDate());
-						txtChequeNo.setText(payment.getChequeNo());
-						txtPaidValue.setText(Double.toString(payment.getPaidValue()));
-						chequePaymentDetail.setBackgroundColor((colorize) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-						donePaymentList.addView(chequePaymentDetail);
-					}
-					colorize = !colorize;
-				}
-				colorize = true;
-				if (invoice.getNewPayments() != null) {
-					for (Payment payment : invoice.getNewPayments()) {
-						if (payment.getPaymentMethod().equalsIgnoreCase(Payment.CASH_PAYMENT)) {
-							View cashPaymentDetail = inflater.inflate(R.layout.cash_payment_details_page, viewGroup, false);
-							TextView txtPaidValue = (TextView) cashPaymentDetail.findViewById(R.id.txtPaidValue);
-							TextView txtPaidDate = (TextView) cashPaymentDetail.findViewById(R.id.txtPaidDate);
-							txtPaidDate.setText(payment.getPaidDate());
-							txtPaidValue.setText(Double.toString(payment.getPaidValue()));
-							cashPaymentDetail.setBackgroundColor((colorize) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-							justMadePaymentList.addView(cashPaymentDetail);
-						} else {
-							View chequePaymentDetail = inflater.inflate(R.layout.cheque_payment_detail_page, viewGroup, false);
-							TextView txtPaidValue = (TextView) chequePaymentDetail.findViewById(R.id.txtPaidValue);
-							TextView txtPaidDate = (TextView) chequePaymentDetail.findViewById(R.id.txtPaidDate);
-							TextView txtChequeNo = (TextView) chequePaymentDetail.findViewById(R.id.txtChequeNo);
-							txtPaidDate.setText(payment.getPaidDate());
-							txtChequeNo.setText(payment.getChequeNo());
-							txtPaidValue.setText(Double.toString(payment.getPaidValue()));
-							chequePaymentDetail.setBackgroundColor((colorize) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-							justMadePaymentList.addView(chequePaymentDetail);
-						}
-						colorize = !colorize;
-					}
-				}
 				Button btnCash = (Button) convertView.findViewById(R.id.btnCash);
 				btnCash.setOnClickListener(new View.OnClickListener() {
 					@Override
@@ -161,13 +129,6 @@ package com.ceylon_linux.lucky_lanka.activity;
 						btnOk.setOnClickListener(new View.OnClickListener() {
 							@Override
 							public void onClick(View view) {
-								Payment payment = new Payment(invoice.getSalesOrderId(), Double.parseDouble(inputAmount.getText().toString()), new SimpleDateFormat("yyyy-MM-dd").format(new Date()), false);
-								ArrayList<Payment> newPayments;
-								if ((newPayments = invoice.getNewPayments()) == null) {
-									newPayments = new ArrayList<Payment>();
-									invoice.setNewPayments(newPayments);
-								}
-								newPayments.add(payment);
 								invoiceList.collapseGroup(groupPosition);
 								invoiceList.expandGroup(groupPosition);
 								dialog.dismiss();
@@ -190,9 +151,9 @@ package com.ceylon_linux.lucky_lanka.activity;
 						dialog.setTitle("Cheque Payment");
 						dialog.setContentView(R.layout.cheque_data_input_dialog_page);
 						final Spinner bankCombo = (Spinner) dialog.findViewById(R.id.bankCombo);
-						ArrayAdapter<Bank> adapter = new ArrayAdapter<Bank>(PaymentActivity.this, android.R.layout.simple_spinner_item, BankController.getBanks());
-						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-						bankCombo.setAdapter(adapter);
+						//ArrayAdapter<Bank> adapter = new ArrayAdapter<Bank>(PaymentActivity.this, android.R.layout.simple_spinner_item, BankController.getBanks());
+						//adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						//bankCombo.setAdapter(adapter);
 						Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
 						Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
 						final EditText inputAmount = (EditText) dialog.findViewById(R.id.inputAmount);
@@ -201,13 +162,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 						btnOk.setOnClickListener(new View.OnClickListener() {
 							@Override
 							public void onClick(View view) {
-								Payment payment = new Payment(invoice.getSalesOrderId(), Double.parseDouble(inputAmount.getText().toString()), new SimpleDateFormat("yyyy-MM-dd").format(new Date()), bankCombo.getSelectedItem().toString(), inputChequeNo.getText().toString(), false);
-								ArrayList<Payment> newPayments;
-								if ((newPayments = invoice.getNewPayments()) == null) {
-									newPayments = new ArrayList<Payment>();
-									invoice.setNewPayments(newPayments);
-								}
-								newPayments.add(payment);
+
 								invoiceList.collapseGroup(groupPosition);
 								invoiceList.expandGroup(groupPosition);
 								dialog.dismiss();
@@ -222,7 +177,6 @@ package com.ceylon_linux.lucky_lanka.activity;
 						dialog.show();
 					}
 				});
-				txtPendingAmount.setText(Double.toString(invoice.getPendingAmount()));
 				return convertView;
 			}
 
@@ -232,20 +186,6 @@ package com.ceylon_linux.lucky_lanka.activity;
 			}
 		};
 
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		MenuInflater menuInflater = getMenuInflater();
-		menuInflater.inflate(R.menu.payments_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		OutletController.syncPayments(PaymentActivity.this);
-		return true;
 	}
 
 	private void outletAutoOnItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
@@ -290,7 +230,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 	}
 
 	private void btnOkClicked(View view) {
-		boolean response = OutletController.saveInvoicePayments(outlets, PaymentActivity.this);
+		boolean response = true;
 		if (response) {
 			Intent homeActivity = new Intent(PaymentActivity.this, HomeActivity.class);
 			startActivity(homeActivity);
@@ -298,7 +238,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 			Toast.makeText(this, "Payments Saved Successfully", Toast.LENGTH_LONG).show();
 		} else {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(PaymentActivity.this);
-			dialog.setTitle(R.string.message_title);
+			dialog.setTitle(R.string.app_name);
 			dialog.setMessage("Unable to place Payments");
 			dialog.setPositiveButton("Ok", null);
 			dialog.show();
@@ -306,8 +246,9 @@ package com.ceylon_linux.lucky_lanka.activity;
 	}
 
 	private static class CategoryViewHolder {
+
 		TextView txtInvoiceNo;
 		TextView txtTotal;
 		TextView txtDate;
 	}
-}*/
+}
