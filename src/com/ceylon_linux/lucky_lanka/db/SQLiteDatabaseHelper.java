@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -66,7 +64,7 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 			}
 			db.execSQL("PRAGMA foreign_keys = ON;");
 		} catch (IOException ex) {
-			Logger.getLogger(SQLiteDatabaseHelper.class.getName()).log(Level.SEVERE, null, ex);
+			ex.printStackTrace();
 		}
 	}
 

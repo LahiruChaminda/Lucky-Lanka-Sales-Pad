@@ -13,9 +13,6 @@ import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.User;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * SplashActivity - Entry point of the Lucky Lanka Sales Pad
  *
@@ -46,8 +43,8 @@ public class SplashActivity extends Activity {
 			public void run() {
 				try {
 					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					Logger.getLogger(SplashActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
 				}
 				User authorizedUser = UserController.getAuthorizedUser(SplashActivity.this);
 				if (authorizedUser != null) {

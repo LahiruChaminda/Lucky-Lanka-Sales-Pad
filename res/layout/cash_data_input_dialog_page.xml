@@ -17,7 +17,7 @@
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal"/>
+                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal" android:hint="Amount"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
