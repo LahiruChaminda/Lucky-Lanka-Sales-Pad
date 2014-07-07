@@ -20,8 +20,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -51,7 +49,7 @@ public class ItemController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
 			database.beginTransaction();
-			SQLiteStatement categoryStatement = database.compileStatement("replace into tbl_category(categoryId,categoryDescription) values (?,?))");
+			SQLiteStatement categoryStatement = database.compileStatement("replace into tbl_category(categoryId,categoryDescription) values (?,?)");
 			SQLiteStatement itemStatement = database.compileStatement("replace into tbl_item(itemId,categoryId,itemCode,itemDescription,wholeSalePrice,retailPrice,availableQuantity,loadedQuantity,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity) values (?,?,?,?,?,?,?,?,?,?,?)");
 			for (Category category : categories) {
 				Object[] categoryParameters = {
@@ -78,7 +76,7 @@ public class ItemController extends AbstractController {
 			}
 			database.setTransactionSuccessful();
 		} catch (SQLException ex) {
-			Logger.getLogger(ItemController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			ex.printStackTrace();
 		} finally {
 			database.endTransaction();
 			databaseHelper.close();

@@ -24,8 +24,6 @@ import com.ceylon_linux.lucky_lanka.model.User;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -102,9 +100,9 @@ public class LoginActivity extends Activity {
 					}
 					return user;
 				} catch (IOException e) {
-					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+					e.printStackTrace();
 				} catch (JSONException e) {
-					Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+					e.printStackTrace();
 				}
 				return null;
 			}

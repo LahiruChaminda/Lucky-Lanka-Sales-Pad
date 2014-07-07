@@ -23,8 +23,6 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -94,7 +92,7 @@ public class OutletController extends AbstractController {
 			}
 			database.setTransactionSuccessful();
 		} catch (SQLException ex) {
-			Logger.getLogger(Outlet.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			ex.printStackTrace();
 		} finally {
 			database.endTransaction();
 			databaseHelper.close();

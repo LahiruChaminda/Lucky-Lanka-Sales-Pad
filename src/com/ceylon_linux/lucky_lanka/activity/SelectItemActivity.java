@@ -32,8 +32,6 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -57,9 +55,9 @@ public class SelectItemActivity extends Activity {
 		try {
 			categories = ItemController.loadItemsFromDb(this);
 		} catch (IOException ex) {
-			Logger.getLogger(SelectItemActivity.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			ex.printStackTrace();
 		} catch (JSONException ex) {
-			Logger.getLogger(SelectItemActivity.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			ex.printStackTrace();
 		}
 
 		itemList.setAdapter(new BaseExpandableListAdapter() {

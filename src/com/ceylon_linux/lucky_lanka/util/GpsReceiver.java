@@ -16,9 +16,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * GpsReceiver - Receive and Provide GPS locations
  *
@@ -53,7 +50,7 @@ public class GpsReceiver extends Service {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException ex) {
-				Logger.getLogger(GpsReceiver.class.getName()).log(Level.SEVERE, null, ex);
+				ex.printStackTrace();
 			}
 		}
 		if (lastKnownLocation != null && lastKnownLocation.getLatitude() != 0 && lastKnownLocation.getLongitude() != 0 && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
