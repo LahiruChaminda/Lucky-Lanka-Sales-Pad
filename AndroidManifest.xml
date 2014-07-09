@@ -8,8 +8,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <application android:label="@string/app_name" android:theme="@android:style/Theme.Holo.Light" android:screenOrientation="portrait"
                  android:icon="@drawable/logo">
-        <activity android:name=".activity.SplashActivity"
-                  android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen">
+        <activity android:name=".activity.SplashActivity" android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -18,13 +17,20 @@
         <activity android:name=".activity.LoginActivity">
         </activity>
         <activity android:name=".activity.HomeActivity" android:screenOrientation="landscape">
-            <!-- android:theme="@android:style/Theme.WithActionBar" -->
         </activity>
         <activity android:name=".activity.LoadAddInvoiceActivity" android:screenOrientation="landscape">
         </activity>
         <activity android:name=".activity.SelectItemActivity" android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".activity.EnterItemDetailsActivity" android:screenOrientation="portrait">
+        </activity>
         <activity android:name=".activity.DeviceListActivity" android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".activity.PaymentActivity" android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".activity.CashPaymentActivity" android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".activity.ChequePaymentActivity" android:screenOrientation="portrait">
         </activity>
     </application>
 </manifest>

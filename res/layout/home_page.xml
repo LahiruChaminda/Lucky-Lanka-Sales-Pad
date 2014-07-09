@@ -68,32 +68,11 @@
                 android:id="@+id/txtUserName"
                 />
     </LinearLayout>
-
-    <Button android:text="Print" android:id="@+id/mPrint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
     <Button
             android:layout_width="match_parent"
             android:text="Start"
             android:id="@+id/btnStart"
             android:textSize="25dp"
-            android:layout_height="wrap_content"/>
-    <Button
-            android:layout_width="match_parent"
-            android:text="Payments"
-            android:id="@+id/btnPayment"
-            android:textSize="25dp"
-            android:layout_height="wrap_content"/>/>
-    <Button
-            android:text="Connect Bluetooth Printer"
-            android:id="@+id/btnConnectPrinter"
-            android:textSize="25dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    <Button android:text="Disconnect Bluetooth Printer"
-            android:id="@+id/btnDisconnectPrinter"
-            android:textSize="25dp"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     <Button
             android:layout_width="match_parent"

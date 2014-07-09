@@ -8,14 +8,11 @@ package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +42,8 @@ public class SelectItemActivity extends Activity {
 	private Outlet outlet;
 	private ArrayList<Category> categories;
 	private ArrayList<OrderDetail> orderDetails;
+	private volatile Item item;
+	private volatile int groupPosition;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -161,74 +160,12 @@ public class SelectItemActivity extends Activity {
 	}
 
 	private boolean itemListOnChildClicked(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
-		final Dialog dialog = new Dialog(SelectItemActivity.this);
-		dialog.setCanceledOnTouchOutside(false);
-		dialog.setTitle("Please Insert Quantity");
-		dialog.setContentView(R.layout.quantity_insert_page);
-		Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
-		TextView txtItemDescription = (TextView) dialog.findViewById(R.id.txtItemDescription);
-		final EditText inputRequestedQuantity = (EditText) dialog.findViewById(R.id.inputRequestedQuantity);
-		final EditText inputReturnQuantity = (EditText) dialog.findViewById(R.id.inputReturnQuantity);
-		final EditText inputReplaceQuantity = (EditText) dialog.findViewById(R.id.inputReplaceQuantity);
-		final EditText inputSampleQuantity = (EditText) dialog.findViewById(R.id.inputSampleQuantity);
-		final Item item = categories.get(groupPosition).getItems().get(childPosition);
-		final TextView txtFreeQuantity = (TextView) dialog.findViewById(R.id.txtFreeQuantity);
-		final TextView txtDiscount = (TextView) dialog.findViewById(R.id.txtDiscount);
-		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
-		txtItemDescription.setText(item.getItemDescription());
-		inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				String requestedQuantityString = inputRequestedQuantity.getText().toString();
-				String returnQuantityString = inputReturnQuantity.getText().toString();
-				String replaceQuantityString = inputReplaceQuantity.getText().toString();
-				String sampleQuantityString = inputSampleQuantity.getText().toString();
-				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
-				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
-				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
-				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
-				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
-				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
-			}
-		});
-		btnOk.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				String requestedQuantityString = inputRequestedQuantity.getText().toString();
-				String returnQuantityString = inputReturnQuantity.getText().toString();
-				String replaceQuantityString = inputReplaceQuantity.getText().toString();
-				String sampleQuantityString = inputSampleQuantity.getText().toString();
-				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
-				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
-				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
-				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
-				if (orderDetails.contains(orderDetail)) {
-					orderDetails.remove(orderDetail);
-				}
-				orderDetails.add(orderDetail);
-				item.setSelected(true);
-				itemList.collapseGroup(groupPosition);
-				itemList.expandGroup(groupPosition);
-				dialog.dismiss();
-			}
-		});
-		btnCancel.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				dialog.dismiss();
-			}
-		});
-		dialog.show();
+		this.item = categories.get(groupPosition).getItems().get(childPosition);
+		Intent enterItemDetailsActivity = new Intent(SelectItemActivity.this, EnterItemDetailsActivity.class);
+		enterItemDetailsActivity.putExtra("item", item);
+		enterItemDetailsActivity.putExtra("outlet", outlet);
+		startActivityForResult(enterItemDetailsActivity, RESULT_OK);
+		this.groupPosition = groupPosition;
 		return true;
 	}
 
@@ -284,8 +221,8 @@ public class SelectItemActivity extends Activity {
 					OrderController.saveOrderToDb(SelectItemActivity.this, order);
 					Toast.makeText(SelectItemActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
 				}
-				Intent homeActivity = new Intent(SelectItemActivity.this, HomeActivity.class);
-				startActivity(homeActivity);
+				Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
+				startActivity(paymentActivity);
 				finish();
 			}
 		}.execute(order);
@@ -315,6 +252,20 @@ public class SelectItemActivity extends Activity {
 		childViewHolder.txtReplaceQuantity.setText("0");
 		childViewHolder.txtSampleQuantity.setText("0");
 		return childViewHolder;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			OrderDetail orderDetail = (OrderDetail) data.getSerializableExtra("orderDetail");
+			if (!orderDetails.contains(orderDetail)) {
+				orderDetails.add(orderDetail);
+				item.setSelected(true);
+				itemList.collapseGroup(groupPosition);
+				itemList.expandGroup(groupPosition);
+			}
+		}
 	}
 
 	private static class GroupViewHolder {

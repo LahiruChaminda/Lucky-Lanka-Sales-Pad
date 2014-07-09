@@ -12,11 +12,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Bank"
-                android:gravity="center_vertical" android:layout_weight="1"/>
+                android:gravity="center_vertical" android:layout_weight="1" android:textSize="25dp"/>
         <Spinner
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/bankCombo" android:layout_weight="2"/>
+                android:id="@+id/bankCombo" android:layout_weight="2" android:spinnerMode="dialog"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
@@ -25,11 +25,11 @@
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical" android:layout_weight="1" android:text="Cheque No"/>
+                android:gravity="center_vertical" android:layout_weight="1" android:text="Cheque No" android:textSize="25dp"/>
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/inputChequeNo" android:layout_weight="2" android:hint="Cheque No"/>
+                android:id="@+id/inputChequeNo" android:layout_weight="2" android:hint="Cheque No" android:textSize="25dp"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
@@ -39,11 +39,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Amount"
-                android:gravity="center_vertical" android:layout_weight="1"/>
+                android:gravity="center_vertical" android:layout_weight="1" android:textSize="25dp"/>
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal" android:hint="Amount"/>
+                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal" android:hint="Amount" android:textSize="25dp"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
@@ -53,44 +53,26 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Realization Date"
-                android:gravity="center_vertical" android:layout_weight="1"/>
-        <LinearLayout
-                android:orientation="horizontal"
+                android:gravity="center_vertical" android:layout_weight="1" android:textSize="25dp"/>
+        <DatePicker
                 android:layout_width="0dp"
-                android:layout_height="wrap_content" android:layout_weight="2" android:weightSum="3">
-            <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="number"
-                    android:id="@+id/inputYear" android:hint="Year"/>
-            <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="number"
-                    android:id="@+id/inputMonth" android:hint="Month"/>
-            <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="number"
-                    android:id="@+id/inputDate" android:hint="Date"/>
-        </LinearLayout>
+                android:layout_height="match_parent"
+                android:calendarViewShown="false"
+                android:id="@+id/datePicker" android:layout_weight="2"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="196dp" android:layout_gravity="right"
+            android:layout_width="240dp" android:layout_gravity="right"
             android:layout_height="wrap_content" android:weightSum="2">
         <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Ok"
-                android:id="@+id/btnOk" android:layout_weight="1"/>
+                android:id="@+id/btnOk" android:layout_weight="1" android:textSize="25dp"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Cancel"
-                android:id="@+id/btnCancel" android:layout_weight="1"/>
+                android:id="@+id/btnCancel" android:layout_weight="1" android:textSize="25dp"/>
     </LinearLayout>
 </LinearLayout>

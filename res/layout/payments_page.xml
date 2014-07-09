@@ -24,9 +24,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/listPayment" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
+    <Button android:text="Print" android:id="@+id/mPrint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    <Button
+            android:text="Connect Bluetooth Printer"
+            android:id="@+id/btnConnectPrinter"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    <Button android:text="Disconnect Bluetooth Printer"
+            android:id="@+id/btnDisconnectPrinter"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Print Invoice"
-            android:id="@+id/btnPrintInvoice" android:textSize="20dp"/>
+            android:id="@+id/btnPrintInvoice" android:textSize="25dp"/>
 </LinearLayout>

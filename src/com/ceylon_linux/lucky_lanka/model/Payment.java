@@ -26,6 +26,18 @@ public class Payment implements Serializable {
 	private String chequeNo;
 	private boolean synced;
 
+	public Payment(double amount) {
+		this.amount = amount;
+		this.paymentDate = new Date();
+	}
+
+	public Payment(double amount, Date chequeDate, String chequeNo) {
+		this.amount = amount;
+		this.chequeDate = chequeDate;
+		this.chequeNo = chequeNo;
+		this.paymentDate = new Date();
+	}
+
 	public Payment(int paymentId, Date paymentDate, double amount, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;

@@ -8,6 +8,7 @@ package com.ceylon_linux.lucky_lanka.model;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
@@ -15,7 +16,7 @@ import java.util.HashMap;
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class OrderDetail {
+public class OrderDetail implements Serializable {
 
 	private int itemId;
 	private String itemDescription;
@@ -179,12 +180,9 @@ public class OrderDetail {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
+		if (o == null || o.getClass() != OrderDetail.class) return false;
 		OrderDetail that = (OrderDetail) o;
-
 		if (itemId != that.itemId) return false;
-
 		return true;
 	}
 
