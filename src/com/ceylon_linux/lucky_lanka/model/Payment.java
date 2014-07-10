@@ -24,18 +24,22 @@ public class Payment implements Serializable {
 	private double amount;
 	private Date chequeDate;
 	private String chequeNo;
+	private String bank;
 	private boolean synced;
 
 	public Payment(double amount) {
 		this.amount = amount;
 		this.paymentDate = new Date();
+		this.synced = false;
 	}
 
-	public Payment(double amount, Date chequeDate, String chequeNo) {
+	public Payment(double amount, Date chequeDate, String chequeNo, String bank) {
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
 		this.paymentDate = new Date();
+		this.bank = bank;
+		this.synced = false;
 	}
 
 	public Payment(int paymentId, Date paymentDate, double amount, boolean synced) {
@@ -44,12 +48,14 @@ public class Payment implements Serializable {
 		this.amount = amount;
 	}
 
-	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, String bank, boolean synced) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
+		this.bank = bank;
+		this.synced = synced;
 	}
 
 	public static Payment parseChequePayment(JSONObject jsonInstance) throws JSONException, ParseException {
@@ -60,6 +66,7 @@ public class Payment implements Serializable {
 			jsonInstance.getDouble("pm_amount"),
 			simpleDateFormat.parse(jsonInstance.getString("pc_date")),
 			jsonInstance.getString("pc_no"),
+			jsonInstance.getString("bank"),
 			true
 		);
 	}
@@ -112,6 +119,14 @@ public class Payment implements Serializable {
 
 	public void setChequeNo(String chequeNo) {
 		this.chequeNo = chequeNo;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
 	}
 
 	public boolean isSynced() {

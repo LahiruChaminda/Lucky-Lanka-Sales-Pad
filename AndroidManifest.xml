@@ -26,7 +26,7 @@
         </activity>
         <activity android:name=".activity.DeviceListActivity" android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".activity.PaymentActivity" android:screenOrientation="portrait">
+        <activity android:name=".activity.PaymentActivity" android:screenOrientation="landscape">
         </activity>
         <activity android:name=".activity.CashPaymentActivity" android:screenOrientation="portrait">
         </activity>

@@ -8,10 +8,8 @@ package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +17,9 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.ItemController;
-import com.ceylon_linux.lucky_lanka.controller.OrderController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.*;
 import com.ceylon_linux.lucky_lanka.util.BatteryUtility;
-import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -37,6 +33,7 @@ import java.util.Date;
  */
 public class SelectItemActivity extends Activity {
 
+	private final int ENTER_ITEM_DETAILS = 0;
 	private ExpandableListView itemList;
 	private Button finishButton;
 	private Outlet outlet;
@@ -164,7 +161,7 @@ public class SelectItemActivity extends Activity {
 		Intent enterItemDetailsActivity = new Intent(SelectItemActivity.this, EnterItemDetailsActivity.class);
 		enterItemDetailsActivity.putExtra("item", item);
 		enterItemDetailsActivity.putExtra("outlet", outlet);
-		startActivityForResult(enterItemDetailsActivity, RESULT_OK);
+		startActivityForResult(enterItemDetailsActivity, ENTER_ITEM_DETAILS);
 		this.groupPosition = groupPosition;
 		return true;
 	}
@@ -186,46 +183,11 @@ public class SelectItemActivity extends Activity {
 			alert.show();
 			return;
 		}
-		final Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
-		new AsyncTask<Order, Void, Boolean>() {
-			ProgressDialog progressDialog;
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				progressDialog = ProgressDialogGenerator.generateProgressDialog(SelectItemActivity.this, "Sync Order", false);
-				progressDialog.show();
-			}
-
-			@Override
-			protected Boolean doInBackground(Order... params) {
-				Order order = params[0];
-				try {
-					return OrderController.syncOrder(SelectItemActivity.this, order.getOrderAsJson());
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				return false;
-			}
-
-			@Override
-			protected void onPostExecute(Boolean aBoolean) {
-				if (progressDialog != null && progressDialog.isShowing()) {
-					progressDialog.dismiss();
-				}
-				if (aBoolean) {
-					Toast.makeText(SelectItemActivity.this, "Order Synced Successfully", Toast.LENGTH_LONG).show();
-				} else {
-					OrderController.saveOrderToDb(SelectItemActivity.this, order);
-					Toast.makeText(SelectItemActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
-				}
-				Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
-				startActivity(paymentActivity);
-				finish();
-			}
-		}.execute(order);
+		Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
+		Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
+		paymentActivity.putExtra("order", order);
+		startActivity(paymentActivity);
+		finish();
 	}
 
 	@Override
@@ -256,25 +218,25 @@ public class SelectItemActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode == RESULT_OK) {
+		if (requestCode == ENTER_ITEM_DETAILS && resultCode == RESULT_OK) {
 			OrderDetail orderDetail = (OrderDetail) data.getSerializableExtra("orderDetail");
-			if (!orderDetails.contains(orderDetail)) {
+			int index;
+			if ((index = orderDetails.indexOf(orderDetail)) != -1) {
+				orderDetails.set(index, orderDetail);
+			} else {
 				orderDetails.add(orderDetail);
 				item.setSelected(true);
-				itemList.collapseGroup(groupPosition);
-				itemList.expandGroup(groupPosition);
 			}
+			itemList.collapseGroup(groupPosition);
+			itemList.expandGroup(groupPosition);
 		}
 	}
 
 	private static class GroupViewHolder {
-
 		TextView txtCategory;
 	}
 
 	private static class ChildViewHolder {
-
 		TextView txtItemDescription;
 		CheckBox checkBox;
 		TextView txtQuantity;

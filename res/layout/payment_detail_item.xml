@@ -2,7 +2,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
-              android:weightSum="4"
+              android:weightSum="5"
+              android:padding="3dp"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <TextView
@@ -10,26 +11,34 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="20dp"
-            android:text="Large Text"
+            android:text="Rs 1500"
             android:id="@+id/txtPaidValue"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="20dp"
-            android:text="Large Text"
+            android:text="10 July, 2014"
             android:id="@+id/txtPaidDate"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="20dp"
+            android:id="@+id/txtPaymentMethod"
             android:text="CHEQUE"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="20dp"
-            android:text="Large Text"
+            android:text="PL8300457812"
             android:id="@+id/txtChequeNo"/>
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:text="30 July, 2014"
+            android:id="@+id/txtBankingDate"/>
 </LinearLayout>

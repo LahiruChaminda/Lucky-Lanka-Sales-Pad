@@ -9,6 +9,7 @@ package com.ceylon_linux.lucky_lanka.model;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +20,7 @@ import java.util.HashMap;
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class Order {
+public class Order implements Serializable {
 
 	private long orderId;
 	private int outletId;
@@ -31,6 +32,7 @@ public class Order {
 	private double latitude;
 	private int batteryLevel;
 	private ArrayList<OrderDetail> orderDetails;
+	private ArrayList<Payment> payments;
 
 	public Order(int outletId, int positionId, int routeId, int batteryLevel, long invoiceTime, double longitude, double latitude, ArrayList<OrderDetail> orderDetails) {
 		this.setOutletId(outletId);
@@ -162,6 +164,14 @@ public class Order {
 		this.orderDetails = orderDetails;
 	}
 
+	public ArrayList<Payment> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(ArrayList<Payment> payments) {
+		this.payments = payments;
+	}
+
 	@Override
 	public String toString() {
 		return outletDescription;
@@ -169,13 +179,10 @@ public class Order {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
 		Order order = (Order) o;
-
+		if (this == o) return true;
+		if (o == null || o.getClass() != Order.class) return false;
 		if (orderId != order.orderId) return false;
-
 		return true;
 	}
 

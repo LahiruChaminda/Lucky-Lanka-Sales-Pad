@@ -51,11 +51,9 @@ public class DeviceListActivity extends Activity {
 		setContentView(R.layout.device_list);
 		setResult(Activity.RESULT_CANCELED);
 		mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
-
 		ListView mPairedListView = (ListView) findViewById(R.id.paired_devices);
 		mPairedListView.setAdapter(mPairedDevicesArrayAdapter);
 		mPairedListView.setOnItemClickListener(mDeviceClickListener);
-
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter.getBondedDevices();
 

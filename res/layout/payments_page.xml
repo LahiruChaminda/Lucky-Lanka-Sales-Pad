@@ -7,26 +7,23 @@
 
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" android:weightSum="2" android:gravity="right">
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Cash Payment"
-                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="20dp"/>
+                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="25dp"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Cheque Payment"
-                android:id="@+id/btnChequePayment" android:layout_weight="1" android:textSize="20dp"/>
+                android:id="@+id/btnChequePayment" android:layout_weight="1" android:textSize="25dp"/>
     </LinearLayout>
     <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/listPayment" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
-    <Button android:text="Print" android:id="@+id/mPrint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
     <Button
             android:text="Connect Bluetooth Printer"
             android:id="@+id/btnConnectPrinter"
