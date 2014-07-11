@@ -22,7 +22,7 @@
         </activity>
         <activity android:name=".activity.SelectItemActivity" android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".activity.EnterItemDetailsActivity" android:screenOrientation="portrait">
+        <activity android:name=".activity.EnterItemDetailsActivity" android:screenOrientation="landscape">
         </activity>
         <activity android:name=".activity.DeviceListActivity" android:screenOrientation="portrait">
         </activity>

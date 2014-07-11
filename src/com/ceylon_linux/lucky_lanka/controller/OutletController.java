@@ -137,7 +137,7 @@ public class OutletController extends AbstractController {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		String invoiceSql = "select invoiceId, invoiceDate, amount from tbl_invoice where outletId=?";
-		String paymentsSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, status from tbl_payment where invoiceId=?";
+		String paymentsSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, status, bank from tbl_payment where invoiceId=?";
 		ArrayList<Invoice> invoices = new ArrayList<Invoice>();
 		Cursor invoiceCursor = DbHandler.performRawQuery(database, invoiceSql, new Object[]{outletId});
 		for (invoiceCursor.moveToFirst(); !invoiceCursor.isAfterLast(); invoiceCursor.moveToNext()) {
@@ -153,6 +153,7 @@ public class OutletController extends AbstractController {
 					paymentCursor.getDouble(2),
 					new Date(paymentCursor.getLong(3)),
 					paymentCursor.getString(4),
+					paymentCursor.getString(6),
 					paymentCursor.getInt(5) == 0
 				));
 			}

@@ -68,5 +68,6 @@ create table tbl_payment(
  amount decimal(20,2) not null check(amount > 0),
  chequeDate long default 0,
  chequeNo Text default '',
+ bank TEXT default '',
  status int default 0
 );

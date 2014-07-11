@@ -81,10 +81,11 @@ public class OrderDetail implements Serializable {
 				}
 				break;
 			case Outlet.SIX_PLUS_ONE_OUTLET:
+
 				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
 					freeIssue = ((int) (quantity / 216)) * 36;
 				} else if (quantity >= minimumFreeIssueQuantity) {
-					freeIssue = ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
+					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
 				}
 				break;
 			case Outlet.SUPER_MARKET:
