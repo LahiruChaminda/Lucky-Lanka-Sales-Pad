@@ -153,13 +153,13 @@
                 android:id="@+id/btnOk"
                 android:textSize="25dp"
                 android:text="OK"
-                android:layout_weight="1"/>
+                android:layout_weight="1" android:background="@drawable/rounded_button"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/btnCancel"
                 android:textSize="25dp"
                 android:text="Cancel"
-                android:layout_weight="1"/>
+                android:layout_weight="1" android:background="@drawable/rounded_button"/>
     </LinearLayout>
 </LinearLayout>

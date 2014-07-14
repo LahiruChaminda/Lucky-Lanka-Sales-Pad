@@ -28,11 +28,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Ok"
-                android:id="@+id/btnOk" android:layout_weight="1" android:textSize="25dp"/>
+                android:id="@+id/btnOk" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Cancel"
-                android:id="@+id/btnCancel" android:layout_weight="1" android:textSize="25dp"/>
+                android:id="@+id/btnCancel" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
     </LinearLayout>
 </LinearLayout>

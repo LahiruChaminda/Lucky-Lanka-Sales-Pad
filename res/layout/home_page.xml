@@ -73,11 +73,11 @@
             android:text="Start"
             android:id="@+id/btnStart"
             android:textSize="25dp"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>
     <Button
             android:layout_width="match_parent"
             android:text="Sign Out"
             android:id="@+id/btnSignOut"
             android:textSize="25dp"
-            android:layout_height="wrap_content"/>/>
+            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>/>
 </LinearLayout>

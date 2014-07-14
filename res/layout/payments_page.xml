@@ -13,12 +13,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Cash Payment"
-                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="25dp"/>
+                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Cheque Payment"
-                android:id="@+id/btnChequePayment" android:layout_weight="1" android:textSize="25dp"/>
+                android:id="@+id/btnChequePayment" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
     </LinearLayout>
     <ListView
             android:layout_width="match_parent"
@@ -29,15 +29,15 @@
             android:id="@+id/btnConnectPrinter"
             android:textSize="25dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>
     <Button android:text="Disconnect Bluetooth Printer"
             android:id="@+id/btnDisconnectPrinter"
             android:textSize="25dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Print Invoice"
-            android:id="@+id/btnPrintInvoice" android:textSize="25dp"/>
+            android:id="@+id/btnPrintInvoice" android:textSize="25dp" android:background="@drawable/rounded_button"/>
 </LinearLayout>

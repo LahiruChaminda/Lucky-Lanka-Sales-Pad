@@ -187,5 +187,6 @@
             android:text="Next"
             android:id="@+id/btnNext"
             android:clickable="true"
+            android:background="@drawable/rounded_button"
             android:textSize="25dp"/>
 </LinearLayout>

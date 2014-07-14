@@ -10,7 +10,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.*;
 import com.ceylon_linux.lucky_lanka.util.BatteryUtility;
+import com.ceylon_linux.lucky_lanka.util.GpsReceiver;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -41,13 +44,21 @@ public class SelectItemActivity extends Activity {
 	private ArrayList<OrderDetail> orderDetails;
 	private volatile Item item;
 	private volatile int groupPosition;
+	private Location location;
+	private GpsReceiver gpsReceiver;
+	private Thread GPS_RECEIVER;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.select_items_page);
 		initialize();
-		outlet = (Outlet) getIntent().getExtras().get("outlet");
+		Intent intent = getIntent();
+		if (intent.hasExtra("order")) {
+			Order order = (Order) intent.getSerializableExtra("order");
+			orderDetails = order.getOrderDetails();
+		}
+		outlet = (Outlet) intent.getExtras().get("outlet");
 		try {
 			categories = ItemController.loadItemsFromDb(this);
 		} catch (IOException ex) {
@@ -154,6 +165,26 @@ public class SelectItemActivity extends Activity {
 				finishButtonClicked(view);
 			}
 		});
+		finishButton.setEnabled(false);
+		gpsReceiver = GpsReceiver.getGpsReceiver(SelectItemActivity.this);
+		GPS_RECEIVER = new Thread() {
+			private Handler handler = new Handler();
+
+			@Override
+			public void run() {
+				do {
+					location = gpsReceiver.getLastKnownLocation();
+				} while (location == null);
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						Toast.makeText(SelectItemActivity.this, "GPS Location Received", Toast.LENGTH_LONG).show();
+						finishButton.setEnabled(true);
+					}
+				});
+			}
+		};
+		GPS_RECEIVER.start();
 	}
 
 	private boolean itemListOnChildClicked(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
@@ -183,9 +214,28 @@ public class SelectItemActivity extends Activity {
 			alert.show();
 			return;
 		}
-		Order order = new Order(outlet.getOutletId(), UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(), outlet.getRouteId(), BatteryUtility.getBatteryLevel(SelectItemActivity.this), new Date().getTime(), 80, 6, orderDetails);
+		if ((location = gpsReceiver.getLastKnownLocation()) == null) {
+			Thread.State state = GPS_RECEIVER.getState();
+			if (state == Thread.State.TERMINATED) {
+				finishButton.setEnabled(false);
+				GPS_RECEIVER.start();
+			}
+			Toast.makeText(SelectItemActivity.this, "Please wait for GPS Location", Toast.LENGTH_LONG).show();
+			return;
+		}
+		Order order = new Order(
+			outlet.getOutletId(),
+			UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(),
+			outlet.getRouteId(),
+			BatteryUtility.getBatteryLevel(SelectItemActivity.this),
+			new Date().getTime(),
+			location.getLongitude(),
+			location.getLatitude(),
+			orderDetails
+		);
 		Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
 		paymentActivity.putExtra("order", order);
+		paymentActivity.putExtra("outlet", outlet);
 		startActivity(paymentActivity);
 		finish();
 	}
@@ -233,10 +283,12 @@ public class SelectItemActivity extends Activity {
 	}
 
 	private static class GroupViewHolder {
+
 		TextView txtCategory;
 	}
 
 	private static class ChildViewHolder {
+
 		TextView txtItemDescription;
 		CheckBox checkBox;
 		TextView txtQuantity;

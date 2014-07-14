@@ -74,12 +74,16 @@ public class Order implements Serializable {
 		invoiceParams.put("lon", getLongitude());
 		invoiceParams.put("lat", getLatitude());
 		invoiceParams.put("bat", getBatteryLevel());
-
 		JSONArray orderDetailsJsonArray = new JSONArray();
-		for (OrderDetail orderDetail : getOrderDetails()) {
+		for (OrderDetail orderDetail : orderDetails) {
 			orderDetailsJsonArray.put(orderDetail.getOrderDetailAsJson());
 		}
+		JSONArray paymentsJsonArray = new JSONArray();
+		for (Payment payment : payments) {
+			paymentsJsonArray.put(payment.getPaymentAsJson());
+		}
 		orderJsonParams.put("invitems", orderDetailsJsonArray);
+		orderJsonParams.put("Payment", paymentsJsonArray);
 		orderJsonParams.put("Invoice", new JSONObject(invoiceParams));
 		return new JSONObject(orderJsonParams);
 	}

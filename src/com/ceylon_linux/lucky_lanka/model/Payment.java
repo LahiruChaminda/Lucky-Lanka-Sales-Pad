@@ -3,6 +3,7 @@
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
  * Created on : Jul 01, 2014, 10:45 AM
  */
+
 package com.ceylon_linux.lucky_lanka.model;
 
 import org.json.JSONException;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -19,6 +21,7 @@ import java.util.Date;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class Payment implements Serializable {
+
 	private int paymentId;
 	private Date paymentDate;
 	private double amount;
@@ -135,5 +138,18 @@ public class Payment implements Serializable {
 
 	public void setSynced(boolean synced) {
 		this.synced = synced;
+	}
+
+	public JSONObject getPaymentAsJson() {
+		HashMap<String, Object> parameters = new HashMap<String, Object>();
+		boolean isChequePayment = chequeNo != null && !chequeNo.isEmpty();
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+		parameters.put("chequepayment", (isChequePayment) ? amount : 0);
+		parameters.put("cashpayment", (isChequePayment) ? 0 : amount);
+		parameters.put("realizeddate", (isChequePayment) ? dateFormatter.format(chequeDate) : "");
+		parameters.put("date", dateFormatter.format(paymentDate));
+		parameters.put("bank", (isChequePayment) ? bank : "");
+		parameters.put("type", (isChequePayment) ? "Cheque" : "Cash");
+		return new JSONObject(parameters);
 	}
 }

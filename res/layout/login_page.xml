@@ -51,7 +51,7 @@
             android:padding="5dp"
             android:textSize="25dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginRight="5dp" android:background="@drawable/rounded_button"/>
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,5 +60,5 @@
             android:padding="5dp"
             android:textSize="25dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginRight="5dp" android:background="@drawable/rounded_button"/>
 </LinearLayout>

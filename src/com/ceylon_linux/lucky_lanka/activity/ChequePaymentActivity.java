@@ -9,11 +9,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
+import com.ceylon_linux.lucky_lanka.controller.BankController;
+import com.ceylon_linux.lucky_lanka.model.Bank;
 import com.ceylon_linux.lucky_lanka.model.Payment;
 
 import java.util.Date;
@@ -43,6 +42,7 @@ public class ChequePaymentActivity extends Activity {
 		inputChequeNo = (EditText) findViewById(R.id.inputChequeNo);
 		datePicker = (DatePicker) findViewById(R.id.datePicker);
 		bankCombo = (Spinner) findViewById(R.id.bankCombo);
+		bankCombo.setAdapter(new ArrayAdapter<Bank>(ChequePaymentActivity.this, R.layout.spinner_layout, BankController.getBanks()));
 		btnOk = (Button) findViewById(R.id.btnOk);
 		btnCancel = (Button) findViewById(R.id.btnCancel);
 		btnOk.setOnClickListener(new View.OnClickListener() {
