@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.OrderController;
 import com.ceylon_linux.lucky_lanka.model.Order;
+import com.ceylon_linux.lucky_lanka.model.OrderDetail;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
 import com.ceylon_linux.lucky_lanka.model.Payment;
 import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -59,7 +60,7 @@ public class PaymentActivity extends Activity {
 	private UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private ProgressDialog bluetoothConnectProgressDialog;
 	private BluetoothSocket bluetoothSocket;
-	private NumberFormat currenyFormat;
+	private NumberFormat currencyFormat;
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -85,10 +86,10 @@ public class PaymentActivity extends Activity {
 		btnPrintInvoice = (Button) findViewById(R.id.btnPrintInvoice);
 		listPayment = (ListView) findViewById(R.id.listPayment);
 		order.setPayments(new ArrayList<Payment>());
-		currenyFormat = NumberFormat.getInstance();
-		currenyFormat.setGroupingUsed(true);
-		currenyFormat.setMaximumFractionDigits(2);
-		currenyFormat.setMinimumFractionDigits(2);
+		currencyFormat = NumberFormat.getInstance();
+		currencyFormat.setGroupingUsed(true);
+		currencyFormat.setMaximumFractionDigits(2);
+		currencyFormat.setMinimumFractionDigits(2);
 		adapter = new BaseAdapter() {
 
 			@Override
@@ -124,7 +125,7 @@ public class PaymentActivity extends Activity {
 				}
 				Payment payment = getItem(position);
 				boolean isChequePayment = payment.getChequeNo() != null && !payment.getChequeNo().isEmpty();
-				paymentViewHolder.txtPaidValue.setText("Rs " + currenyFormat.format(payment.getAmount()));
+				paymentViewHolder.txtPaidValue.setText("Rs " + currencyFormat.format(payment.getAmount()));
 				paymentViewHolder.txtPaidDate.setText(dateFormatter.format(payment.getPaymentDate()));
 				paymentViewHolder.txtPaymentMethod.setText((isChequePayment) ? "CHEQUE" : "CASH");
 				paymentViewHolder.txtChequeNo.setText((isChequePayment) ? payment.getChequeNo() : "");
@@ -191,23 +192,9 @@ public class PaymentActivity extends Activity {
 					}
 				});
 				try {
-					Log.i("order", order.getOrderAsJson().toString());
 					syncStatus = OrderController.syncOrder(PaymentActivity.this, order.getOrderAsJson());
-					OutputStream os = bluetoothSocket.getOutputStream();
-					StringBuilder builder = new StringBuilder();
-					builder.append("   Lucky Lanka Invoice                          \n");
-					builder.append("   ---------------------------------------------\n");
-					builder.append("   Outlet : Piyani Stores                       \n");
-					builder.append("   Date   : 10 July, 2014                       \n");
-					builder.append("   Time   : 14:40 pm                            \n");
-					builder.append("   ---------------------------------------------\n");
-					builder.append("   Vanilla Milk 100ml           120 x 10 Rs 1200\n");
-					builder.append("   Chocolate Milk 100ml         120 x 10 Rs 1200\n");
-					builder.append("   ---------------------------------------------\n");
-					builder.append("   Total                                 Rs 2400\n");
-					builder.append("   ---------------------------------------------\n");
-					builder.append("   ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRS\n\n\n\n");
-					os.write(builder.toString().getBytes());
+					OutputStream os = bluetoothSocket.getOutputStream();//48
+					os.write(getOrderIntoByteStream(order));
 					os.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -315,8 +302,27 @@ public class PaymentActivity extends Activity {
 	}
 
 	private byte[] getOrderIntoByteStream(Order order) {
-
-		return null;
+		SimpleDateFormat dateFormatter = new SimpleDateFormat();
+		dateFormatter.applyPattern("dd MMM, yyyy");
+		Date date = new Date();
+		StringBuilder builder = new StringBuilder();
+		builder.append(getPaddedString(getAlignedString("Lucky Lanka Invoice", 44)));
+		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
+		builder.append(getPaddedString(getAlignedString("Outlet : " + outlet.getOutletName(), 44)));
+		builder.append(getPaddedString(getAlignedString("Date   : " + dateFormatter.format(date), 44)));
+		dateFormatter.applyPattern("hh:mm:ss aa");
+		builder.append(getPaddedString(getAlignedString("Time   : " + dateFormatter.format(date), 44)));
+		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
+		double sum = 0;
+		for (OrderDetail orderDetail : order.getOrderDetails()) {
+			sum += (orderDetail.getPrice() * orderDetail.getQuantity());
+			builder.append(getPaddedString(getAlignedString(orderDetail.getItemDescription(), 25) + getAlignedString(String.valueOf(orderDetail.getPrice()), 5) + "x" + getAlignedString(String.valueOf(orderDetail.getQuantity()), 3) + " Rs " + (orderDetail.getPrice() * orderDetail.getQuantity())));
+		}
+		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
+		builder.append(getPaddedString(getAlignedString("Total           ", 34) + "Rs " + sum));
+		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
+		builder.append("\n\n\n");
+		return builder.toString().getBytes();
 	}
 
 	private String getAlignedString(String snippet, int length) {

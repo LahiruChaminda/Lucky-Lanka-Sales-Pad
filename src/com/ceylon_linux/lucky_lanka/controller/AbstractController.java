@@ -7,6 +7,7 @@
 package com.ceylon_linux.lucky_lanka.controller;
 
 import android.content.Context;
+import android.util.Log;
 import com.ceylon_linux.lucky_lanka.util.InternetObserver;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -76,6 +77,7 @@ abstract class AbstractController extends WebServiceURL {
 				while ((currentLine = bufferedReader.readLine()) != null) {
 					responseString = responseString + currentLine + lineSeparator;
 				}
+				Log.i("response", responseString);
 				return new JSONObject(responseString);
 			} finally {
 				if (bufferedReader != null) {

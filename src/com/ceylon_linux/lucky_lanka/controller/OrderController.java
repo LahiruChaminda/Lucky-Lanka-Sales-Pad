@@ -45,9 +45,9 @@ public class OrderController extends AbstractController {
 				order.getPositionId(),
 				order.getInvoiceTime(),
 				0,//total
-				0,
-				80,
-				6
+				order.getBatteryLevel(),
+				order.getLongitude(),
+				order.getLatitude()
 			});
 			SQLiteStatement orderDetailInsertStatement = database.compileStatement(orderDetailInsertSQL);
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
