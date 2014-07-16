@@ -60,7 +60,6 @@ public class Order implements Serializable {
 
 	public JSONObject getOrderAsJson() {
 		HashMap<String, Object> orderJsonParams = new HashMap<String, Object>();
-
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		simpleDateFormat.applyPattern("yyyy-MM-dd");
 		Date invoiceDate = new Date(getInvoiceTime());

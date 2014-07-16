@@ -70,4 +70,15 @@ abstract class WebServiceURL {
 
 		public static final String INSERT_ORDER = webServiceURL + "insert_order";
 	}
+
+	protected static final class BankURLPack {
+
+		public static final HashMap<String, Object> getParameters(int positionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			return parameters;
+		}
+
+		public static final String GET_BANKS = webServiceURL + "getBanks";
+	}
 }

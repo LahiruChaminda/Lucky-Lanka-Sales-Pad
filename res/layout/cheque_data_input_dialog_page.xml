@@ -25,6 +25,20 @@
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:text="Branch"
+                android:gravity="center_vertical" android:layout_weight="1" android:textSize="25dp"/>
+        <Spinner
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/branchCombo" android:layout_weight="2" android:spinnerMode="dialog"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_weight="1" android:weightSum="3">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:gravity="center_vertical" android:layout_weight="1" android:text="Cheque No" android:textSize="25dp"/>
         <EditText
                 android:layout_width="0dp"

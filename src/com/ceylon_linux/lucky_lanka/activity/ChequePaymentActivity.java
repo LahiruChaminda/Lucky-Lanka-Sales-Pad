@@ -15,6 +15,7 @@ import com.ceylon_linux.lucky_lanka.controller.BankController;
 import com.ceylon_linux.lucky_lanka.model.Bank;
 import com.ceylon_linux.lucky_lanka.model.Payment;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -23,12 +24,15 @@ import java.util.Date;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class ChequePaymentActivity extends Activity {
+	private final ArrayList<Bank.BankBranch> BANK_BRANCHES = new ArrayList<Bank.BankBranch>();
 	private EditText inputAmount;
 	private EditText inputChequeNo;
 	private DatePicker datePicker;
 	private Spinner bankCombo;
+	private Spinner branchCombo;
 	private Button btnOk;
 	private Button btnCancel;
+	private ArrayAdapter<Bank.BankBranch> bankBranchArrayAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,16 @@ public class ChequePaymentActivity extends Activity {
 		inputChequeNo = (EditText) findViewById(R.id.inputChequeNo);
 		datePicker = (DatePicker) findViewById(R.id.datePicker);
 		bankCombo = (Spinner) findViewById(R.id.bankCombo);
-		bankCombo.setAdapter(new ArrayAdapter<Bank>(ChequePaymentActivity.this, R.layout.spinner_layout, BankController.getBanks()));
+		branchCombo = (Spinner) findViewById(R.id.branchCombo);
+		bankCombo.setAdapter(new ArrayAdapter<Bank>(ChequePaymentActivity.this, R.layout.spinner_layout, BankController.getBanks(ChequePaymentActivity.this)));
+		bankCombo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				bankComboItemClicked(parent, view, position, id);
+			}
+		});
+		bankBranchArrayAdapter = new ArrayAdapter<Bank.BankBranch>(ChequePaymentActivity.this, R.layout.spinner_layout, BANK_BRANCHES);
+		branchCombo.setAdapter(bankBranchArrayAdapter);
 		btnOk = (Button) findViewById(R.id.btnOk);
 		btnCancel = (Button) findViewById(R.id.btnCancel);
 		btnOk.setOnClickListener(new View.OnClickListener() {
@@ -59,6 +72,14 @@ public class ChequePaymentActivity extends Activity {
 		});
 	}
 
+	private void bankComboItemClicked(AdapterView<?> parent, View view, int position, long id) {
+		Bank bank = (Bank) parent.getAdapter().getItem(position);
+		BANK_BRANCHES.clear();
+		BANK_BRANCHES.addAll(bank.getBankBranches());
+		bankBranchArrayAdapter.notifyDataSetChanged();
+		branchCombo.setAdapter(bankBranchArrayAdapter);
+	}
+
 	private void btnOkClicked(View view) {
 		String amountString = inputAmount.getText().toString();
 		double amount = amountString.isEmpty() ? 0 : Double.parseDouble(amountString);
@@ -66,7 +87,7 @@ public class ChequePaymentActivity extends Activity {
 			return;
 		}
 		Intent intent = new Intent();
-		Payment payment = new Payment(amount, new Date(datePicker.getCalendarView().getDate()), inputChequeNo.getText().toString(), bankCombo.getSelectedItem().toString());
+		Payment payment = new Payment(amount, new Date(datePicker.getCalendarView().getDate()), inputChequeNo.getText().toString(), bankCombo.getSelectedItem().toString(), ((Bank.BankBranch) branchCombo.getSelectedItem()).getBranchId());
 		intent.putExtra("payment", payment);
 		setResult(RESULT_OK, intent);
 		finish();

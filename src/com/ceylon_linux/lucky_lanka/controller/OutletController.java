@@ -8,9 +8,9 @@ package com.ceylon_linux.lucky_lanka.controller;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Invoice;
@@ -52,7 +52,7 @@ public class OutletController extends AbstractController {
 		SQLiteStatement routeInsertSqlStatement = database.compileStatement("replace into tbl_route(routeId, routeName) values (?,?)");
 		SQLiteStatement outletInsertSqlStatement = database.compileStatement("replace into tbl_outlet(outletId, routeId, outletName, outletAddress, outletType, outletDiscount) values (?,?,?,?,?,?)");
 		SQLiteStatement invoiceInsertSqlStatement = database.compileStatement("insert into tbl_invoice( invoiceId, outletId, invoiceDate, amount) values(?,?,?,?)");
-		SQLiteStatement paymentInsertSqlStatement = database.compileStatement("insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values(?,?,?,?,?,?)");
+		SQLiteStatement paymentInsertSqlStatement = database.compileStatement("insert or ignore into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, status) values(?,?,?,?,?,?)");
 		try {
 			database.beginTransaction();
 			DbHandler.performExecute(database, invoiceDeleteSql, null);
@@ -91,8 +91,8 @@ public class OutletController extends AbstractController {
 				}
 			}
 			database.setTransactionSuccessful();
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (Exception ex) {
+			Log.e("ADDED", ex.getMessage(), ex);
 		} finally {
 			database.endTransaction();
 			databaseHelper.close();

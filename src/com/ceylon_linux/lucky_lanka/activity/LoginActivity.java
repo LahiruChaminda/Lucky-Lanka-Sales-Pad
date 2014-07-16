@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.ceylon_linux.lucky_lanka.R;
+import com.ceylon_linux.lucky_lanka.controller.BankController;
 import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
@@ -93,6 +94,8 @@ public class LoginActivity extends Activity {
 					if (user != null && user.isValidUser()) {
 						UserController.setAuthorizedUser(LoginActivity.this, user);
 						publishProgress("Authenticated");
+						BankController.downloadBanks(LoginActivity.this, user.getPositionId());
+						publishProgress("Banks Downloaded Successfully");
 						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
 						publishProgress("Outlets Downloaded Successfully");
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());

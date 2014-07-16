@@ -193,7 +193,7 @@ public class PaymentActivity extends Activity {
 				});
 				try {
 					syncStatus = OrderController.syncOrder(PaymentActivity.this, order.getOrderAsJson());
-					OutputStream os = bluetoothSocket.getOutputStream();//48
+					OutputStream os = bluetoothSocket.getOutputStream();
 					os.write(getOrderIntoByteStream(order));
 					os.close();
 				} catch (IOException e) {
@@ -319,7 +319,7 @@ public class PaymentActivity extends Activity {
 			builder.append(getPaddedString(getAlignedString(orderDetail.getItemDescription(), 25) + getAlignedString(String.valueOf(orderDetail.getPrice()), 5) + "x" + getAlignedString(String.valueOf(orderDetail.getQuantity()), 3) + " Rs " + (orderDetail.getPrice() * orderDetail.getQuantity())));
 		}
 		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
-		builder.append(getPaddedString(getAlignedString("Total           ", 34) + "Rs " + sum));
+		builder.append(getPaddedString(getAlignedString("Total                             ", 34) + "Rs " + sum));
 		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
 		builder.append("\n\n\n");
 		return builder.toString().getBytes();

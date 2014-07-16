@@ -28,6 +28,7 @@ public class Payment implements Serializable {
 	private Date chequeDate;
 	private String chequeNo;
 	private String bank;
+	private int branchCode;
 	private boolean synced;
 
 	public Payment(double amount) {
@@ -36,12 +37,13 @@ public class Payment implements Serializable {
 		this.synced = false;
 	}
 
-	public Payment(double amount, Date chequeDate, String chequeNo, String bank) {
+	public Payment(double amount, Date chequeDate, String chequeNo, String bank, int branchCode) {
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
 		this.paymentDate = new Date();
 		this.bank = bank;
+		this.branchCode = branchCode;
 		this.synced = false;
 	}
 
@@ -140,19 +142,26 @@ public class Payment implements Serializable {
 		this.synced = synced;
 	}
 
+	public int getBranchCode() {
+		return branchCode;
+	}
+
+	public void setBranchCode(int branchCode) {
+		this.branchCode = branchCode;
+	}
+
 	public JSONObject getPaymentAsJson() {
 		HashMap<String, Object> parameters = new HashMap<String, Object>();
 		boolean isChequePayment = chequeNo != null && !chequeNo.isEmpty();
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-		parameters.put("chequepayment", (isChequePayment) ? amount : 0);
-		parameters.put("idsession", 500);
-		parameters.put("cashamt", (isChequePayment) ? 0 : amount);
-		parameters.put("realizeddate", (isChequePayment) ? dateFormatter.format(chequeDate) : "");
-		parameters.put("date", dateFormatter.format(paymentDate));
-		parameters.put("bank", (isChequePayment) ? bank : "");
-		parameters.put("billamt", 100);
-		parameters.put("pay", 100);
-		parameters.put("type", (isChequePayment) ? "Cheque" : "Cash");
+		parameters.put("creditpayment", 0);
+		parameters.put("cashpayment", isChequePayment ? amount : 0);
+		parameters.put("cheque_date", isChequePayment ? dateFormatter.format(chequeDate) : "");
+		parameters.put("chequeNo", isChequePayment ? chequeNo : "");
+		parameters.put("bank", isChequePayment ? branchCode : 0);
+		parameters.put("realizeddate", isChequePayment ? dateFormatter.format(chequeDate) : "");
+		parameters.put("chequepayment", isChequePayment ? amount : 0);
+		parameters.put("type", isChequePayment ? "Cheque" : "Cash");
 		return new JSONObject(parameters);
 	}
 }

@@ -3,6 +3,11 @@ DROP TABLE IF EXISTS tbl_category;
 DROP TABLE IF EXISTS tbl_outlet;
 DROP TABLE IF EXISTS tbl_order_detail;
 DROP TABLE IF EXISTS tbl_order;
+DROP TABLE IF EXISTS tbl_route;
+DROP TABLE IF EXISTS tbl_payment;
+DROP TABLE IF EXISTS tbl_invoice;
+DROP TABLE IF EXISTS tbl_bank_branch;
+DROP TABLE IF EXISTS tbl_bank;
 
 CREATE TABLE tbl_category (
   categoryId          INTEGER PRIMARY KEY,
@@ -60,6 +65,15 @@ create table tbl_invoice(
   outletId INTEGER NOT NULL REFERENCES tbl_outlet(outletId) ON UPDATE CASCADE ON DELETE CASCADE,
   invoiceDate long not null,
   amount decimal(10,2) default 0
+);
+create table tbl_bank(
+  bankCode TEXT NOT NULL PRIMARY KEY,
+  bankName TEXT NOT NULL CHECK (bankName!='')
+);
+create table tbl_bank_branch(
+  branchId INTEGER NOT NULL primary key,
+  bankCode TEXT NOT null references tbl_bank(bankCode) On UPDATE CASCADE On DELETE CASCADE,
+  branchName Text NOT NULL CHECK (branchName !='')
 );
 create table tbl_payment(
  paymentId INTEGER NOT NULL primary key AUTOINCREMENT,

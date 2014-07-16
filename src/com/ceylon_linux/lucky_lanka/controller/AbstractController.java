@@ -128,6 +128,7 @@ abstract class AbstractController extends WebServiceURL {
 				while ((currentLine = bufferedReader.readLine()) != null) {
 					responseString = responseString + currentLine + lineSeparator;
 				}
+				Log.i("response", responseString);
 				return new JSONArray(responseString);
 			} finally {
 				if (bufferedReader != null) {
