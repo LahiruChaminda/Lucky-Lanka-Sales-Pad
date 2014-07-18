@@ -48,10 +48,15 @@ public class ChequePaymentActivity extends Activity {
 		bankCombo = (Spinner) findViewById(R.id.bankCombo);
 		branchCombo = (Spinner) findViewById(R.id.branchCombo);
 		bankCombo.setAdapter(new ArrayAdapter<Bank>(ChequePaymentActivity.this, R.layout.spinner_layout, BankController.getBanks(ChequePaymentActivity.this)));
-		bankCombo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		bankCombo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				bankComboItemClicked(parent, view, position, id);
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				bankComboItemSelected(parent, view, position, id);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				//Do Nothing
 			}
 		});
 		bankBranchArrayAdapter = new ArrayAdapter<Bank.BankBranch>(ChequePaymentActivity.this, R.layout.spinner_layout, BANK_BRANCHES);
@@ -72,7 +77,7 @@ public class ChequePaymentActivity extends Activity {
 		});
 	}
 
-	private void bankComboItemClicked(AdapterView<?> parent, View view, int position, long id) {
+	private void bankComboItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		Bank bank = (Bank) parent.getAdapter().getItem(position);
 		BANK_BRANCHES.clear();
 		BANK_BRANCHES.addAll(bank.getBankBranches());

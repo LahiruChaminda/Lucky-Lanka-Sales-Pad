@@ -7,10 +7,12 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -179,6 +181,30 @@ public class PaymentActivity extends Activity {
 	}
 
 	private void btnPrintInvoiceClicked(View view) {
+		final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PaymentActivity.this);
+		alertBuilder.setTitle("Lucky Lanka Sales Pad");
+		alertBuilder.setMessage("Printer is not connected");
+		alertBuilder.setPositiveButton("Setup Printer", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				btnConnectPrinter.performClick();
+				return;
+			}
+		});
+		alertBuilder.setNegativeButton("Proceed without printing", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				printInvoice();
+			}
+		});
+		if (bluetoothSocket == null) {
+			alertBuilder.show();
+		} else {
+			printInvoice();
+		}
+	}
+
+	private void printInvoice() {
 		new Thread() {
 			private ProgressDialog progressDialog;
 			private boolean syncStatus;
@@ -193,9 +219,11 @@ public class PaymentActivity extends Activity {
 				});
 				try {
 					syncStatus = OrderController.syncOrder(PaymentActivity.this, order.getOrderAsJson());
-					OutputStream os = bluetoothSocket.getOutputStream();
-					os.write(getOrderIntoByteStream(order));
-					os.close();
+					if (bluetoothSocket != null) {
+						OutputStream os = bluetoothSocket.getOutputStream();
+						os.write(getOrderIntoByteStream(order));
+						os.close();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSONException e) {
@@ -213,6 +241,9 @@ public class PaymentActivity extends Activity {
 							OrderController.saveOrderToDb(PaymentActivity.this, order);
 							Toast.makeText(PaymentActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
 						}
+						Intent homeActivity = new Intent(PaymentActivity.this, HomeActivity.class);
+						startActivity(homeActivity);
+						finish();
 					}
 				});
 			}
