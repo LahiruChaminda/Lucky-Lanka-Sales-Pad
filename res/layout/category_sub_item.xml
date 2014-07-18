@@ -13,14 +13,10 @@
             android:id="@+id/txtItemDescription"
             android:textSize="20dp" android:paddingLeft="10dp"/>
 
-    <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:editable="false"
-            android:focusable="false"
-            android:id="@+id/checkBox"
-            android:textSize="20dp"
-            android:checked="false"/>
+    <ImageView
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:id="@+id/checkBox"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"

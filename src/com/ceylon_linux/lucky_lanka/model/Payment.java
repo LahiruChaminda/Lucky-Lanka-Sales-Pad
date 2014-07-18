@@ -63,6 +63,16 @@ public class Payment implements Serializable {
 		this.synced = synced;
 	}
 
+	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, int branchCode, boolean synced) {
+		this.paymentId = paymentId;
+		this.paymentDate = paymentDate;
+		this.amount = amount;
+		this.chequeDate = chequeDate;
+		this.chequeNo = chequeNo;
+		this.branchCode = branchCode;
+		this.synced = synced;
+	}
+
 	public static Payment parseChequePayment(JSONObject jsonInstance) throws JSONException, ParseException {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return new Payment(
@@ -71,7 +81,7 @@ public class Payment implements Serializable {
 			jsonInstance.getDouble("pm_amount"),
 			simpleDateFormat.parse(jsonInstance.getString("pc_date")),
 			jsonInstance.getString("pc_no"),
-			jsonInstance.getString("bank"),
+			jsonInstance.getString("b_name"),
 			true
 		);
 	}

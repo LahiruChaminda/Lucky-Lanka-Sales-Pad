@@ -16,11 +16,13 @@ import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Order;
 import com.ceylon_linux.lucky_lanka.model.OrderDetail;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
+import com.ceylon_linux.lucky_lanka.model.Payment;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -39,12 +41,17 @@ public class OrderController extends AbstractController {
 			database.beginTransaction();
 			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude) values(?,?,?,?,?,?,?,?)";
 			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity, returnQuantity, replaceQuantity, sampleQuantity) values(?,?,?,?,?,?,?,?,?)";
+			String paymentInsertSql = "insert into tbl_current_payment(orderId, paymentDate, amount, chequeDate, chequeNo, branchId) values (?,?,?,?,?,?)";
+			double total = 0;
+			for (OrderDetail orderDetail : order.getOrderDetails()) {
+				total += orderDetail.getPrice() * orderDetail.getQuantity();
+			}
 			long orderId = DbHandler.performExecuteInsert(database, orderInsertSQL, new Object[]{
 				order.getOutletId(),
 				order.getRouteId(),
 				order.getPositionId(),
 				order.getInvoiceTime(),
-				0,//total
+				total,
 				order.getBatteryLevel(),
 				order.getLongitude(),
 				order.getLatitude()
@@ -61,6 +68,17 @@ public class OrderController extends AbstractController {
 					orderDetail.getReturnQuantity(),
 					orderDetail.getReplaceQuantity(),
 					orderDetail.getSampleQuantity()
+				});
+			}
+			SQLiteStatement paymentInsertStatement = database.compileStatement(paymentInsertSql);
+			for (Payment payment : order.getPayments()) {
+				DbHandler.performExecuteInsert(paymentInsertStatement, new Object[]{
+					orderId,
+					payment.getPaymentDate().getTime(),
+					payment.getAmount(),
+					payment.getChequeDate().getTime(),
+					payment.getChequeNo(),
+					payment.getBranchCode()
 				});
 			}
 			database.setTransactionSuccessful();
@@ -83,6 +101,8 @@ public class OrderController extends AbstractController {
 		try {
 			String orderSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId";
 			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription, tbl_order_detail.returnQuantity, tbl_order_detail.replaceQuantity, tbl_order_detail.sampleQuantity from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
+			String paymentSelectSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, branchCode from tbl_current_payment where orderId=?";
+
 			Cursor orderCursor = DbHandler.performRawQuery(database, orderSelectSql, null);
 			ArrayList<Order> orders = new ArrayList<Order>();
 			for (orderCursor.moveToFirst(); !orderCursor.isAfterLast(); orderCursor.moveToNext()) {
@@ -97,7 +117,7 @@ public class OrderController extends AbstractController {
 				double latitude = orderCursor.getDouble(8);
 				int outletType = orderCursor.getInt(9);
 				ArrayList<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
-
+				ArrayList<Payment> payments = new ArrayList<Payment>();
 
 				Cursor orderDetailsCursor = DbHandler.performRawQuery(database, orderDetailSelectSql, new Object[]{orderId});
 				for (orderDetailsCursor.moveToFirst(); !orderDetailsCursor.isAfterLast(); orderDetailsCursor.moveToNext()) {
@@ -122,6 +142,21 @@ public class OrderController extends AbstractController {
 
 				Order order = new Order(outletId, positionId, routeId, batteryLevel, invoiceTime, longitude, latitude, orderDetails);
 				orders.add(order);
+
+				Cursor paymentDetailsCursor = DbHandler.performRawQuery(database, paymentSelectSql, new Object[]{orderId});
+				for (paymentDetailsCursor.moveToFirst(); !paymentDetailsCursor.isAfterLast(); paymentDetailsCursor.moveToNext()) {
+					Payment payment = new Payment(
+						paymentDetailsCursor.getInt(0),
+						new Date(paymentDetailsCursor.getLong(1)),
+						paymentDetailsCursor.getDouble(2),
+						new Date(paymentDetailsCursor.getLong(3)),
+						paymentDetailsCursor.getString(4),
+						paymentDetailsCursor.getInt(5),
+						paymentDetailsCursor.getInt(6) == 1
+					);
+					payments.add(payment);
+				}
+				order.setPayments(payments);
 			}
 			orderCursor.close();
 			String deleteQuery = "delete from tbl_order where orderId=?";

@@ -56,6 +56,8 @@ public class PaymentActivity extends Activity {
 	private Button btnChequePayment;
 	private Button btnPrintInvoice;
 	private ListView listPayment;
+	private TextView txtInvoiceTotal;
+	private TextView txtTotallyPaid;
 	private BaseAdapter adapter;
 	private Button btnConnectPrinter;
 	private Button btnDisconnectPrinter;
@@ -87,11 +89,18 @@ public class PaymentActivity extends Activity {
 		btnChequePayment = (Button) findViewById(R.id.btnChequePayment);
 		btnPrintInvoice = (Button) findViewById(R.id.btnPrintInvoice);
 		listPayment = (ListView) findViewById(R.id.listPayment);
+		txtInvoiceTotal = (TextView) findViewById(R.id.txtInvoiceTotal);
+		txtTotallyPaid = (TextView) findViewById(R.id.txtTotalPaid);
 		order.setPayments(new ArrayList<Payment>());
 		currencyFormat = NumberFormat.getInstance();
 		currencyFormat.setGroupingUsed(true);
 		currencyFormat.setMaximumFractionDigits(2);
 		currencyFormat.setMinimumFractionDigits(2);
+		double invoiceTotal = 0;
+		for (OrderDetail orderDetail : order.getOrderDetails()) {
+			invoiceTotal = orderDetail.getPrice() * orderDetail.getQuantity();
+		}
+		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoiceTotal));
 		adapter = new BaseAdapter() {
 
 			@Override
@@ -121,18 +130,37 @@ public class PaymentActivity extends Activity {
 					paymentViewHolder.txtPaymentMethod = (TextView) convertView.findViewById(R.id.txtPaymentMethod);
 					paymentViewHolder.txtChequeNo = (TextView) convertView.findViewById(R.id.txtChequeNo);
 					paymentViewHolder.txtBankingDate = (TextView) convertView.findViewById(R.id.txtBankingDate);
+					paymentViewHolder.imageButton = (ImageButton) convertView.findViewById(R.id.imageButton);
 					convertView.setTag(paymentViewHolder);
 				} else {
 					paymentViewHolder = (PaymentViewHolder) convertView.getTag();
 				}
-				Payment payment = getItem(position);
+				final Payment payment = getItem(position);
 				boolean isChequePayment = payment.getChequeNo() != null && !payment.getChequeNo().isEmpty();
 				paymentViewHolder.txtPaidValue.setText("Rs " + currencyFormat.format(payment.getAmount()));
 				paymentViewHolder.txtPaidDate.setText(dateFormatter.format(payment.getPaymentDate()));
 				paymentViewHolder.txtPaymentMethod.setText((isChequePayment) ? "CHEQUE" : "CASH");
 				paymentViewHolder.txtChequeNo.setText((isChequePayment) ? payment.getChequeNo() : "");
 				paymentViewHolder.txtBankingDate.setText((isChequePayment) ? dateFormatter.format(payment.getChequeDate()) : "");
+				paymentViewHolder.imageButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						order.getPayments().remove(payment);
+						adapter.notifyDataSetChanged();
+						listPayment.setAdapter(adapter);
+					}
+				});
 				return convertView;
+			}
+
+			@Override
+			public void notifyDataSetChanged() {
+				super.notifyDataSetChanged();
+				double sum = 0;
+				for (Payment payment : order.getPayments()) {
+					sum += payment.getAmount();
+				}
+				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum));
 			}
 		};
 		listPayment.setAdapter(adapter);
@@ -377,5 +405,6 @@ public class PaymentActivity extends Activity {
 		TextView txtPaymentMethod;
 		TextView txtChequeNo;
 		TextView txtBankingDate;
+		ImageButton imageButton;
 	}
 }

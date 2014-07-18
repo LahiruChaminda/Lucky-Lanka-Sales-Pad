@@ -130,7 +130,7 @@ public class SelectItemActivity extends Activity {
 					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
 					childViewHolder.txtFreeIssue = (TextView) view.findViewById(R.id.txtFreeIssue);
 					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
-					childViewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
+					childViewHolder.imageView = (ImageView) view.findViewById(R.id.checkBox);
 					childViewHolder.txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
 					childViewHolder.txtReturnQuantity = (TextView) view.findViewById(R.id.txtReturnQuantity);
 					childViewHolder.txtReplaceQuantity = (TextView) view.findViewById(R.id.txtReplaceQuantity);
@@ -142,7 +142,6 @@ public class SelectItemActivity extends Activity {
 				Item item = getChild(groupPosition, childPosition);
 				childViewHolder.txtItemDescription.setText(item.getItemDescription());
 				childViewHolder.txtEachDiscount.setText(Double.toString(outlet.getOutletDiscount()));
-				childViewHolder.checkBox.setChecked(item.isSelected());
 				view.setBackgroundColor((childPosition % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
 				updateView(childViewHolder, item);
 				return view;
@@ -255,6 +254,7 @@ public class SelectItemActivity extends Activity {
 				childViewHolder.txtReturnQuantity.setText(Integer.toString(orderDetail.getReturnQuantity()));
 				childViewHolder.txtReplaceQuantity.setText(Integer.toString(orderDetail.getReplaceQuantity()));
 				childViewHolder.txtSampleQuantity.setText(Integer.toString(orderDetail.getSampleQuantity()));
+				childViewHolder.imageView.setBackgroundResource(R.drawable.right);
 				return childViewHolder;
 			}
 		}
@@ -263,6 +263,7 @@ public class SelectItemActivity extends Activity {
 		childViewHolder.txtReturnQuantity.setText("0");
 		childViewHolder.txtReplaceQuantity.setText("0");
 		childViewHolder.txtSampleQuantity.setText("0");
+		childViewHolder.imageView.setBackgroundDrawable(null);
 		return childViewHolder;
 	}
 
@@ -290,7 +291,7 @@ public class SelectItemActivity extends Activity {
 	private static class ChildViewHolder {
 
 		TextView txtItemDescription;
-		CheckBox checkBox;
+		ImageView imageView;
 		TextView txtQuantity;
 		TextView txtFreeIssue;
 		TextView txtEachDiscount;

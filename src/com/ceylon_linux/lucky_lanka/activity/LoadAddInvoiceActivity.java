@@ -57,6 +57,7 @@ public class LoadAddInvoiceActivity extends Activity {
 
 		txtRoutine.setText(Integer.toString(UserController.getAuthorizedUser(LoadAddInvoiceActivity.this).getRoutineId()));
 		routes = OutletController.loadRoutesFromDb(LoadAddInvoiceActivity.this);
+
 		ArrayAdapter<Route> routeAdapter = new ArrayAdapter<Route>(LoadAddInvoiceActivity.this, R.layout.spinner_layout, routes);
 		routeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_layout);
 		routeAuto.setAdapter(routeAdapter);
@@ -152,7 +153,7 @@ public class LoadAddInvoiceActivity extends Activity {
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-		for (Invoice invoice : invoices) {
+		for (final Invoice invoice : invoices) {
 			View pendingDetailsItemView = layoutInflater.inflate(R.layout.pending_details_item, null);
 			TextView txtInvoiceNo = (TextView) pendingDetailsItemView.findViewById(R.id.txtInvoiceNo);
 			TextView txtDate = (TextView) pendingDetailsItemView.findViewById(R.id.txtDate);
@@ -167,6 +168,12 @@ public class LoadAddInvoiceActivity extends Activity {
 			txtAmount.setText(String.valueOf(invoice.getAmount()));
 			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
 			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
+			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Toast.makeText(LoadAddInvoiceActivity.this, "This function will be add soon", Toast.LENGTH_LONG).show();
+				}
+			});
 			pendingDetailsTable.addView(pendingDetailsItemView);
 		}
 	}
