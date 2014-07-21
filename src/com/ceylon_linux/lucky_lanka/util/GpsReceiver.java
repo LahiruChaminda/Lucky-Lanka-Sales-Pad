@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 
+import java.util.List;
+
 /**
  * GpsReceiver - Receive and Provide GPS locations
  *
@@ -25,6 +27,7 @@ import android.os.Looper;
  */
 public class GpsReceiver extends Service {
 
+
 	private static final long MINIMUM_DISTANCE_CHANGE = 0;
 	private static final long MINIMUM_TIME_DIFFERENCE = 0;
 	protected static LocationManager locationManager;
@@ -33,8 +36,26 @@ public class GpsReceiver extends Service {
 
 	private GpsReceiver(Context applicationContext) {
 		locationManager = (LocationManager) applicationContext.getSystemService(Context.LOCATION_SERVICE);
-		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, new LocationListenerImpl(), Looper.getMainLooper());
+
+		float bestAccuracy = Float.MAX_VALUE;
+		long bestTime = Long.MIN_VALUE;
+		List<String> matchingProviders = locationManager.getAllProviders();
+		for (String provider : matchingProviders) {
+			Location location = locationManager.getLastKnownLocation(provider);
+			locationManager.requestLocationUpdates(provider, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
+			if (location != null) {
+				float accuracy = location.getAccuracy();
+				long time = location.getTime();
+				if ((time > MINIMUM_TIME_DIFFERENCE && accuracy < bestAccuracy)) {
+					lastKnownLocation = location;
+					bestAccuracy = accuracy;
+					bestTime = time;
+				} else if (time < MINIMUM_TIME_DIFFERENCE && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+					lastKnownLocation = location;
+					bestTime = time;
+				}
+			}
+		}
 	}
 
 	public synchronized static GpsReceiver getGpsReceiver(Context applicationContext) {
@@ -46,45 +67,68 @@ public class GpsReceiver extends Service {
 
 	public synchronized Location getHighAccurateLocation() {
 		lastKnownLocation = null;
-		while (lastKnownLocation == null) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
+		do {
+			if (lastKnownLocation != null) {
+				if (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0) {
+					return lastKnownLocation = null;
+				}
+				long time = lastKnownLocation.getTime();
+				long currentTimeMillis = System.currentTimeMillis();
+				long timeDifference = Math.abs(time - currentTimeMillis);
+				if (timeDifference > 30 * 60 * 1000) {
+					return lastKnownLocation = null;
+				}
 			}
-		}
-		if (lastKnownLocation != null && lastKnownLocation.getLatitude() != 0 && lastKnownLocation.getLongitude() != 0 && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			long time = lastKnownLocation.getTime();
-			long currentTimeMillis = System.currentTimeMillis();
-			long timeDifference = Math.abs(time - currentTimeMillis);
-			if (timeDifference > 30 * 60 * 1000) {
-				return null;
-			}
-		}
+		} while (lastKnownLocation == null || (lastKnownLocation != null && (lastKnownLocation.getLatitude() == 0 || lastKnownLocation.getLongitude() == 0)));
 		return lastKnownLocation;
 	}
 
 	public synchronized Location getLastKnownLocation() {
-		if (lastKnownLocation != null && lastKnownLocation.getLatitude() != 0 && lastKnownLocation.getLongitude() != 0 && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+		if (lastKnownLocation != null) {
+			if (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0) {
+				return lastKnownLocation = null;
+			}
 			long time = lastKnownLocation.getTime();
 			long currentTimeMillis = System.currentTimeMillis();
 			long timeDifference = Math.abs(time - currentTimeMillis);
 			if (timeDifference > 30 * 60 * 1000) {
-				return null;
+				return lastKnownLocation = null;
 			}
 		}
 		return lastKnownLocation;
 	}
 
 	@Override
-	public IBinder onBind(Intent intent) {
+	public IBinder onBind(Intent arg0) {
 		return null;
 	}
 
 	private static class LocationListenerImpl implements LocationListener {
+		private static LocationListenerImpl locationListener;
+
+		private LocationListenerImpl() {
+		}
+
+		public static LocationListenerImpl getInstance() {
+			return (locationListener == null) ? locationListener = new LocationListenerImpl() : locationListener;
+		}
 
 		@Override
 		public void onLocationChanged(Location location) {
+			float bestAccuracy = Float.MAX_VALUE;
+			long bestTime = Long.MIN_VALUE;
+			if (location != null) {
+				float accuracy = location.getAccuracy();
+				long time = location.getTime();
+				if ((time > MINIMUM_TIME_DIFFERENCE && accuracy < bestAccuracy)) {
+					lastKnownLocation = location;
+					bestAccuracy = accuracy;
+					bestTime = time;
+				} else if (time < MINIMUM_TIME_DIFFERENCE && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+					lastKnownLocation = location;
+					bestTime = time;
+				}
+			}
 			lastKnownLocation = location;
 		}
 
@@ -100,5 +144,4 @@ public class GpsReceiver extends Service {
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
 	}
-
 }
