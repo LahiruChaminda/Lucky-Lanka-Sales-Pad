@@ -8,6 +8,7 @@ package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -47,6 +48,7 @@ public class SelectItemActivity extends Activity {
 	private Location location;
 	private GpsReceiver gpsReceiver;
 	private Thread GPS_RECEIVER;
+	private ProgressDialog progressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +166,6 @@ public class SelectItemActivity extends Activity {
 				finishButtonClicked(view);
 			}
 		});
-		finishButton.setEnabled(false);
 		gpsReceiver = GpsReceiver.getGpsReceiver(SelectItemActivity.this);
 		GPS_RECEIVER = new Thread() {
 			private Handler handler = new Handler();
@@ -173,12 +174,19 @@ public class SelectItemActivity extends Activity {
 			public void run() {
 				do {
 					location = gpsReceiver.getLastKnownLocation();
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				} while (location == null);
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
+						if (progressDialog != null && progressDialog.isShowing()) {
+							progressDialog.dismiss();
+						}
 						Toast.makeText(SelectItemActivity.this, "GPS Location Received", Toast.LENGTH_LONG).show();
-						finishButton.setEnabled(true);
 					}
 				});
 			}
@@ -216,10 +224,10 @@ public class SelectItemActivity extends Activity {
 		if ((location = gpsReceiver.getLastKnownLocation()) == null) {
 			Thread.State state = GPS_RECEIVER.getState();
 			if (state == Thread.State.TERMINATED) {
-				finishButton.setEnabled(false);
 				GPS_RECEIVER.start();
 			}
-			Toast.makeText(SelectItemActivity.this, "Please wait for GPS Location", Toast.LENGTH_LONG).show();
+			progressDialog = ProgressDialog.show(SelectItemActivity.this, null, "Waiting For GPS...", true);
+			progressDialog.show();
 			return;
 		}
 		Order order = new Order(

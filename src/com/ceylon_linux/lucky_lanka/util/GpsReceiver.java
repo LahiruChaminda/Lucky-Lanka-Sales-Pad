@@ -6,18 +6,16 @@
 
 package com.ceylon_linux.lucky_lanka.util;
 
+import android.app.AlarmManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-
-import java.util.List;
 
 /**
  * GpsReceiver - Receive and Provide GPS locations
@@ -37,17 +35,16 @@ public class GpsReceiver extends Service {
 	private GpsReceiver(Context context) {
 		locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-		//look for fastest location fix
-		Criteria criteria = new Criteria();
-		String bestProvider = locationManager.getBestProvider(criteria, true);
-		lastKnownLocation = locationManager.getLastKnownLocation(bestProvider);
+		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
 
-		List<String> matchingProviders = locationManager.getAllProviders();
-		for (String provider : matchingProviders) {
-			Location location = locationManager.getLastKnownLocation(provider);
-			lastKnownLocation = (lastKnownLocation != null && location != null && location.getAccuracy() < lastKnownLocation.getAccuracy()) ? location : lastKnownLocation;
-			locationManager.requestLocationUpdates(provider, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
-		}
+		lastKnownLocation = (lastKnownLocation == null) ? locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) : lastKnownLocation;
+		lastKnownLocation = (lastKnownLocation != null && lastKnownLocation != null && lastKnownLocation.getAccuracy() < lastKnownLocation.getAccuracy()) ? lastKnownLocation : lastKnownLocation;
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
+
+		lastKnownLocation = (lastKnownLocation == null) ? locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER) : lastKnownLocation;
+		lastKnownLocation = (lastKnownLocation != null && lastKnownLocation != null && lastKnownLocation.getAccuracy() < lastKnownLocation.getAccuracy()) ? lastKnownLocation : lastKnownLocation;
+		locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
 	}
 
 	public synchronized static GpsReceiver getGpsReceiver(Context applicationContext) {
@@ -64,7 +61,7 @@ public class GpsReceiver extends Service {
 				long time = lastKnownLocation.getTime();
 				long currentTimeMillis = System.currentTimeMillis();
 				long timeDifference = Math.abs(time - currentTimeMillis);
-				if (timeDifference > 30 * 60 * 1000) {
+				if (timeDifference > AlarmManager.INTERVAL_HALF_HOUR) {
 					return lastKnownLocation = null;
 				}
 			}
@@ -80,7 +77,7 @@ public class GpsReceiver extends Service {
 			long time = lastKnownLocation.getTime();
 			long currentTimeMillis = System.currentTimeMillis();
 			long timeDifference = Math.abs(time - currentTimeMillis);
-			if (timeDifference > 30 * 60 * 1000) {
+			if (timeDifference > AlarmManager.INTERVAL_HALF_HOUR) {
 				return lastKnownLocation = null;
 			}
 		}
