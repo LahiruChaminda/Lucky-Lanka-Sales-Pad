@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -84,7 +85,7 @@ public class Invoice implements Serializable {
 	}
 
 	public ArrayList<Payment> getPayments() {
-		return payments;
+		return (payments == null) ? payments = new ArrayList<Payment>() : payments;
 	}
 
 	public void setPayments(ArrayList<Payment> payments) {
@@ -113,5 +114,16 @@ public class Invoice implements Serializable {
 			}
 			return amount - paidValue;
 		}
+	}
+
+	public JSONObject getInvoiceAsJson() {
+		HashMap<String, Object> jsonParams = new HashMap<String, Object>();
+		jsonParams.put("invoiceId", invoiceId);
+		JSONArray paymentsJsonArray = new JSONArray();
+		for (Payment payment : payments) {
+			paymentsJsonArray.put(payment.getPaymentAsJson());
+		}
+		jsonParams.put("payments", paymentsJsonArray);
+		return new JSONObject(jsonParams);
 	}
 }

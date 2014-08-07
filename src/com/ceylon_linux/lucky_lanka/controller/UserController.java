@@ -113,4 +113,13 @@ public class UserController extends AbstractController {
 		JSONObject userJson = getJsonObject(UserURLPack.LOGIN, UserURLPack.getParameters(userName, password), context);
 		return User.parseUser(userJson);
 	}
+
+	public static String getPastAuthorizedUserName(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		String userName;
+		if ((userName = userData.getString("userName", "")).isEmpty()) {
+			return null;
+		}
+		return userName;
+	}
 }

@@ -11,61 +11,69 @@
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Invoice Total"
+                android:text="Invoice Amount"
                 android:layout_weight="1"
-                android:textSize="25dp"/>
+                android:textSize="20dp" android:typeface="serif" android:textStyle="bold|italic"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:id="@+id/txtInvoiceTotal"
-                android:textSize="25dp"/>
+                android:textSize="25dp" android:typeface="serif" android:textStyle="bold" android:gravity="left"/>
+        <Space
+                android:layout_width="30px"
+                android:layout_height="20px"
+                />
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Totally Paid"
+                android:text="Totally   Paid"
                 android:layout_weight="1"
-                android:textSize="25dp"/>
+                android:textSize="20dp" android:typeface="serif" android:textStyle="bold|italic"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:id="@+id/txtTotalPaid"
-                android:textSize="25dp"/>
+                android:textSize="25dp" android:typeface="serif" android:textStyle="bold" android:gravity="left"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="match_parent"
+            android:layout_width="287dp"
             android:layout_height="wrap_content" android:weightSum="2" android:gravity="right">
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Cash Payment"
-                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
+                android:text="Cash"
+                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="20dp" android:background="@drawable/rounded_button"
+                android:typeface="serif"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Cheque Payment"
-                android:id="@+id/btnChequePayment" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
+                android:text="Cheque"
+                android:id="@+id/btnChequePayment" android:textSize="20dp" android:background="@drawable/rounded_button" android:layout_weight="1"
+                android:typeface="serif"/>
     </LinearLayout>
     <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/listPayment" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
-    <Button
-            android:text="Connect Bluetooth Printer"
-            android:id="@+id/btnConnectPrinter"
-            android:textSize="25dp"
+    <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>
-    <Button android:text="Disconnect Bluetooth Printer"
-            android:id="@+id/btnDisconnectPrinter"
-            android:textSize="25dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:background="@drawable/rounded_button"/>
-    <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Print Invoice"
-            android:id="@+id/btnPrintInvoice" android:textSize="25dp" android:background="@drawable/rounded_button"/>
+            android:layout_height="wrap_content" android:weightSum="2" android:gravity="right">
+        <Button
+                android:text="Connect Printer"
+                android:id="@+id/btnConnectPrinter"
+                android:textSize="20dp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" android:background="@drawable/rounded_button" android:typeface="serif"/>
+        <Button
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Print Invoice"
+                android:id="@+id/btnPrintInvoice" android:textSize="20dp" android:background="@drawable/rounded_button" android:typeface="serif"/>
+    </LinearLayout>
 </LinearLayout>

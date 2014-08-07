@@ -45,6 +45,18 @@ public class GpsReceiver extends Service {
 		lastKnownLocation = (lastKnownLocation == null) ? locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER) : lastKnownLocation;
 		lastKnownLocation = (lastKnownLocation != null && lastKnownLocation != null && lastKnownLocation.getAccuracy() < lastKnownLocation.getAccuracy()) ? lastKnownLocation : lastKnownLocation;
 		locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, MINIMUM_TIME_DIFFERENCE, MINIMUM_DISTANCE_CHANGE, LocationListenerImpl.getInstance(), Looper.getMainLooper());
+
+		//remove following
+		locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, true, true, true, 0, 5);
+		locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
+		Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
+		mockLocation.setLatitude(6.067333);
+		mockLocation.setLongitude(80.533565);
+		mockLocation.setAltitude(0);
+		mockLocation.setTime(System.currentTimeMillis());
+		locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, mockLocation);
+		lastKnownLocation = (lastKnownLocation == null) ? locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) : lastKnownLocation;
+
 	}
 
 	public synchronized static GpsReceiver getGpsReceiver(Context applicationContext) {
@@ -74,12 +86,12 @@ public class GpsReceiver extends Service {
 			if (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0) {
 				return lastKnownLocation = null;
 			}
-			long time = lastKnownLocation.getTime();
+			/*long time = lastKnownLocation.getTime();
 			long currentTimeMillis = System.currentTimeMillis();
 			long timeDifference = Math.abs(time - currentTimeMillis);
 			if (timeDifference > AlarmManager.INTERVAL_HALF_HOUR) {
 				return lastKnownLocation = null;
-			}
+			}*/
 		}
 		return lastKnownLocation;
 	}

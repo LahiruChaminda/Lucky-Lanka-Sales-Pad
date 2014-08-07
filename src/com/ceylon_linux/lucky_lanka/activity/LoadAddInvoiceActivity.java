@@ -36,6 +36,7 @@ import java.util.TimerTask;
 public class LoadAddInvoiceActivity extends Activity {
 
 	private final ArrayList<Outlet> outlets = new ArrayList<Outlet>();
+	private final int REQUEST_OUTSTANDING_PAYMENTS = 0;
 	private Button btnNext;
 	private TextView txtDate;
 	private TextView txtTime;
@@ -151,27 +152,28 @@ public class LoadAddInvoiceActivity extends Activity {
 		pendingDetailsTable.removeAllViews();
 		ArrayList<Invoice> invoices = outlet.getInvoices(LoadAddInvoiceActivity.this);
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd");
 		for (final Invoice invoice : invoices) {
 			View pendingDetailsItemView = layoutInflater.inflate(R.layout.pending_details_item, null);
 			TextView txtInvoiceNo = (TextView) pendingDetailsItemView.findViewById(R.id.txtInvoiceNo);
 			TextView txtDate = (TextView) pendingDetailsItemView.findViewById(R.id.txtDate);
-			TextView txtTime = (TextView) pendingDetailsItemView.findViewById(R.id.txtTime);
 			TextView txtAmount = (TextView) pendingDetailsItemView.findViewById(R.id.txtAmount);
 			TextView txtPaid = (TextView) pendingDetailsItemView.findViewById(R.id.txtPaid);
 			TextView txtBalance = (TextView) pendingDetailsItemView.findViewById(R.id.txtBalance);
 
 			txtInvoiceNo.setText(String.valueOf(invoice.getInvoiceId()));
 			txtDate.setText(dateFormat.format(invoice.getDate()));
-			txtTime.setText(timeFormat.format(invoice.getDate()));
 			txtAmount.setText(String.valueOf(invoice.getAmount()));
 			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
 			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
+
 			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Toast.makeText(LoadAddInvoiceActivity.this, "This function will be add soon", Toast.LENGTH_LONG).show();
+					Intent outstandingPaymentActivity = new Intent(LoadAddInvoiceActivity.this, OutstandingPaymentActivity.class);
+					outstandingPaymentActivity.putExtra("invoice", invoice);
+					outstandingPaymentActivity.putExtra("outlet", outlet);
+					startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
 				}
 			});
 			pendingDetailsTable.addView(pendingDetailsItemView);

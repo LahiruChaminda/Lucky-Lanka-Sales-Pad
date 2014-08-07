@@ -132,7 +132,6 @@ public class SelectItemActivity extends Activity {
 					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
 					childViewHolder.txtFreeIssue = (TextView) view.findViewById(R.id.txtFreeIssue);
 					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
-					childViewHolder.imageView = (ImageView) view.findViewById(R.id.checkBox);
 					childViewHolder.txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
 					childViewHolder.txtReturnQuantity = (TextView) view.findViewById(R.id.txtReturnQuantity);
 					childViewHolder.txtReplaceQuantity = (TextView) view.findViewById(R.id.txtReplaceQuantity);
@@ -145,7 +144,7 @@ public class SelectItemActivity extends Activity {
 				childViewHolder.txtItemDescription.setText(item.getItemDescription());
 				childViewHolder.txtEachDiscount.setText(Double.toString(outlet.getOutletDiscount()));
 				view.setBackgroundColor((childPosition % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-				updateView(childViewHolder, item);
+				updateView(childViewHolder, item, view);
 				return view;
 			}
 
@@ -223,11 +222,10 @@ public class SelectItemActivity extends Activity {
 		}
 		if ((location = gpsReceiver.getLastKnownLocation()) == null) {
 			Thread.State state = GPS_RECEIVER.getState();
+			progressDialog = ProgressDialog.show(SelectItemActivity.this, null, "Waiting For GPS...", false);
 			if (state == Thread.State.TERMINATED) {
 				GPS_RECEIVER.start();
 			}
-			progressDialog = ProgressDialog.show(SelectItemActivity.this, null, "Waiting For GPS...", true);
-			progressDialog.show();
 			return;
 		}
 		Order order = new Order(
@@ -254,7 +252,7 @@ public class SelectItemActivity extends Activity {
 		finish();
 	}
 
-	private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item) {
+	private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item, View view) {
 		for (OrderDetail orderDetail : orderDetails) {
 			if (orderDetail.getItemId() == item.getItemId()) {
 				childViewHolder.txtFreeIssue.setText(Integer.toString(orderDetail.getFreeIssue()));
@@ -262,16 +260,16 @@ public class SelectItemActivity extends Activity {
 				childViewHolder.txtReturnQuantity.setText(Integer.toString(orderDetail.getReturnQuantity()));
 				childViewHolder.txtReplaceQuantity.setText(Integer.toString(orderDetail.getReplaceQuantity()));
 				childViewHolder.txtSampleQuantity.setText(Integer.toString(orderDetail.getSampleQuantity()));
-				childViewHolder.imageView.setBackgroundResource(R.drawable.right);
+				view.setBackgroundColor(Color.parseColor("#FFEFACFF"));
 				return childViewHolder;
 			}
 		}
 		childViewHolder.txtFreeIssue.setText("0");
 		childViewHolder.txtQuantity.setText("0");
+		view.setBackgroundColor(Color.TRANSPARENT);
 		childViewHolder.txtReturnQuantity.setText("0");
 		childViewHolder.txtReplaceQuantity.setText("0");
 		childViewHolder.txtSampleQuantity.setText("0");
-		childViewHolder.imageView.setBackgroundDrawable(null);
 		return childViewHolder;
 	}
 
@@ -299,7 +297,6 @@ public class SelectItemActivity extends Activity {
 	private static class ChildViewHolder {
 
 		TextView txtItemDescription;
-		ImageView imageView;
 		TextView txtQuantity;
 		TextView txtFreeIssue;
 		TextView txtEachDiscount;

@@ -22,7 +22,8 @@
                         android:gravity="center"
                         android:text="New Invoice"
                         android:textSize="25dp"
-                        android:layout_weight="1" android:background="#65aaff"/>
+                        android:layout_weight="1" android:background="#65aaff" android:textColor="#ffffffff" android:typeface="serif"
+                        android:textStyle="bold|italic"/>
                 <LinearLayout
                         android:orientation="horizontal"
                         android:layout_width="match_parent" android:padding="5dp"
@@ -31,17 +32,17 @@
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1.5"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:layout_height="match_parent"
                             android:text="Date"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif" android:gravity="center_vertical" android:textStyle="bold"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="4"
-                            android:textSize="25dp"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="3.5"
+                            android:textSize="20dp"
+                            android:layout_height="match_parent"
                             android:text="Date"
-                            android:id="@+id/txtDate"/>
+                            android:id="@+id/txtDate" android:typeface="serif" android:gravity="center_vertical"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
@@ -51,17 +52,17 @@
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1.5"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:layout_height="match_parent"
                             android:text="Time"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif" android:gravity="center_vertical" android:textStyle="bold"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="4"
-                            android:textSize="25dp"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="3.5"
+                            android:textSize="20dp"
+                            android:layout_height="match_parent"
                             android:text="Time"
-                            android:id="@+id/txtTime"/>
+                            android:id="@+id/txtTime" android:typeface="serif" android:gravity="center_vertical"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
@@ -71,17 +72,17 @@
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1.5"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:layout_height="match_parent"
                             android:text="Routine ID"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif" android:gravity="center_vertical" android:textStyle="bold"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="4"
-                            android:textSize="25dp"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="3.5"
+                            android:textSize="20dp"
+                            android:layout_height="match_parent"
                             android:text="Routine ID"
-                            android:id="@+id/txtRoutine"/>
+                            android:id="@+id/txtRoutine" android:typeface="serif" android:gravity="center_vertical"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
@@ -91,13 +92,13 @@
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1.5"
-                            android:layout_height="wrap_content"
-                            android:text="Route"
-                            android:textSize="25dp"/>
+                            android:layout_weight="2"
+                            android:layout_height="match_parent"
+                            android:text="Select Route"
+                            android:textSize="20dp" android:typeface="serif" android:gravity="center_vertical" android:textStyle="bold"/>
                     <Spinner
                             android:layout_width="0dp"
-                            android:layout_weight="4"
+                            android:layout_weight="3.5"
                             android:layout_height="wrap_content"
                             android:id="@+id/routeAuto" android:spinnerMode="dialog"/>
                 </LinearLayout>
@@ -109,13 +110,13 @@
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1.5"
-                            android:layout_height="wrap_content"
-                            android:text="Outlet"
-                            android:textSize="25dp"/>
+                            android:layout_weight="2"
+                            android:layout_height="match_parent"
+                            android:text="Select Outlet"
+                            android:textSize="20dp" android:typeface="serif" android:gravity="center_vertical" android:textStyle="bold"/>
                     <Spinner
                             android:layout_width="0dp"
-                            android:layout_weight="4"
+                            android:layout_weight="3.5"
                             android:layout_height="wrap_content"
                             android:id="@+id/outletAuto" android:spinnerMode="dialog"/>
                 </LinearLayout>
@@ -123,54 +124,49 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:gravity="center"
-                        android:text="Pending Details"
+                        android:text="Debit Payments"
                         android:textSize="25dp"
-                        android:layout_weight="1" android:background="#65aaff"/>
+                        android:layout_weight="1" android:background="#65aaff" android:textColor="#ffffffff" android:typeface="serif"
+                        android:textStyle="bold|italic"/>
                 <LinearLayout
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_weight="1"
-                        android:weightSum="6" android:padding="5dp"
+                        android:weightSum="5" android:padding="5dp"
                         android:layout_height="0dp">
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="1.3"
                             android:layout_height="wrap_content"
                             android:text="Invoice No"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif"/>
                     <TextView
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="Date"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:text="Time"
-                            android:textSize="25dp"/>
-                    <TextView
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="0.9"
                             android:layout_height="wrap_content"
                             android:text="Amount"
                             android:gravity="right"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="0.9"
                             android:layout_height="wrap_content"
                             android:text="Paid"
                             android:gravity="right"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif"/>
                     <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="0.9"
                             android:layout_height="wrap_content"
                             android:gravity="right"
                             android:text="Balance"
-                            android:textSize="25dp"/>
+                            android:textSize="20dp" android:typeface="serif"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="vertical"
@@ -188,5 +184,5 @@
             android:id="@+id/btnNext"
             android:clickable="true"
             android:background="@drawable/rounded_button"
-            android:textSize="25dp"/>
+            android:textSize="20dp" android:typeface="serif"/>
 </LinearLayout>

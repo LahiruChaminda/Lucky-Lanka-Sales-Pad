@@ -16,54 +16,50 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5.64"
                 android:text="Item Description"
-                android:textSize="20dp" android:paddingLeft="10dp"/>
+                android:textSize="15dp" android:paddingLeft="10dp" android:typeface="serif"/>
 
-        <ImageView
-                android:layout_width="30dp"
-                android:layout_height="25dp"
-                android:background="@drawable/right"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Qty"
                 android:gravity="right"
                 android:layout_weight="0.69"
-                android:textSize="20dp"/>
+                android:textSize="15dp" android:typeface="serif"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Free"
                 android:gravity="right"
                 android:layout_weight="0.69"
-                android:textSize="20dp"/>
+                android:textSize="15dp" android:typeface="serif"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="Dis"
                 android:layout_weight="0.69"
-                android:textSize="20dp"/>
+                android:textSize="15dp" android:typeface="serif"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="Ret"
                 android:layout_weight="0.69"
-                android:textSize="20dp"/>
+                android:textSize="15dp" android:typeface="serif"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="Rep"
                 android:layout_weight="0.69"
-                android:textSize="20dp"/>
+                android:textSize="15dp" android:typeface="serif"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="Sam"
                 android:layout_weight="0.69"
-                android:textSize="20dp" android:singleLine="false"/>
+                android:textSize="15dp" android:singleLine="false" android:typeface="serif"/>
     </LinearLayout>
     <ExpandableListView
             android:layout_width="match_parent"
@@ -73,7 +69,7 @@
     <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:background="@drawable/rounded_button"
             android:text="Finish Bill"
             android:id="@+id/finishButton"/>

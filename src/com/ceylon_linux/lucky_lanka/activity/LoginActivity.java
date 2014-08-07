@@ -43,6 +43,10 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_page);
 		initialize();
+		String userName;
+		if ((userName = UserController.getPastAuthorizedUserName(LoginActivity.this)) != null) {
+			inputUserName.setText(userName);
+		}
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">

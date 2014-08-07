@@ -19,6 +19,7 @@ import com.ceylon_linux.lucky_lanka.model.Payment;
 import com.ceylon_linux.lucky_lanka.model.Route;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -183,5 +184,27 @@ public class OutletController extends AbstractController {
 		outletCursor.close();
 		databaseHelper.close();
 		return outlets;
+	}
+
+	public static boolean syncOutstandingPayments(Context context, Invoice invoice) throws IOException, JSONException {
+		JSONObject responseJson = getJsonObject(PaymentURLPack.PAYMENT_SYNC, PaymentURLPack.getParameters(invoice.getInvoiceAsJson(), UserController.getAuthorizedUser(context).getPositionId()), context);
+		return (responseJson != null) && responseJson.getBoolean("result");
+	}
+
+	public static void saveOutstandingPayments(Context context, Invoice invoice) {
+		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate,amount, chequeDate, chequeNo, bank, status) values (?,?,?,?,?,?,0);";
+		SQLiteStatement paymentInsertStatement = database.compileStatement(paymentInsertSql);
+		for (Payment payment : invoice.getPayments()) {
+			DbHandler.performExecuteInsert(paymentInsertStatement, new Object[]{
+				invoice.getInvoiceId(),
+				(payment.getPaymentDate() != null) ? payment.getPaymentDate().getTime() : 0,
+				payment.getAmount(),
+				(payment.getChequeDate() != null) ? payment.getChequeDate().getTime() : 0,
+				payment.getChequeNo()
+			});
+		}
+		database.close();
 	}
 }

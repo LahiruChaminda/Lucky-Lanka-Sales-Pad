@@ -71,6 +71,17 @@ abstract class WebServiceURL {
 		public static final String INSERT_ORDER = webServiceURL + "insert_order";
 	}
 
+	protected static final class PaymentURLPack {
+		public static final HashMap<String, Object> getParameters(JSONObject invoiceJson, int positionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("jsonString", invoiceJson);
+			parameters.put("position_id", positionId);
+			return parameters;
+		}
+
+		public static final String PAYMENT_SYNC = webServiceURL + "outstandingPayment";
+	}
+
 	protected static final class BankURLPack {
 
 		public static final HashMap<String, Object> getParameters(int positionId) {

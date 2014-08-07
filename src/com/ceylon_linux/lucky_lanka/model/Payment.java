@@ -165,7 +165,7 @@ public class Payment implements Serializable {
 		boolean isChequePayment = chequeNo != null && !chequeNo.isEmpty();
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 		parameters.put("creditpayment", 0);
-		parameters.put("cashpayment", isChequePayment ? amount : 0);
+		parameters.put("cashpayment", isChequePayment ? 0 : amount);
 		parameters.put("cheque_date", isChequePayment ? dateFormatter.format(chequeDate) : "");
 		parameters.put("chequeNo", isChequePayment ? chequeNo : "");
 		parameters.put("bank", isChequePayment ? branchCode : 0);

@@ -70,8 +70,8 @@ public class Order implements Serializable {
 		invoiceParams.put("invDate", simpleDateFormat.format(invoiceDate));
 		simpleDateFormat.applyPattern("HH:mm:ss");
 		invoiceParams.put("invtime", simpleDateFormat.format(invoiceDate));
-		invoiceParams.put("lon", getLongitude());
-		invoiceParams.put("lat", getLatitude());
+		invoiceParams.put("lon", String.valueOf(getLongitude()));
+		invoiceParams.put("lat", String.valueOf(getLatitude()));
 		invoiceParams.put("bat", getBatteryLevel());
 		JSONArray orderDetailsJsonArray = new JSONArray();
 		for (OrderDetail orderDetail : orderDetails) {

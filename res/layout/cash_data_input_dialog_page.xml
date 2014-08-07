@@ -13,11 +13,12 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Amount"
-                android:gravity="center_vertical" android:layout_weight="1" android:textSize="25dp"/>
+                android:gravity="center_vertical" android:layout_weight="1" android:textSize="20dp" android:typeface="serif"/>
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal" android:hint="Amount" android:textSize="25dp"/>
+                android:id="@+id/inputAmount" android:layout_weight="2" android:inputType="numberDecimal" android:hint="Amount" android:textSize="20dp"
+                android:typeface="serif"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
@@ -28,11 +29,13 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Ok"
-                android:id="@+id/btnOk" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
+                android:id="@+id/btnOk" android:layout_weight="1" android:textSize="20dp" android:background="@drawable/rounded_button"
+                android:typeface="serif"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Cancel"
-                android:id="@+id/btnCancel" android:layout_weight="1" android:textSize="25dp" android:background="@drawable/rounded_button"/>
+                android:id="@+id/btnCancel" android:layout_weight="1" android:textSize="20dp" android:background="@drawable/rounded_button"
+                android:typeface="serif"/>
     </LinearLayout>
 </LinearLayout>
