@@ -102,7 +102,6 @@ public class UserController extends AbstractController {
 		SharedPreferences.Editor editor = userData.edit();
 		editor.putInt("userId", -1);
 		editor.putInt("routineId", -1);
-		editor.putString("userName", "");
 		editor.putString("name", "");
 		editor.putString("address", "");
 		editor.putLong("loginTime", -1);

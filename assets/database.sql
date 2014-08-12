@@ -24,7 +24,8 @@ CREATE TABLE tbl_item (
     loadedQuantity        INT,
     sixPlusOneAvailability INT DEFAULT 0,
     minimumFreeIssueQuantity INT DEFAULT 0,
-    freeIssueQuantity INT DEFAULT 0
+    freeIssueQuantity INT DEFAULT 0,
+    itemShortName         TEXT
 );
 CREATE TABLE tbl_route (
     routeId       INTEGER NOT NULL PRIMARY KEY,
@@ -47,7 +48,8 @@ CREATE TABLE tbl_order (
     total decimal(20,2) default 0.00,
     batteryLevel INTEGER NOT NULL,
     longitude REAL NOT NULL,
-    latitude REAL NOT NULL
+    latitude REAL NOT NULL,
+    syncStatus INT default 0
 );
 CREATE TABLE tbl_order_detail (
     orderId      INTEGER NOT NULL REFERENCES tbl_order(orderId) ON UPDATE CASCADE ON DELETE CASCADE,

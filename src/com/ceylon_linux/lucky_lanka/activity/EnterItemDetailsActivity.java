@@ -27,6 +27,7 @@ import com.ceylon_linux.lucky_lanka.model.Outlet;
 public class EnterItemDetailsActivity extends Activity {
 	private Item item;
 	private Outlet outlet;
+	private OrderDetail orderDetail;
 	private TextView txtItemDescription;
 	private EditText inputRequestedQuantity;
 	private EditText inputReturnQuantity;
@@ -48,7 +49,9 @@ public class EnterItemDetailsActivity extends Activity {
 		Intent intent = getIntent();
 		item = (Item) intent.getSerializableExtra("item");
 		outlet = (Outlet) intent.getSerializableExtra("outlet");
-
+		if (intent.hasExtra("orderDetail")) {
+			orderDetail = (OrderDetail) intent.getSerializableExtra("orderDetail");
+		}
 		btnOk = (Button) findViewById(R.id.btnOk);
 		txtItemDescription = (TextView) findViewById(R.id.txtItemDescription);
 		inputRequestedQuantity = (EditText) findViewById(R.id.inputRequestedQuantity);
@@ -59,6 +62,17 @@ public class EnterItemDetailsActivity extends Activity {
 		txtDiscount = (TextView) findViewById(R.id.txtDiscount);
 		btnCancel = (Button) findViewById(R.id.btnCancel);
 		txtItemDescription.setText(item.getItemDescription());
+		if (orderDetail != null) {
+			inputRequestedQuantity.setText(String.valueOf(orderDetail.getQuantity()));
+			inputReturnQuantity.setText(String.valueOf(orderDetail.getReturnQuantity()));
+			inputReplaceQuantity.setText(String.valueOf(orderDetail.getReplaceQuantity()));
+			inputSampleQuantity.setText(String.valueOf(orderDetail.getSampleQuantity()));
+			txtFreeQuantity.setText(String.valueOf(orderDetail.getFreeIssue()));
+		}
+		boolean quantityAvailable;
+		inputRequestedQuantity.setEnabled(quantityAvailable = item.getAvailableQuantity() != 0);
+		inputReplaceQuantity.setEnabled(quantityAvailable);
+		inputSampleQuantity.setEnabled(quantityAvailable);
 		inputRequestedQuantity.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -79,6 +93,7 @@ public class EnterItemDetailsActivity extends Activity {
 				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
 				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
 				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
+				System.out.println(orderDetail.getFreeIssue());
 				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
 				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
 			}

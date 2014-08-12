@@ -31,8 +31,9 @@ public class Item implements Serializable {
 	private int minimumFreeIssueQuantity;
 	private int freeIssueQuantity;
 	private boolean selected;
+	private String itemShortName;
 
-	public Item(int itemId, String itemCode, String itemDescription, int availableQuantity, int loadedQuantity, double wholeSalePrice, double retailSalePrice, boolean sixPlusOneAvailability, int minimumFreeIssueQuantity, int freeIssueQuantity) {
+	public Item(int itemId, String itemCode, String itemDescription, int availableQuantity, int loadedQuantity, double wholeSalePrice, double retailSalePrice, boolean sixPlusOneAvailability, int minimumFreeIssueQuantity, int freeIssueQuantity, String shortName) {
 		this.itemId = itemId;
 		this.itemCode = itemCode;
 		this.itemDescription = itemDescription;
@@ -43,6 +44,7 @@ public class Item implements Serializable {
 		this.sixPlusOneAvailability = sixPlusOneAvailability;
 		this.minimumFreeIssueQuantity = minimumFreeIssueQuantity;
 		this.freeIssueQuantity = freeIssueQuantity;
+		this.itemShortName = shortName;
 	}
 
 	public static final Item parseItem(JSONObject itemJsonInstance) throws JSONException {
@@ -59,7 +61,8 @@ public class Item implements Serializable {
 			itemJsonInstance.getDouble("ip_price_visible"),//retailSalePrice
 			itemJsonInstance.getBoolean("af_sixone_status"), //sixPlusOneAvailability
 			itemJsonInstance.getInt("minim"),//minimumFreeIssueQuantity
-			itemJsonInstance.getInt("freeq")//freeIssueQuantity
+			itemJsonInstance.getInt("freeq"),//freeIssueQuantity
+			itemJsonInstance.getString("item_name_short")
 		);
 	}
 
@@ -149,6 +152,14 @@ public class Item implements Serializable {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public String getItemShortName() {
+		return itemShortName;
+	}
+
+	public void setItemShortName(String itemShortName) {
+		this.itemShortName = itemShortName;
 	}
 
 	@Override

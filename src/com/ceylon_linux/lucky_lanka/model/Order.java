@@ -31,6 +31,7 @@ public class Order implements Serializable {
 	private double longitude;
 	private double latitude;
 	private int batteryLevel;
+	private double discount;
 	private ArrayList<OrderDetail> orderDetails;
 	private ArrayList<Payment> payments;
 
@@ -85,6 +86,29 @@ public class Order implements Serializable {
 		orderJsonParams.put("Payment", paymentsJsonArray);
 		orderJsonParams.put("Invoice", new JSONObject(invoiceParams));
 		return new JSONObject(orderJsonParams);
+	}
+
+	public boolean isCreditBill() {
+		if (payments == null) {
+			return true;
+		}
+		double paymentSum = 0;
+		double invoiceSum = 0;
+		for (Payment payment : payments) {
+			paymentSum += payment.getAmount();
+		}
+		for (OrderDetail orderDetail : orderDetails) {
+			invoiceSum += (orderDetail.getQuantity() * orderDetail.getPrice());
+		}
+		return invoiceSum - discount > paymentSum;
+	}
+
+	public double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
 	}
 
 	public long getOrderId() {

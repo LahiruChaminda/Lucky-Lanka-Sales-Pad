@@ -27,6 +27,7 @@ import com.ceylon_linux.lucky_lanka.util.GpsReceiver;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -39,16 +40,20 @@ public class SelectItemActivity extends Activity {
 
 	private final int ENTER_ITEM_DETAILS = 0;
 	private ExpandableListView itemList;
+	private MyExpandableListAdapter expandableListAdapter;
 	private Button finishButton;
 	private Outlet outlet;
 	private ArrayList<Category> categories;
 	private ArrayList<OrderDetail> orderDetails;
 	private volatile Item item;
-	private volatile int groupPosition;
 	private Location location;
+	private ArrayList<Item> availableStock = new ArrayList<Item>();
+	private ArrayList<Item> unAvailableStock = new ArrayList<Item>();
 	private GpsReceiver gpsReceiver;
 	private Thread GPS_RECEIVER;
 	private ProgressDialog progressDialog;
+	private TextView txtInvoiceAmount;
+	private NumberFormat currencyFormat;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,100 +64,31 @@ public class SelectItemActivity extends Activity {
 		if (intent.hasExtra("order")) {
 			Order order = (Order) intent.getSerializableExtra("order");
 			orderDetails = order.getOrderDetails();
+			double invoiceTotal = 0;
+			for (OrderDetail instance : orderDetails) {
+				invoiceTotal += instance.getPrice() * instance.getQuantity();
+			}
+			txtInvoiceAmount.setText("Rs " + currencyFormat.format(invoiceTotal));
 		}
 		outlet = (Outlet) intent.getExtras().get("outlet");
 		try {
 			categories = ItemController.loadItemsFromDb(this);
+			for (Category category : categories) {
+				for (Item item : category.getItems()) {
+					if (item.getAvailableQuantity() != 0) {
+						availableStock.add(item);
+					} else {
+						unAvailableStock.add(item);
+					}
+				}
+			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		} catch (JSONException ex) {
 			ex.printStackTrace();
 		}
-
-		itemList.setAdapter(new BaseExpandableListAdapter() {
-			@Override
-			public int getGroupCount() {
-				return categories.size();
-			}
-
-			@Override
-			public int getChildrenCount(int groupPosition) {
-				return categories.get(groupPosition).getItems().size();
-			}
-
-			@Override
-			public Category getGroup(int groupPosition) {
-				return categories.get(groupPosition);
-			}
-
-			@Override
-			public Item getChild(int groupPosition, int childPosition) {
-				return categories.get(groupPosition).getItems().get(childPosition);
-			}
-
-			@Override
-			public long getGroupId(int groupPosition) {
-				return groupPosition;
-			}
-
-			@Override
-			public long getChildId(int groupPosition, int childPosition) {
-				return childPosition;
-			}
-
-			@Override
-			public boolean hasStableIds() {
-				return false;
-			}
-
-			@Override
-			public View getGroupView(int groupPosition, boolean b, View view, ViewGroup viewGroup) {
-				GroupViewHolder groupViewHolder;
-				if (view == null) {
-					LayoutInflater layoutInflater = (LayoutInflater) SelectItemActivity.this.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-					view = layoutInflater.inflate(R.layout.category_item_view, null);
-					groupViewHolder = new GroupViewHolder();
-					groupViewHolder.txtCategory = (TextView) view.findViewById(R.id.txtCategory);
-					view.setTag(groupViewHolder);
-				} else {
-					groupViewHolder = (GroupViewHolder) view.getTag();
-				}
-				groupViewHolder.txtCategory.setText(getGroup(groupPosition).getCategoryDescription());
-				return view;
-			}
-
-			@Override
-			public View getChildView(int groupPosition, int childPosition, boolean b, View view, ViewGroup viewGroup) {
-				ChildViewHolder childViewHolder;
-				if (view == null) {
-					LayoutInflater layoutInflater = (LayoutInflater) SelectItemActivity.this.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-					view = layoutInflater.inflate(R.layout.category_sub_item, null);
-					childViewHolder = new ChildViewHolder();
-					childViewHolder.txtItemDescription = (TextView) view.findViewById(R.id.txtItemDescription);
-					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
-					childViewHolder.txtFreeIssue = (TextView) view.findViewById(R.id.txtFreeIssue);
-					childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
-					childViewHolder.txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
-					childViewHolder.txtReturnQuantity = (TextView) view.findViewById(R.id.txtReturnQuantity);
-					childViewHolder.txtReplaceQuantity = (TextView) view.findViewById(R.id.txtReplaceQuantity);
-					childViewHolder.txtSampleQuantity = (TextView) view.findViewById(R.id.txtSampleQuantity);
-					view.setTag(childViewHolder);
-				} else {
-					childViewHolder = (ChildViewHolder) view.getTag();
-				}
-				Item item = getChild(groupPosition, childPosition);
-				childViewHolder.txtItemDescription.setText(item.getItemDescription());
-				childViewHolder.txtEachDiscount.setText(Double.toString(outlet.getOutletDiscount()));
-				view.setBackgroundColor((childPosition % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
-				updateView(childViewHolder, item, view);
-				return view;
-			}
-
-			@Override
-			public boolean isChildSelectable(int groupPosition, int childPosition) {
-				return true;
-			}
-		});
+		expandableListAdapter = new MyExpandableListAdapter();
+		itemList.setAdapter(expandableListAdapter);
 		itemList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			@Override
 			public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long id) {
@@ -194,12 +130,17 @@ public class SelectItemActivity extends Activity {
 	}
 
 	private boolean itemListOnChildClicked(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
-		this.item = categories.get(groupPosition).getItems().get(childPosition);
+		this.item = (groupPosition == 0) ? availableStock.get(childPosition) : unAvailableStock.get(childPosition);
 		Intent enterItemDetailsActivity = new Intent(SelectItemActivity.this, EnterItemDetailsActivity.class);
 		enterItemDetailsActivity.putExtra("item", item);
 		enterItemDetailsActivity.putExtra("outlet", outlet);
+		for (OrderDetail orderDetail : orderDetails) {
+			if (orderDetail.getItemId() == item.getItemId()) {
+				enterItemDetailsActivity.putExtra("orderDetail", orderDetail);
+				break;
+			}
+		}
 		startActivityForResult(enterItemDetailsActivity, ENTER_ITEM_DETAILS);
-		this.groupPosition = groupPosition;
 		return true;
 	}
 
@@ -207,7 +148,12 @@ public class SelectItemActivity extends Activity {
 	private void initialize() {
 		itemList = (ExpandableListView) findViewById(R.id.itemList);
 		finishButton = (Button) findViewById(R.id.finishButton);
+		txtInvoiceAmount = (TextView) findViewById(R.id.txtInvoiceAmount);
 		orderDetails = new ArrayList<OrderDetail>();
+		currencyFormat = NumberFormat.getInstance();
+		currencyFormat.setGroupingUsed(true);
+		currencyFormat.setMaximumFractionDigits(2);
+		currencyFormat.setMinimumFractionDigits(2);
 	}
 	// </editor-fold>
 
@@ -221,11 +167,7 @@ public class SelectItemActivity extends Activity {
 			return;
 		}
 		if ((location = gpsReceiver.getLastKnownLocation()) == null) {
-			Thread.State state = GPS_RECEIVER.getState();
 			progressDialog = ProgressDialog.show(SelectItemActivity.this, null, "Waiting For GPS...", false);
-			if (state == Thread.State.TERMINATED) {
-				GPS_RECEIVER.start();
-			}
 			return;
 		}
 		Order order = new Order(
@@ -279,13 +221,22 @@ public class SelectItemActivity extends Activity {
 			OrderDetail orderDetail = (OrderDetail) data.getSerializableExtra("orderDetail");
 			int index;
 			if ((index = orderDetails.indexOf(orderDetail)) != -1) {
-				orderDetails.set(index, orderDetail);
+				if (orderDetail.getQuantity() != 0) {
+					orderDetails.set(index, orderDetail);
+				} else {
+					orderDetails.remove(index);
+				}
 			} else {
 				orderDetails.add(orderDetail);
 				item.setSelected(true);
 			}
-			itemList.collapseGroup(groupPosition);
-			itemList.expandGroup(groupPosition);
+			System.out.println(orderDetail);
+			expandableListAdapter.notifyDataSetChanged();
+			double invoiceTotal = 0;
+			for (OrderDetail instance : orderDetails) {
+				invoiceTotal += instance.getPrice() * instance.getQuantity();
+			}
+			txtInvoiceAmount.setText("Rs " + currencyFormat.format(invoiceTotal));
 		}
 	}
 
@@ -303,5 +254,90 @@ public class SelectItemActivity extends Activity {
 		TextView txtReturnQuantity;
 		TextView txtReplaceQuantity;
 		TextView txtSampleQuantity;
+	}
+
+	private class MyExpandableListAdapter extends BaseExpandableListAdapter {
+		@Override
+		public int getGroupCount() {
+			return 2;
+		}
+
+		@Override
+		public int getChildrenCount(int groupPosition) {
+			return (groupPosition == 0) ? availableStock.size() : unAvailableStock.size();
+		}
+
+		@Override
+		public ArrayList<Item> getGroup(int groupPosition) {
+			return (groupPosition == 0) ? availableStock : unAvailableStock;
+		}
+
+		@Override
+		public Item getChild(int groupPosition, int childPosition) {
+			return (groupPosition == 0) ? availableStock.get(childPosition) : unAvailableStock.get(childPosition);
+		}
+
+		@Override
+		public long getGroupId(int groupPosition) {
+			return groupPosition;
+		}
+
+		@Override
+		public long getChildId(int groupPosition, int childPosition) {
+			return childPosition;
+		}
+
+		@Override
+		public boolean hasStableIds() {
+			return false;
+		}
+
+		@Override
+		public View getGroupView(int groupPosition, boolean b, View view, ViewGroup viewGroup) {
+			GroupViewHolder groupViewHolder;
+			if (view == null) {
+				LayoutInflater layoutInflater = (LayoutInflater) SelectItemActivity.this.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+				view = layoutInflater.inflate(R.layout.category_item_view, null);
+				groupViewHolder = new GroupViewHolder();
+				groupViewHolder.txtCategory = (TextView) view.findViewById(R.id.txtCategory);
+				view.setTag(groupViewHolder);
+			} else {
+				groupViewHolder = (GroupViewHolder) view.getTag();
+			}
+			groupViewHolder.txtCategory.setText((groupPosition == 0) ? "Available Items" : "UnAvailable Items");
+			return view;
+		}
+
+		@Override
+		public View getChildView(int groupPosition, int childPosition, boolean b, View view, ViewGroup viewGroup) {
+			ChildViewHolder childViewHolder;
+			if (view == null) {
+				LayoutInflater layoutInflater = (LayoutInflater) SelectItemActivity.this.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+				view = layoutInflater.inflate(R.layout.category_sub_item, null);
+				childViewHolder = new ChildViewHolder();
+				childViewHolder.txtItemDescription = (TextView) view.findViewById(R.id.txtItemDescription);
+				childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
+				childViewHolder.txtFreeIssue = (TextView) view.findViewById(R.id.txtFreeIssue);
+				childViewHolder.txtEachDiscount = (TextView) view.findViewById(R.id.txtEachDiscount);
+				childViewHolder.txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
+				childViewHolder.txtReturnQuantity = (TextView) view.findViewById(R.id.txtReturnQuantity);
+				childViewHolder.txtReplaceQuantity = (TextView) view.findViewById(R.id.txtReplaceQuantity);
+				childViewHolder.txtSampleQuantity = (TextView) view.findViewById(R.id.txtSampleQuantity);
+				view.setTag(childViewHolder);
+			} else {
+				childViewHolder = (ChildViewHolder) view.getTag();
+			}
+			Item item = getChild(groupPosition, childPosition);
+			childViewHolder.txtItemDescription.setText(item.getItemDescription());
+			childViewHolder.txtEachDiscount.setText(Double.toString(outlet.getOutletDiscount()));
+			view.setBackgroundColor((childPosition % 2 == 0) ? Color.parseColor("#E6E6E6") : Color.parseColor("#FFFFFF"));
+			updateView(childViewHolder, item, view);
+			return view;
+		}
+
+		@Override
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
+			return true;
+		}
 	}
 }

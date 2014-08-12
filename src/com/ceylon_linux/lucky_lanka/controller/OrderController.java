@@ -76,8 +76,8 @@ public class OrderController extends AbstractController {
 					orderId,
 					payment.getPaymentDate().getTime(),
 					payment.getAmount(),
-					payment.getChequeDate().getTime(),
-					payment.getChequeNo(),
+					(payment.getChequeDate() == null) ? 0 : payment.getChequeDate().getTime(),
+					payment.getChequeNo() == null ? "" : payment.getChequeNo(),
 					payment.getBranchCode()
 				});
 			}
@@ -99,9 +99,9 @@ public class OrderController extends AbstractController {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
-			String orderSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId";
-			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription, tbl_order_detail.returnQuantity, tbl_order_detail.replaceQuantity, tbl_order_detail.sampleQuantity from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
-			String paymentSelectSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, branchCode from tbl_current_payment where orderId=?";
+			String orderSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId where tbl_order.syncStatus=0";
+			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription, tbl_order_detail.returnQuantity, tbl_order_detail.replaceQuantity, tbl_order_detail.sampleQuantity, tbl_item.itemShortName from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
+			String paymentSelectSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, branchId from tbl_current_payment where orderId=?";
 
 			Cursor orderCursor = DbHandler.performRawQuery(database, orderSelectSql, null);
 			ArrayList<Order> orders = new ArrayList<Order>();
@@ -130,11 +130,12 @@ public class OrderController extends AbstractController {
 					int returnQuantity = orderDetailsCursor.getInt(6);
 					int replaceQuantity = orderDetailsCursor.getInt(7);
 					int sampleQuantity = orderDetailsCursor.getInt(8);
+					String itemShortName = orderDetailsCursor.getString(9);
 					OrderDetail orderDetail;
 					if (outletType == Outlet.SUPER_MARKET) {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, price, returnQuantity, replaceQuantity, sampleQuantity);
+						orderDetail = new OrderDetail(itemId, itemDescription, quantity, price, returnQuantity, replaceQuantity, sampleQuantity, itemShortName);
 					} else {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, freeQuantity, price, returnQuantity, replaceQuantity, sampleQuantity);
+						orderDetail = new OrderDetail(itemId, itemDescription, quantity, freeQuantity, price, returnQuantity, replaceQuantity, sampleQuantity, itemShortName);
 					}
 					orderDetails.add(orderDetail);
 				}
@@ -159,8 +160,8 @@ public class OrderController extends AbstractController {
 				order.setPayments(payments);
 			}
 			orderCursor.close();
-			String deleteQuery = "delete from tbl_order where orderId=?";
-			SQLiteStatement deleteStatement = database.compileStatement(deleteQuery);
+			String updateQuery = "update tbl_order set syncStatus=1 where orderId=?";
+			SQLiteStatement deleteStatement = database.compileStatement(updateQuery);
 			for (Order order : orders) {
 				boolean response = syncOrder(context, order.getOrderAsJson());
 				if (response) {

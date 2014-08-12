@@ -72,7 +72,6 @@ public class OutstandingPaymentActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.payments_page);
 		initialize();
 	}
 
@@ -154,13 +153,6 @@ public class OutstandingPaymentActivity extends Activity {
 			}
 		};
 		listPayment.setAdapter(adapter);
-
-		btnConnectPrinter = (Button) findViewById(R.id.btnConnectPrinter);
-		btnConnectPrinter.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View view) {
-				btnConnectPrinterClicked(view);
-			}
-		});
 
 		btnCashPayment.setOnClickListener(new View.OnClickListener() {
 			@Override

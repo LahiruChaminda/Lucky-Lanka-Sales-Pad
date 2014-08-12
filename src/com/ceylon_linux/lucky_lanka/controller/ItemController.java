@@ -50,7 +50,8 @@ public class ItemController extends AbstractController {
 		try {
 			database.beginTransaction();
 			SQLiteStatement categoryStatement = database.compileStatement("replace into tbl_category(categoryId,categoryDescription) values (?,?)");
-			SQLiteStatement itemStatement = database.compileStatement("replace into tbl_item(itemId,categoryId,itemCode,itemDescription,wholeSalePrice,retailPrice,availableQuantity,loadedQuantity,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity) values (?,?,?,?,?,?,?,?,?,?,?)");
+			SQLiteStatement itemStatement = database.compileStatement("replace into tbl_item(itemId,categoryId,itemCode,itemDescription,wholeSalePrice,retailPrice,availableQuantity,loadedQuantity,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName) values (?,?,?,?,?,?,?,?,?,?,?,?)");
+			SQLiteStatement updateStatement = database.compileStatement("update tbl_item set availableQuantity= (availableQuantity-?) where ");
 			for (Category category : categories) {
 				Object[] categoryParameters = {
 					category.getCategoryId(),
@@ -69,7 +70,8 @@ public class ItemController extends AbstractController {
 						item.getLoadedQuantity(),
 						(item.isSixPlusOneAvailability()) ? 1 : 0,
 						item.getMinimumFreeIssueQuantity(),
-						item.getFreeIssueQuantity()
+						item.getFreeIssueQuantity(),
+						item.getItemShortName()
 					};
 					DbHandler.performExecuteInsert(itemStatement, itemParameters);
 				}
@@ -88,7 +90,7 @@ public class ItemController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		ArrayList<Category> categories = new ArrayList<Category>();
 		String categorySql = "select categoryId,categoryDescription from tbl_category";
-		String itemSql = "select itemId,itemCode,itemDescription,availableQuantity,loadedQuantity,wholeSalePrice,retailPrice,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity from tbl_item where categoryId=?";
+		String itemSql = "select itemId,itemCode,itemDescription,availableQuantity,loadedQuantity,wholeSalePrice,retailPrice,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName from tbl_item where categoryId=?";
 		Cursor categoryCursor = DbHandler.performRawQuery(database, categorySql, null);
 		for (categoryCursor.moveToFirst(); !categoryCursor.isAfterLast(); categoryCursor.moveToNext()) {
 			int categoryId = categoryCursor.getInt(0);
@@ -106,7 +108,8 @@ public class ItemController extends AbstractController {
 					itemCursor.getDouble(6),
 					(itemCursor.getInt(7) == 1),
 					itemCursor.getInt(8),
-					itemCursor.getInt(9)
+					itemCursor.getInt(9),
+					itemCursor.getString(10)
 				));
 			}
 			itemCursor.close();

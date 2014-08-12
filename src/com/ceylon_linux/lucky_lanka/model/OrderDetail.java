@@ -20,6 +20,7 @@ public class OrderDetail implements Serializable {
 
 	private int itemId;
 	private String itemDescription;
+	private String itemShortName;
 	private int quantity;
 	private int freeIssue;
 	private double price;
@@ -27,7 +28,7 @@ public class OrderDetail implements Serializable {
 	private int replaceQuantity;
 	private int sampleQuantity;
 
-	private OrderDetail(Item item, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity) {
+	private OrderDetail(Item item, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
 		this.itemId = item.getItemId();
 		this.itemDescription = item.getItemDescription();
 		this.quantity = quantity;
@@ -36,9 +37,10 @@ public class OrderDetail implements Serializable {
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
 	}
 
-	private OrderDetail(Item item, int quantity, double discountPercentage, int returnQuantity, int replaceQuantity, int sampleQuantity) {
+	private OrderDetail(Item item, int quantity, double discountPercentage, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
 		this.itemId = item.getItemId();
 		this.itemDescription = item.getItemDescription();
 		this.quantity = quantity;
@@ -46,9 +48,10 @@ public class OrderDetail implements Serializable {
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
 	}
 
-	public OrderDetail(int itemId, String itemDescription, int quantity, int freeIssue, double price, int returnQuantity, int replaceQuantity, int sampleQuantity) {
+	public OrderDetail(int itemId, String itemDescription, int quantity, int freeIssue, double price, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
 		this.itemId = itemId;
 		this.itemDescription = itemDescription;
 		this.quantity = quantity;
@@ -57,9 +60,10 @@ public class OrderDetail implements Serializable {
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
 	}
 
-	public OrderDetail(int itemId, String itemDescription, int quantity, double price, int returnQuantity, int replaceQuantity, int sampleQuantity) {
+	public OrderDetail(int itemId, String itemDescription, int quantity, double price, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
 		this.itemId = itemId;
 		this.itemDescription = itemDescription;
 		this.quantity = quantity;
@@ -67,6 +71,7 @@ public class OrderDetail implements Serializable {
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
 	}
 
 	public static final OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity, int returnQuantity, int replaceQuantity, int sampleQuantity) {
@@ -81,7 +86,6 @@ public class OrderDetail implements Serializable {
 				}
 				break;
 			case Outlet.SIX_PLUS_ONE_OUTLET:
-
 				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
 					freeIssue = ((int) (quantity / 216)) * 36;
 				} else if (quantity >= minimumFreeIssueQuantity) {
@@ -92,12 +96,21 @@ public class OrderDetail implements Serializable {
 				discountPercentage = outlet.getOutletDiscount();
 				break;
 		}
-
 		if (outlet.getOutletType() == Outlet.SUPER_MARKET) {
-			return new OrderDetail(item, quantity, discountPercentage, returnQuantity, replaceQuantity, sampleQuantity);
+			System.out.println("free" + freeIssue);
+			return new OrderDetail(item, quantity, discountPercentage, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
 		} else {
-			return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity);
+			System.out.println("free" + freeIssue);
+			return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
 		}
+	}
+
+	public String getItemShortName() {
+		return itemShortName;
+	}
+
+	public void setItemShortName(String itemShortName) {
+		this.itemShortName = itemShortName;
 	}
 
 	public int getItemId() {
