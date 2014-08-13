@@ -17,6 +17,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -156,16 +158,16 @@ public class PaymentActivity extends Activity {
 				for (Payment payment : order.getPayments()) {
 					sum += payment.getAmount();
 				}
-				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum));
 				String valueString;
 				double discount = (valueString = inputDiscount.getText().toString()).isEmpty() ? 0 : Double.parseDouble(valueString);
 				if (invoiceTotal - discount < sum) {
-					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF4B40"));
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF8080"));
 				} else if (invoiceTotal - discount > sum) {
-					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FFFBFF61"));
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FFFF80"));
 				} else {
-					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF45C009"));
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#80FF80"));
 				}
+				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum + discount));
 			}
 		};
 		listPayment.setAdapter(adapter);
@@ -185,6 +187,22 @@ public class PaymentActivity extends Activity {
 			@Override
 			public void onClick(View view) {
 				btnPrintInvoiceClicked(view);
+			}
+		});
+		inputDiscount.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				adapter.notifyDataSetChanged();
 			}
 		});
 	}

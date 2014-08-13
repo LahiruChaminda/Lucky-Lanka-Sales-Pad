@@ -40,6 +40,8 @@ public class HomeActivity extends Activity {
 	private TextView txtUserName;
 	private Button btnSignOut;
 	private Button btnStart;
+	private Button btnLoad;
+	private Button btnUnload;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +129,8 @@ public class HomeActivity extends Activity {
 		btnSignOut = (Button) findViewById(R.id.btnSignOut);
 		txtName = (TextView) findViewById(R.id.txtName);
 		txtAddress = (TextView) findViewById(R.id.txtAddress);
+		btnLoad = (Button) findViewById(R.id.btnLoad);
+		btnUnload = (Button) findViewById(R.id.btnUnload);
 		txtUserName = (TextView) findViewById(R.id.txtUserName);
 		btnStart.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -140,8 +144,34 @@ public class HomeActivity extends Activity {
 				btnSignOutClicked(view);
 			}
 		});
+		btnLoad.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnLoadClicked(v);
+			}
+		});
+		btnUnload.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnUnloadClicked(v);
+			}
+		});
 	}
 	// </editor-fold>
+
+	private void btnUnloadClicked(View view) {
+		Intent loadingActivity = new Intent(HomeActivity.this, LoadingActivity.class);
+		loadingActivity.putExtra("loading", false);
+		startActivity(loadingActivity);
+		finish();
+	}
+
+	private void btnLoadClicked(View view) {
+		Intent loadingActivity = new Intent(HomeActivity.this, LoadingActivity.class);
+		loadingActivity.putExtra("loading", true);
+		startActivity(loadingActivity);
+		finish();
+	}
 
 	private void btnStartClicked(View view) {
 		Intent loadAddInvoiceActivity = new Intent(HomeActivity.this, LoadAddInvoiceActivity.class);

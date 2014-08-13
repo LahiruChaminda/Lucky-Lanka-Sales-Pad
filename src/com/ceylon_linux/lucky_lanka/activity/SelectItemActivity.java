@@ -259,7 +259,7 @@ public class SelectItemActivity extends Activity {
 	private class MyExpandableListAdapter extends BaseExpandableListAdapter {
 		@Override
 		public int getGroupCount() {
-			return 2;
+			return 1;
 		}
 
 		@Override
@@ -304,7 +304,7 @@ public class SelectItemActivity extends Activity {
 			} else {
 				groupViewHolder = (GroupViewHolder) view.getTag();
 			}
-			groupViewHolder.txtCategory.setText((groupPosition == 0) ? "Available Items" : "UnAvailable Items");
+			groupViewHolder.txtCategory.setText((groupPosition == 0) ? "Loaded Items" : "UnAvailable Items");
 			return view;
 		}
 

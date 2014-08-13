@@ -76,6 +76,8 @@ public class UserController extends AbstractController {
 		editor.putString("name", user.getName());
 		editor.putString("address", user.getAddress());
 		editor.putLong("loginTime", user.getLoginTime());
+		editor.putBoolean("loading", false);
+		editor.putBoolean("unloading", false);
 		return editor.commit();
 	}
 
@@ -108,6 +110,20 @@ public class UserController extends AbstractController {
 		return editor.commit();
 	}
 
+	public static boolean confirmLoading(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = userData.edit();
+		editor.putBoolean("loading", true);
+		return editor.commit();
+	}
+
+	public static boolean confirmUnloading(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = userData.edit();
+		editor.putBoolean("unloading", true);
+		return editor.commit();
+	}
+
 	public static User authenticate(Context context, String userName, String password) throws IOException, JSONException {
 		JSONObject userJson = getJsonObject(UserURLPack.LOGIN, UserURLPack.getParameters(userName, password), context);
 		return User.parseUser(userJson);
@@ -120,5 +136,15 @@ public class UserController extends AbstractController {
 			return null;
 		}
 		return userName;
+	}
+
+	public static boolean isLoadingConfirmed(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		return userData.getBoolean("loading", false);
+	}
+
+	public static boolean isUnloadingConfirmed(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		return userData.getBoolean("unloading", false);
 	}
 }
