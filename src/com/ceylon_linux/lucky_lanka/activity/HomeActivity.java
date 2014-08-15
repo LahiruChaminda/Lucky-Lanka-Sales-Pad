@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.ceylon_linux.lucky_lanka.R;
 import com.ceylon_linux.lucky_lanka.controller.OrderController;
+import com.ceylon_linux.lucky_lanka.controller.OutletController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
 import com.ceylon_linux.lucky_lanka.model.User;
 import org.json.JSONException;
@@ -80,6 +81,8 @@ public class HomeActivity extends Activity {
 			@Override
 			protected Integer doInBackground(Void... params) {
 				try {
+					UserController.confirmUnloading(HomeActivity.this);
+					OutletController.syncOutstandingPayments(HomeActivity.this);
 					return OrderController.syncUnSyncedOrders(HomeActivity.this);
 				} catch (IOException ex) {
 					ex.printStackTrace();

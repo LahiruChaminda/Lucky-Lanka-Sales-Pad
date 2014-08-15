@@ -15,9 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
-import com.ceylon_linux.lucky_lanka.model.Order;
-import com.ceylon_linux.lucky_lanka.model.OrderDetail;
-import com.ceylon_linux.lucky_lanka.model.Outlet;
+import com.ceylon_linux.lucky_lanka.controller.OutletController;
+import com.ceylon_linux.lucky_lanka.model.Invoice;
 import com.ceylon_linux.lucky_lanka.model.Payment;
 
 import java.text.NumberFormat;
@@ -32,8 +31,7 @@ import java.util.ArrayList;
 public class OutstandingPaymentActivity extends Activity {
 
 	private final int PAYMENT_DONE = 3;
-	private Order order;
-	private Outlet outlet;
+	private Invoice invoice;
 	private Button btnCashPayment;
 	private Button btnChequePayment;
 	private Button btnSavePayment;
@@ -42,20 +40,23 @@ public class OutstandingPaymentActivity extends Activity {
 	private TextView txtTotallyPaid;
 	private BaseAdapter adapter;
 	private NumberFormat currencyFormat;
-	private double invoiceTotal = 0;
-	private boolean validOrder;
+	private boolean validInvoice;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.payments_page);
+		setContentView(R.layout.outstanding_payments_page);
 		initialize();
 	}
 
 	private void initialize() {
+		currencyFormat = NumberFormat.getInstance();
+		currencyFormat.setGroupingUsed(true);
+		currencyFormat.setMaximumFractionDigits(2);
+		currencyFormat.setMinimumFractionDigits(2);
+
 		Intent intent = getIntent();
-		order = (Order) intent.getSerializableExtra("order");
-		outlet = (Outlet) intent.getSerializableExtra("outlet");
+		invoice = (Invoice) intent.getSerializableExtra("invoice");
 		final SimpleDateFormat dateFormatter = new SimpleDateFormat("yy-MM-dd");
 		btnCashPayment = (Button) findViewById(R.id.btnCashPayment);
 		btnChequePayment = (Button) findViewById(R.id.btnChequePayment);
@@ -63,25 +64,19 @@ public class OutstandingPaymentActivity extends Activity {
 		listPayment = (ListView) findViewById(R.id.listPayment);
 		txtInvoiceTotal = (TextView) findViewById(R.id.txtInvoiceTotal);
 		txtTotallyPaid = (TextView) findViewById(R.id.txtTotalPaid);
-		order.setPayments(new ArrayList<Payment>());
-		currencyFormat = NumberFormat.getInstance();
-		currencyFormat.setGroupingUsed(true);
-		currencyFormat.setMaximumFractionDigits(2);
-		currencyFormat.setMinimumFractionDigits(2);
-		for (OrderDetail orderDetail : order.getOrderDetails()) {
-			invoiceTotal += orderDetail.getPrice() * orderDetail.getQuantity();
-		}
-		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoiceTotal));
+		invoice.setPayments(invoice.getPayments() != null ? invoice.getPayments() : new ArrayList<Payment>());
+		txtTotallyPaid.setText("Rs " + currencyFormat.format(invoice.getPaidValue()));
+		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoice.getAmount()));
 		adapter = new BaseAdapter() {
 
 			@Override
 			public int getCount() {
-				return order.getPayments().size();
+				return invoice.getPayments().size();
 			}
 
 			@Override
 			public Payment getItem(int position) {
-				return order.getPayments().get(position);
+				return invoice.getPayments().get(position);
 			}
 
 			@Override
@@ -114,11 +109,12 @@ public class OutstandingPaymentActivity extends Activity {
 				paymentViewHolder.imageButton.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						order.getPayments().remove(payment);
+						invoice.getPayments().remove(payment);
 						adapter.notifyDataSetChanged();
 						listPayment.setAdapter(adapter);
 					}
 				});
+				paymentViewHolder.imageButton.setVisibility(payment.isSynced() ? View.INVISIBLE : View.VISIBLE);
 				return convertView;
 			}
 
@@ -126,18 +122,18 @@ public class OutstandingPaymentActivity extends Activity {
 			public void notifyDataSetChanged() {
 				super.notifyDataSetChanged();
 				double sum = 0;
-				for (Payment payment : order.getPayments()) {
+				for (Payment payment : invoice.getPayments()) {
 					sum += payment.getAmount();
 				}
-				if (invoiceTotal < sum) {
+				if (invoice.getAmount() < sum) {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF8080"));
-					validOrder = false;
-				} else if (invoiceTotal > sum) {
+					validInvoice = false;
+				} else if (invoice.getAmount() > sum) {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FFFF80"));
-					validOrder = true;
+					validInvoice = true;
 				} else {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#80FF80"));
-					validOrder = true;
+					validInvoice = true;
 				}
 				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum));
 			}
@@ -164,7 +160,9 @@ public class OutstandingPaymentActivity extends Activity {
 	}
 
 	private void btnSavePaymentClicked(View view) {
-		throw new UnsupportedOperationException("Plz implement this");
+		OutletController.saveOutstandingPayments(OutstandingPaymentActivity.this, invoice);
+		setResult(RESULT_OK);
+		finish();
 	}
 
 	private void btnCashPaymentClicked(View view) {
@@ -179,10 +177,7 @@ public class OutstandingPaymentActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		Intent selectItemActivity = new Intent(OutstandingPaymentActivity.this, SelectItemActivity.class);
-		selectItemActivity.putExtra("order", order);
-		selectItemActivity.putExtra("outlet", outlet);
-		startActivity(selectItemActivity);
+		setResult(RESULT_CANCELED);
 		finish();
 	}
 
@@ -192,7 +187,7 @@ public class OutstandingPaymentActivity extends Activity {
 			case PAYMENT_DONE:
 				if (resultCode == RESULT_OK) {
 					Payment payment = (Payment) data.getSerializableExtra("payment");
-					order.getPayments().add(payment);
+					invoice.getPayments().add(payment);
 					adapter.notifyDataSetChanged();
 					listPayment.setAdapter(adapter);
 				}

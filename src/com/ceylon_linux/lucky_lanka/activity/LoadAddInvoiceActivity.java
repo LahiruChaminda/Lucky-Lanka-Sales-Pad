@@ -166,13 +166,11 @@ public class LoadAddInvoiceActivity extends Activity {
 			txtAmount.setText(String.valueOf(invoice.getAmount()));
 			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
 			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
-/*
-			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
+			/*pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent outstandingPaymentActivity = new Intent(LoadAddInvoiceActivity.this, OutstandingPaymentActivity.class);
 					outstandingPaymentActivity.putExtra("invoice", invoice);
-					outstandingPaymentActivity.putExtra("outlet", outlet);
 					startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
 				}
 			});*/
@@ -203,5 +201,16 @@ public class LoadAddInvoiceActivity extends Activity {
 		startActivity(selectItemsActivity);
 		timer.cancel();
 		finish();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REQUEST_OUTSTANDING_PAYMENTS:
+				if (resultCode == RESULT_OK) {
+					//
+				}
+				break;
+		}
 	}
 }

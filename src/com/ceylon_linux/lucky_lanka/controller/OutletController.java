@@ -31,6 +31,10 @@ import java.util.Date;
  */
 public class OutletController extends AbstractController {
 
+	public static final int OUTSTANDING_PAYMENTS_SYNCED_SUCCESSFULLY = 0;
+	public static final int OUTSTANDING_PAYMENTS_ALREADY_SYNCED = 0;
+	public static final int UNABLE_TO_SYNC_OUTSTANDING_PAYMENTS = 0;
+
 	private OutletController() {
 	}
 
@@ -99,24 +103,6 @@ public class OutletController extends AbstractController {
 		}
 	}
 
-	public static boolean addPayment(long invoiceId, Context context, ArrayList<Payment> payments) {
-		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
-		SQLiteDatabase database = databaseInstance.getWritableDatabase();
-		SQLiteStatement paymentStatement = database.compileStatement("insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, bank) values(?,?,?,?,?,?)");
-		for (Payment payment : payments) {
-			DbHandler.performExecuteInsert(paymentStatement, new Object[]{
-				invoiceId,
-				payment.getPaymentDate().getTime(),
-				payment.getAmount(),
-				payment.getChequeDate().getTime(),
-				payment.getChequeNo(),
-				payment.getBank()
-			});
-		}
-		databaseInstance.close();
-		return false;
-	}
-
 	public static ArrayList<Route> loadRoutesFromDb(Context context) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
@@ -161,15 +147,24 @@ public class OutletController extends AbstractController {
 			ArrayList<Payment> payments = new ArrayList<Payment>();
 			Cursor paymentCursor = DbHandler.performRawQuery(database, paymentsSql, new Object[]{invoiceId});
 			for (paymentCursor.moveToFirst(); !paymentCursor.isAfterLast(); paymentCursor.moveToNext()) {
-				payments.add(new Payment(
-					paymentCursor.getInt(0),
-					new Date(paymentCursor.getLong(1)),
-					paymentCursor.getDouble(2),
-					new Date(paymentCursor.getLong(3)),
-					paymentCursor.getString(4),
-					paymentCursor.getString(6),
-					paymentCursor.getInt(5) == 0
-				));
+				if (paymentCursor.getLong(3) == 0) {
+					payments.add(new Payment(
+						paymentCursor.getInt(0),
+						new Date(paymentCursor.getLong(1)),
+						paymentCursor.getDouble(2),
+						paymentCursor.getInt(5) == 1
+					));
+				} else {
+					payments.add(new Payment(
+						paymentCursor.getInt(0),
+						new Date(paymentCursor.getLong(1)),
+						paymentCursor.getDouble(2),
+						new Date(paymentCursor.getLong(3)),
+						paymentCursor.getString(4),
+						paymentCursor.getString(6),
+						paymentCursor.getInt(5) == 1
+					));
+				}
 			}
 			invoices.add(new Invoice(invoiceId, date, amount, payments));
 		}
@@ -178,30 +173,30 @@ public class OutletController extends AbstractController {
 		return invoices;
 	}
 
-	public static ArrayList<Outlet> loadOutletsFromDb(Context context) {
+	public static void syncOutstandingPayments(Context context) throws IOException, JSONException {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
-		SQLiteDatabase database = databaseHelper.getWritableDatabase();
-		String outletSql = "select outletId, routeId, outletName, outletAddress, outletType, outletDiscount from tbl_outlet";
-		ArrayList<Outlet> outlets = new ArrayList<Outlet>();
-		Cursor outletCursor = DbHandler.performRawQuery(database, outletSql, null);
-		for (outletCursor.moveToFirst(); !outletCursor.isAfterLast(); outletCursor.moveToNext()) {
-			outlets.add(new Outlet(
-				outletCursor.getInt(0),
-				outletCursor.getInt(1),
-				outletCursor.getString(2),
-				outletCursor.getString(3),
-				outletCursor.getInt(4),
-				outletCursor.getDouble(5)
-			));
+		try {
+			SQLiteDatabase database = databaseHelper.getWritableDatabase();
+			String sql = "select outletId from tbl_outlet";
+			SQLiteStatement updateStatement = database.compileStatement("update tbl_payment set status=1 where paymentId=?");
+			Cursor cursor = DbHandler.performRawQuery(database, sql, null);
+			for (cursor.moveToFirst(); cursor.isAfterLast(); cursor.moveToNext()) {
+				ArrayList<Invoice> invoices = loadInvoicesFromDb(context, cursor.getInt(0));
+				for (Invoice invoice : invoices) {
+					JSONObject responseJson = getJsonObject(PaymentURLPack.PAYMENT_SYNC, PaymentURLPack.getParameters(invoice.getInvoiceAsJson(), UserController.getAuthorizedUser(context).getPositionId()), context);
+					if ((responseJson != null) && responseJson.getBoolean("result")) {
+						for (Payment payment : invoice.getPayments()) {
+							DbHandler.performExecuteUpdateDelete(updateStatement, new Object[]{
+								payment.getPaymentId()
+							});
+						}
+					}
+				}
+			}
+			cursor.close();
+		} finally {
+			databaseHelper.close();
 		}
-		outletCursor.close();
-		databaseHelper.close();
-		return outlets;
-	}
-
-	public static boolean syncOutstandingPayments(Context context, Invoice invoice) throws IOException, JSONException {
-		JSONObject responseJson = getJsonObject(PaymentURLPack.PAYMENT_SYNC, PaymentURLPack.getParameters(invoice.getInvoiceAsJson(), UserController.getAuthorizedUser(context).getPositionId()), context);
-		return (responseJson != null) && responseJson.getBoolean("result");
 	}
 
 	public static void saveOutstandingPayments(Context context, Invoice invoice) {
@@ -210,6 +205,9 @@ public class OutletController extends AbstractController {
 		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate,amount, chequeDate, chequeNo, bank, status) values (?,?,?,?,?,?,0);";
 		SQLiteStatement paymentInsertStatement = database.compileStatement(paymentInsertSql);
 		for (Payment payment : invoice.getPayments()) {
+			if (payment.isSynced()) {
+				continue;
+			}
 			DbHandler.performExecuteInsert(paymentInsertStatement, new Object[]{
 				invoice.getInvoiceId(),
 				(payment.getPaymentDate() != null) ? payment.getPaymentDate().getTime() : 0,
@@ -217,6 +215,7 @@ public class OutletController extends AbstractController {
 				(payment.getChequeDate() != null) ? payment.getChequeDate().getTime() : 0,
 				payment.getChequeNo()
 			});
+
 		}
 		database.close();
 	}

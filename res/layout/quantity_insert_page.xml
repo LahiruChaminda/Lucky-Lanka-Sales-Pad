@@ -73,7 +73,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="match_parent"
-                    android:textSize="20dp" android:id="@+id/inputReplaceQuantity" android:inputType="number" android:typeface="serif"/>
+                    android:textSize="20dp" android:id="@+id/inputReplaceQuantity" android:typeface="serif"
+                    android:focusable="false"/>
         </LinearLayout>
         <LinearLayout
                 android:layout_width="0dp"
@@ -92,7 +93,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="match_parent"
-                    android:textSize="20dp" android:id="@+id/inputSampleQuantity" android:inputType="number" android:typeface="serif"/>
+                    android:inputType="number"
+                    android:textSize="20dp" android:id="@+id/inputSampleQuantity" android:typeface="serif"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:weightSum="2" android:orientation="horizontal">

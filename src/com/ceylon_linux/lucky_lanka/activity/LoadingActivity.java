@@ -35,7 +35,6 @@ public class LoadingActivity extends Activity {
 	private BaseAdapter adapter;
 	private ListView listView;
 	private Button btnLoading;
-	private Button btnUnloading;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,34 +97,16 @@ public class LoadingActivity extends Activity {
 		btnLoading = (Button) findViewById(R.id.btnLoading);
 		btnLoading.setEnabled(!UserController.confirmLoading(LoadingActivity.this));
 		btnLoading.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
-		btnUnloading = (Button) findViewById(R.id.btnUnloading);
-		btnUnloading.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
-		btnUnloading.setEnabled(!UserController.confirmUnloading(LoadingActivity.this));
 		btnLoading.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				btnLoadingClicked(v);
 			}
 		});
-		btnUnloading.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				btnUnloadingClicked(v);
-			}
-		});
 	}
 
 	private void btnLoadingClicked(View view) {
 		boolean response = UserController.confirmLoading(LoadingActivity.this);
-		if (response) {
-			Intent homeActivity = new Intent(LoadingActivity.this, HomeActivity.class);
-			startActivity(homeActivity);
-			finish();
-		}
-	}
-
-	private void btnUnloadingClicked(View view) {
-		boolean response = UserController.confirmUnloading(LoadingActivity.this);
 		if (response) {
 			Intent homeActivity = new Intent(LoadingActivity.this, HomeActivity.class);
 			startActivity(homeActivity);

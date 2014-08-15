@@ -43,6 +43,7 @@ public class Invoice implements Serializable {
 	}
 
 	public static Invoice parseInvoice(JSONObject jsonInstance) throws JSONException, ParseException {
+		System.out.println("invoice" + jsonInstance);
 		JSONArray cashArray = jsonInstance.getJSONArray("cash");
 		JSONArray chequeArray = jsonInstance.getJSONArray("cheque");
 		ArrayList<Payment> payments = new ArrayList<Payment>();

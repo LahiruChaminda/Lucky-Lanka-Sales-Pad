@@ -224,6 +224,7 @@ public class PaymentActivity extends Activity {
 	private void btnPrintInvoiceClicked(View view) {
 		if (validOrder) {
 			if (immediatePrint) {
+				connectPrinter();
 				printInvoice();
 				immediatePrint = false;
 			} else {
@@ -256,7 +257,6 @@ public class PaymentActivity extends Activity {
 					}
 				});
 				try {
-					syncStatus = OrderController.syncOrder(PaymentActivity.this, order.getOrderAsJson());
 					if (bluetoothSocket != null) {
 						outputStream = bluetoothSocket.getOutputStream();
 						outputStream.write(getOrderIntoByteStream(order));
@@ -265,8 +265,16 @@ public class PaymentActivity extends Activity {
 						}
 						outputStream.flush();
 					}
+					syncStatus = OrderController.syncOrder(PaymentActivity.this, order.getOrderAsJson());
 				} catch (IOException e) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							connectPrinter();
+						}
+					});
 					e.printStackTrace();
+					return;
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -413,7 +421,7 @@ public class PaymentActivity extends Activity {
 		builder.append(getPaddedString(getLeftAlignedString("Lucky Lanka Milk Processing PLC", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Bibulewela,Karagoda,Uyangoda.", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("HotLine: 011-7215021", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------", PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Outlet : " + outlet.getOutletName(), PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Date   : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		dateFormatter.applyPattern("hh:mm:ss aa");
@@ -430,38 +438,24 @@ public class PaymentActivity extends Activity {
 		}
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Gross Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum), 6)));
+		builder.append(getPaddedString(getLeftAlignedString("Discount", 21) + " Rs " + getRightAlignedString(String.valueOf(order.getDiscount()), 6)));
 		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------", PRINTER_LENGTH)));
-		double returnValue = 0;
-		boolean returnReplacementExist = false;
+		boolean returnAvailable = false;
 		for (OrderDetail orderDetail : order.getOrderDetails()) {
 			if (orderDetail.getReturnQuantity() != 0) {
-				returnValue += (orderDetail.getPrice() * orderDetail.getReturnQuantity());
-				returnReplacementExist = true;
+				returnAvailable = true;
+				break;
 			}
 		}
-		if (returnValue != 0) {
-			builder.append(getPaddedString(getLeftAlignedString("Return:", PRINTER_LENGTH)));
+		if (returnAvailable) {
+			builder.append(getPaddedString(getLeftAlignedString("Return & Replacement:", PRINTER_LENGTH)));
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
 				if (orderDetail.getReturnQuantity() != 0) {
 					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getReturnQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
 				}
 			}
 		}
-		double replacementValue = 0;
-		for (OrderDetail orderDetail : order.getOrderDetails()) {
-			if (orderDetail.getReplaceQuantity() != 0) {
-				replacementValue += (orderDetail.getPrice() * orderDetail.getReplaceQuantity());
-				returnReplacementExist = true;
-			}
-		}
-		if (replacementValue != 0) {
-			builder.append(getPaddedString(getLeftAlignedString("Replacement:", PRINTER_LENGTH)));
-			for (OrderDetail orderDetail : order.getOrderDetails()) {
-				if (orderDetail.getReplaceQuantity() != 0) {
-					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getReplaceQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
-				}
-			}
-		}
+
 		boolean freeIssueAvailability = false;
 		for (OrderDetail orderDetail : order.getOrderDetails()) {
 			if (orderDetail.getFreeIssue() != 0) {
@@ -477,16 +471,34 @@ public class PaymentActivity extends Activity {
 				}
 			}
 		}
-		builder.append(getPaddedString(getLeftAlignedString("--------------------------------------", PRINTER_LENGTH)));
-		if (returnReplacementExist) {
-			builder.append(getPaddedString(getLeftAlignedString("Return & Replacement", 21) + " Rs " + getRightAlignedString(String.valueOf(replacementValue - returnValue), 6)));
+
+		boolean sampleAvailability = false;
+		for (OrderDetail orderDetail : order.getOrderDetails()) {
+			if (orderDetail.getSampleQuantity() != 0) {
+				sampleAvailability = true;
+				break;
+			}
 		}
-		builder.append(getPaddedString(getLeftAlignedString("Discount", 21) + " Rs " + getRightAlignedString(String.valueOf(order.getDiscount()), 6)));
-		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Grand Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum + replacementValue - returnValue - order.getDiscount()), 6)));
+		if (sampleAvailability) {
+			builder.append(getPaddedString(getLeftAlignedString("Sample:", PRINTER_LENGTH)));
+			for (OrderDetail orderDetail : order.getOrderDetails()) {
+				if (orderDetail.getSampleQuantity() != 0) {
+					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getSampleQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
+				}
+			}
+		}
+
+		builder.append(getPaddedString(getLeftAlignedString("--------------------------------------", PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Grand Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum - order.getDiscount()), 6)));
+		double totallyPaid = 0;
+		for (Payment payment : order.getPayments()) {
+			totallyPaid += payment.getAmount();
+		}
+		builder.append(getPaddedString(getLeftAlignedString("Total Paid", 21) + " Rs " + getRightAlignedString(String.valueOf(totallyPaid), 6)));
+		builder.append(getPaddedString(getLeftAlignedString("Balance", 21) + " Rs " + getRightAlignedString(String.valueOf(sum - order.getDiscount() - totallyPaid), 6)));
 		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("      " + "HAVE A LUCKY DAY !!!", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("------------------------------------------------", PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------------", PRINTER_LENGTH)));
 		builder.append("\n\n");
 		return builder.toString().getBytes();
 	}
@@ -496,10 +508,11 @@ public class PaymentActivity extends Activity {
 		dateFormatter.applyPattern("dd MMM, yyyy");
 		Date date = new Date();
 		StringBuilder builder = new StringBuilder();
+		builder.append(getPaddedString(getLeftAlignedString("----------Company Copy----------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Lucky Lanka Milk Processing PLC", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Bibulewela,Karagoda,Uyangoda.", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("HotLine: 011-7215021", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------", PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Outlet : " + outlet.getOutletName(), PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Date   : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		dateFormatter.applyPattern("hh:mm:ss aa");
@@ -516,38 +529,24 @@ public class PaymentActivity extends Activity {
 		}
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Gross Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum), 6)));
+		builder.append(getPaddedString(getLeftAlignedString("Discount", 21) + " Rs " + getRightAlignedString(String.valueOf(order.getDiscount()), 6)));
 		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------", PRINTER_LENGTH)));
-		double returnValue = 0;
-		boolean returnReplacementExist = false;
+		boolean returnAvailable = false;
 		for (OrderDetail orderDetail : order.getOrderDetails()) {
 			if (orderDetail.getReturnQuantity() != 0) {
-				returnValue += (orderDetail.getPrice() * orderDetail.getReturnQuantity());
-				returnReplacementExist = true;
+				returnAvailable = true;
+				break;
 			}
 		}
-		if (returnValue != 0) {
-			builder.append(getPaddedString(getLeftAlignedString("Return:", PRINTER_LENGTH)));
+		if (returnAvailable) {
+			builder.append(getPaddedString(getLeftAlignedString("Return & Replacement:", PRINTER_LENGTH)));
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
 				if (orderDetail.getReturnQuantity() != 0) {
 					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getReturnQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
 				}
 			}
 		}
-		double replacementValue = 0;
-		for (OrderDetail orderDetail : order.getOrderDetails()) {
-			if (orderDetail.getReplaceQuantity() != 0) {
-				replacementValue += (orderDetail.getPrice() * orderDetail.getReplaceQuantity());
-				returnReplacementExist = true;
-			}
-		}
-		if (replacementValue != 0) {
-			builder.append(getPaddedString(getLeftAlignedString("Replacement:", PRINTER_LENGTH)));
-			for (OrderDetail orderDetail : order.getOrderDetails()) {
-				if (orderDetail.getReplaceQuantity() != 0) {
-					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getReplaceQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
-				}
-			}
-		}
+
 		boolean freeIssueAvailability = false;
 		for (OrderDetail orderDetail : order.getOrderDetails()) {
 			if (orderDetail.getFreeIssue() != 0) {
@@ -563,24 +562,37 @@ public class PaymentActivity extends Activity {
 				}
 			}
 		}
-		builder.append(getPaddedString(getLeftAlignedString("--------------------------------------", PRINTER_LENGTH)));
-		if (returnReplacementExist) {
-			builder.append(getPaddedString(getLeftAlignedString("Return & Replacement", 21) + " Rs " + getRightAlignedString(String.valueOf(replacementValue - returnValue), 6)));
+
+		boolean sampleAvailability = false;
+		for (OrderDetail orderDetail : order.getOrderDetails()) {
+			if (orderDetail.getSampleQuantity() != 0) {
+				sampleAvailability = true;
+				break;
+			}
 		}
-		builder.append(getPaddedString(getLeftAlignedString("Discount", 21) + " Rs " + getRightAlignedString(String.valueOf(order.getDiscount()), 6)));
-		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Grand Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum + replacementValue - returnValue - order.getDiscount()), 6)));
+		if (sampleAvailability) {
+			builder.append(getPaddedString(getLeftAlignedString("Sample:", PRINTER_LENGTH)));
+			for (OrderDetail orderDetail : order.getOrderDetails()) {
+				if (orderDetail.getSampleQuantity() != 0) {
+					builder.append(getPaddedString(getLeftAlignedString(String.valueOf(orderDetail.getSampleQuantity()), 3) + "  " + getLeftAlignedString(orderDetail.getItemShortName(), 13) + getRightAlignedString(String.valueOf(orderDetail.getPrice()), 4) + getRightAlignedString("                  ", 9)));
+				}
+			}
+		}
+		if (returnAvailable || freeIssueAvailability || sampleAvailability) {
+			builder.append(getPaddedString(getLeftAlignedString("--------------------------------------", PRINTER_LENGTH)));
+		}
+		builder.append(getPaddedString(getLeftAlignedString("Grand Total", 21) + " Rs " + getRightAlignedString(String.valueOf(sum - order.getDiscount()), 6)));
 		double totallyPaid = 0;
 		for (Payment payment : order.getPayments()) {
 			totallyPaid += payment.getAmount();
 		}
 		builder.append(getPaddedString(getLeftAlignedString("Total Paid", 21) + " Rs " + getRightAlignedString(String.valueOf(totallyPaid), 6)));
-		builder.append(getPaddedString(getLeftAlignedString("Balance", 21) + " Rs " + getRightAlignedString(String.valueOf(sum + replacementValue - returnValue - order.getDiscount() - totallyPaid), 6)));
+		builder.append(getPaddedString(getLeftAlignedString("Balance", 21) + " Rs " + getRightAlignedString(String.valueOf(sum - order.getDiscount() - totallyPaid), 6)));
 		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Signature : ", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("      " + "HAVE A LUCKY DAY !!!", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("------------------------------------------------", PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("-------------------------------------------------", PRINTER_LENGTH)));
 		builder.append("\n\n");
 		return builder.toString().getBytes();
 	}
