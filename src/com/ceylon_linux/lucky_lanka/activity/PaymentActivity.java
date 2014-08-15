@@ -226,7 +226,6 @@ public class PaymentActivity extends Activity {
 			if (immediatePrint) {
 				connectPrinter();
 				printInvoice();
-				immediatePrint = false;
 			} else {
 				String valueString;
 				order.setDiscount((valueString = inputDiscount.getText().toString()).isEmpty() ? 0 : Double.parseDouble(valueString));
@@ -295,6 +294,7 @@ public class PaymentActivity extends Activity {
 						finish();
 					}
 				});
+				immediatePrint = false;
 			}
 		}.start();
 	}
