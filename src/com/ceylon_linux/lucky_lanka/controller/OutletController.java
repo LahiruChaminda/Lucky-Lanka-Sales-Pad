@@ -100,7 +100,21 @@ public class OutletController extends AbstractController {
 		}
 	}
 
-	public static boolean addPayment(long invoiceId, Context context, Payment... payments) {
+	public static boolean addPayment(long invoiceId, Context context, ArrayList<Payment> payments) {
+		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseInstance.getWritableDatabase();
+		SQLiteStatement paymentStatement = database.compileStatement("insert into tbl_payment(invoiceId, paymentDate, amount, chequeDate, chequeNo, bank) values(?,?,?,?,?,?)");
+		for (Payment payment : payments) {
+			DbHandler.performExecuteInsert(paymentStatement, new Object[]{
+				invoiceId,
+				payment.getPaymentDate().getTime(),
+				payment.getAmount(),
+				payment.getChequeDate().getTime(),
+				payment.getChequeNo(),
+				payment.getBank()
+			});
+		}
+		databaseInstance.close();
 		return false;
 	}
 
@@ -168,7 +182,7 @@ public class OutletController extends AbstractController {
 	public static ArrayList<Outlet> loadOutletsFromDb(Context context) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
-		String outletSql = "select outletId, routeId, outletName, outletAddress, outletType, outletDiscount from tbl_outlet where routeId=?";
+		String outletSql = "select outletId, routeId, outletName, outletAddress, outletType, outletDiscount from tbl_outlet";
 		ArrayList<Outlet> outlets = new ArrayList<Outlet>();
 		Cursor outletCursor = DbHandler.performRawQuery(database, outletSql, null);
 		for (outletCursor.moveToFirst(); !outletCursor.isAfterLast(); outletCursor.moveToNext()) {

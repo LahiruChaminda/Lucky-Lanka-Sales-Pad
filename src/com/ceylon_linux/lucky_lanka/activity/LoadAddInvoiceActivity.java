@@ -166,7 +166,7 @@ public class LoadAddInvoiceActivity extends Activity {
 			txtAmount.setText(String.valueOf(invoice.getAmount()));
 			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
 			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
-
+/*
 			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -175,7 +175,7 @@ public class LoadAddInvoiceActivity extends Activity {
 					outstandingPaymentActivity.putExtra("outlet", outlet);
 					startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
 				}
-			});
+			});*/
 			pendingDetailsTable.addView(pendingDetailsItemView);
 		}
 	}

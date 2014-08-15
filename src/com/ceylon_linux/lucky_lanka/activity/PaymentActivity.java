@@ -72,6 +72,7 @@ public class PaymentActivity extends Activity {
 	private NumberFormat currencyFormat;
 	private Handler handler = new Handler();
 	private double invoiceTotal = 0;
+	private boolean validOrder = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -162,10 +163,13 @@ public class PaymentActivity extends Activity {
 				double discount = (valueString = inputDiscount.getText().toString()).isEmpty() ? 0 : Double.parseDouble(valueString);
 				if (invoiceTotal - discount < sum) {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF8080"));
+					validOrder = false;
 				} else if (invoiceTotal - discount > sum) {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FFFF80"));
+					validOrder = true;
 				} else {
 					txtTotallyPaid.setBackgroundColor(Color.parseColor("#80FF80"));
+					validOrder = true;
 				}
 				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum + discount));
 			}
@@ -218,18 +222,25 @@ public class PaymentActivity extends Activity {
 	}
 
 	private void btnPrintInvoiceClicked(View view) {
-		if (immediatePrint) {
-			printInvoice();
-			immediatePrint = false;
+		if (validOrder) {
+			if (immediatePrint) {
+				printInvoice();
+				immediatePrint = false;
+			} else {
+				String valueString;
+				order.setDiscount((valueString = inputDiscount.getText().toString()).isEmpty() ? 0 : Double.parseDouble(valueString));
+				Intent printPreviewActivity = new Intent(PaymentActivity.this, PrintPreviewActivity.class);
+				printPreviewActivity.putExtra("orderStream", getOrderCopyIntoByteStream(order));
+				startActivityForResult(printPreviewActivity, INVOICE_PREVIEW);
+			}
 		} else {
-			Intent printPreviewActivity = new Intent(PaymentActivity.this, PrintPreviewActivity.class);
-			String valueString;
-			order.setDiscount((valueString = inputDiscount.getText().toString()).isEmpty() ? 0 : Double.parseDouble(valueString));
-			printPreviewActivity.putExtra("orderStream", getOrderCopyIntoByteStream(order));
-			startActivityForResult(printPreviewActivity, INVOICE_PREVIEW);
+			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PaymentActivity.this);
+			alertBuilder.setMessage("Please check payments!");
+			alertBuilder.setTitle(R.string.app_name);
+			alertBuilder.setPositiveButton("Ok", null);
+			alertBuilder.show();
 		}
 	}
-
 
 	private void printInvoice() {
 		new Thread() {

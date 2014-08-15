@@ -108,8 +108,10 @@ public class LoginActivity extends Activity {
 					return user;
 				} catch (IOException e) {
 					e.printStackTrace();
+					UserController.clearAuthentication(LoginActivity.this);
 				} catch (JSONException e) {
 					e.printStackTrace();
+					UserController.clearAuthentication(LoginActivity.this);
 				}
 				return null;
 			}

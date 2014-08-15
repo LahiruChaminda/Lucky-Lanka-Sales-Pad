@@ -7,12 +7,10 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,6 +70,7 @@ public class OutstandingPaymentActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.outstanding_payments_page);
 		initialize();
 	}
 
@@ -90,8 +89,7 @@ public class OutstandingPaymentActivity extends Activity {
 		currencyFormat.setGroupingUsed(true);
 		currencyFormat.setMaximumFractionDigits(2);
 		currencyFormat.setMinimumFractionDigits(2);
-		double invoiceTotal = 0;
-		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoiceTotal));
+		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoice.getAmount()));
 		adapter = new BaseAdapter() {
 
 			@Override
@@ -185,7 +183,13 @@ public class OutstandingPaymentActivity extends Activity {
 	}
 
 	private void btnPrintInvoiceClicked(View view) {
-		final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(OutstandingPaymentActivity.this);
+		boolean response = OutletController.addPayment(invoice.getInvoiceId(), OutstandingPaymentActivity.this, invoice.getPayments());
+		if (response) {
+			Intent intent = new Intent();
+			setResult(RESULT_OK, intent);
+			finish();
+		}
+		/*final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(OutstandingPaymentActivity.this);
 		alertBuilder.setTitle("Lucky Lanka Sales Pad");
 		alertBuilder.setMessage("Printer is not connected");
 		alertBuilder.setPositiveButton("Setup Printer", new DialogInterface.OnClickListener() {
@@ -205,7 +209,7 @@ public class OutstandingPaymentActivity extends Activity {
 			alertBuilder.show();
 		} else {
 			printInvoice();
-		}
+		}*/
 	}
 
 	private void printInvoice() {

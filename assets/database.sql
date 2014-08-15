@@ -84,7 +84,7 @@ create table tbl_payment(
    amount decimal(20,2) not null check(amount > 0),
    chequeDate long default 0,
    chequeNo Text default '',
-   bank TEXT default '',
+   bank int default 0,
    status int default 0
 );
 create table tbl_current_payment(

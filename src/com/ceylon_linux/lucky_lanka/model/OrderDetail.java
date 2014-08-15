@@ -182,6 +182,9 @@ public class OrderDetail implements Serializable {
 		orderDetailsParams.put("id_item", itemId);
 		orderDetailsParams.put("qty", quantity);
 		orderDetailsParams.put("free", freeIssue);
+		orderDetailsParams.put("return", returnQuantity);
+		orderDetailsParams.put("replace", replaceQuantity);
+		orderDetailsParams.put("sample", sampleQuantity);
 		orderDetailsParams.put("price", price);
 		return new JSONObject(orderDetailsParams);
 	}

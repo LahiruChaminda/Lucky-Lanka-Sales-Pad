@@ -113,10 +113,48 @@ public class HomeActivity extends Activity {
 		builder.setPositiveButton("Sign out", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				UserController.clearAuthentication(HomeActivity.this);
-				Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
-				startActivity(loginActivity);
-				finish();
+				new AsyncTask<Void, Void, Boolean>() {
+					ProgressDialog progressDialog;
+
+					@Override
+					protected void onPreExecute() {
+						super.onPreExecute();
+						progressDialog = new ProgressDialog(HomeActivity.this);
+						progressDialog.setCanceledOnTouchOutside(false);
+						progressDialog.setCancelable(false);
+						progressDialog.setMessage("Syncing Orders");
+						progressDialog.show();
+					}
+
+					@Override
+					protected Boolean doInBackground(Void... params) {
+						try {
+							return OrderController.syncUnSyncedOrders(HomeActivity.this);
+						} catch (IOException ex) {
+							ex.printStackTrace();
+							return false;
+						} catch (JSONException ex) {
+							ex.printStackTrace();
+							return false;
+						}
+					}
+
+					@Override
+					protected void onPostExecute(Boolean response) {
+						if (progressDialog != null && progressDialog.isShowing()) {
+							progressDialog.dismiss();
+						}
+						if (response) {
+							Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
+							UserController.clearAuthentication(HomeActivity.this);
+							Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
+							startActivity(loginActivity);
+							finish();
+						} else {
+							Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
+						}
+					}
+				}.execute();
 			}
 		});
 		builder.setNegativeButton("Cancel", null);
