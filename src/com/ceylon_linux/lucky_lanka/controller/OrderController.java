@@ -31,15 +31,19 @@ import java.util.Date;
  */
 public class OrderController extends AbstractController {
 
+	public static final int ORDERS_SYNCED_SUCCESSFULLY = 0;
+	public static final int UNABLE_TO_SYNC_ORDERS = 1;
+	public static final int ORDERS_ALREADY_SYNCED = 2;
+
 	private OrderController() {
 	}
 
-	public static boolean saveOrderToDb(Context context, Order order) {
+	public static boolean saveOrderToDb(Context context, Order order, boolean syncStatus) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
 			database.beginTransaction();
-			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude) values(?,?,?,?,?,?,?,?)";
+			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude, syncStatus) values(?,?,?,?,?,?,?,?,?)";
 			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity, returnQuantity, replaceQuantity, sampleQuantity) values(?,?,?,?,?,?,?,?,?)";
 			String paymentInsertSql = "insert into tbl_current_payment(orderId, paymentDate, amount, chequeDate, chequeNo, branchId) values (?,?,?,?,?,?)";
 			double total = 0;
@@ -54,7 +58,8 @@ public class OrderController extends AbstractController {
 				total,
 				order.getBatteryLevel(),
 				order.getLongitude(),
-				order.getLatitude()
+				order.getLatitude(),
+				syncStatus ? 1 : 0
 			});
 			SQLiteStatement orderDetailInsertStatement = database.compileStatement(orderDetailInsertSQL);
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
@@ -95,7 +100,7 @@ public class OrderController extends AbstractController {
 		return (responseJson != null) && responseJson.getBoolean("result");
 	}
 
-	public static boolean syncUnSyncedOrders(Context context) throws IOException, JSONException {
+	public static int syncUnSyncedOrders(Context context) throws IOException, JSONException {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
@@ -139,8 +144,7 @@ public class OrderController extends AbstractController {
 					orderDetails.add(orderDetail);
 				}
 				orderDetailsCursor.close();
-
-				Order order = new Order(outletId, positionId, routeId, batteryLevel, invoiceTime, longitude, latitude, orderDetails);
+				Order order = new Order(orderId, outletId, null, positionId, routeId, invoiceTime, longitude, latitude, batteryLevel, orderDetails);
 				orders.add(order);
 
 				Cursor paymentDetailsCursor = DbHandler.performRawQuery(database, paymentSelectSql, new Object[]{orderId});
@@ -158,6 +162,9 @@ public class OrderController extends AbstractController {
 				}
 				order.setPayments(payments);
 			}
+			if (orders.size() == 0) {
+				return ORDERS_ALREADY_SYNCED;
+			}
 			orderCursor.close();
 			String updateQuery = "update tbl_order set syncStatus=1 where orderId=?";
 			SQLiteStatement deleteStatement = database.compileStatement(updateQuery);
@@ -166,13 +173,13 @@ public class OrderController extends AbstractController {
 				if (response) {
 					DbHandler.performExecuteUpdateDelete(deleteStatement, new Object[]{order.getOrderId()});
 				} else {
-					return false;
+					return UNABLE_TO_SYNC_ORDERS;
 				}
 			}
 		} finally {
 			databaseHelper.close();
 		}
-		return true;
+		return ORDERS_SYNCED_SUCCESSFULLY;
 	}
 
 	/*public static boolean syncUnSyncedInvoices(Context context) throws IOException, JSONException {

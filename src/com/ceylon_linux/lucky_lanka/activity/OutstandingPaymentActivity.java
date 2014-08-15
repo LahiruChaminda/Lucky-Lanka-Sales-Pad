@@ -7,31 +7,22 @@
 package com.ceylon_linux.lucky_lanka.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.ceylon_linux.lucky_lanka.R;
-import com.ceylon_linux.lucky_lanka.controller.OutletController;
-import com.ceylon_linux.lucky_lanka.model.Invoice;
+import com.ceylon_linux.lucky_lanka.model.Order;
+import com.ceylon_linux.lucky_lanka.model.OrderDetail;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
 import com.ceylon_linux.lucky_lanka.model.Payment;
-import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
+import java.util.ArrayList;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -40,66 +31,57 @@ import java.util.UUID;
  */
 public class OutstandingPaymentActivity extends Activity {
 
-	private final int REQUEST_CONNECT_DEVICE = 1;
-	private final int REQUEST_ENABLE_BLUETOOTH = 2;
 	private final int PAYMENT_DONE = 3;
-	private BluetoothAdapter bluetoothAdapter;
-	private BluetoothDevice bluetoothDevice;
-	private Invoice invoice;
+	private Order order;
 	private Outlet outlet;
 	private Button btnCashPayment;
 	private Button btnChequePayment;
-	private Button btnPrintInvoice;
+	private Button btnSavePayment;
 	private ListView listPayment;
 	private TextView txtInvoiceTotal;
 	private TextView txtTotallyPaid;
 	private BaseAdapter adapter;
-	private Button btnConnectPrinter;
-	private UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-	private ProgressDialog bluetoothConnectProgressDialog;
-	private BluetoothSocket bluetoothSocket;
 	private NumberFormat currencyFormat;
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			bluetoothConnectProgressDialog.dismiss();
-			Toast.makeText(OutstandingPaymentActivity.this, "Device Connected", Toast.LENGTH_LONG).show();
-		}
-	};
+	private double invoiceTotal = 0;
+	private boolean validOrder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.outstanding_payments_page);
+		setContentView(R.layout.payments_page);
 		initialize();
 	}
 
 	private void initialize() {
 		Intent intent = getIntent();
-		invoice = (Invoice) intent.getSerializableExtra("invoice");
+		order = (Order) intent.getSerializableExtra("order");
 		outlet = (Outlet) intent.getSerializableExtra("outlet");
-		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMMM, yyyy");
+		final SimpleDateFormat dateFormatter = new SimpleDateFormat("yy-MM-dd");
 		btnCashPayment = (Button) findViewById(R.id.btnCashPayment);
 		btnChequePayment = (Button) findViewById(R.id.btnChequePayment);
-		btnPrintInvoice = (Button) findViewById(R.id.btnPrintInvoice);
+		btnSavePayment = (Button) findViewById(R.id.btnSavePayment);
 		listPayment = (ListView) findViewById(R.id.listPayment);
 		txtInvoiceTotal = (TextView) findViewById(R.id.txtInvoiceTotal);
 		txtTotallyPaid = (TextView) findViewById(R.id.txtTotalPaid);
+		order.setPayments(new ArrayList<Payment>());
 		currencyFormat = NumberFormat.getInstance();
 		currencyFormat.setGroupingUsed(true);
 		currencyFormat.setMaximumFractionDigits(2);
 		currencyFormat.setMinimumFractionDigits(2);
-		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoice.getAmount()));
+		for (OrderDetail orderDetail : order.getOrderDetails()) {
+			invoiceTotal += orderDetail.getPrice() * orderDetail.getQuantity();
+		}
+		txtInvoiceTotal.setText("Rs " + currencyFormat.format(invoiceTotal));
 		adapter = new BaseAdapter() {
 
 			@Override
 			public int getCount() {
-				return invoice.getPayments().size();
+				return order.getPayments().size();
 			}
 
 			@Override
 			public Payment getItem(int position) {
-				return invoice.getPayments().get(position);
+				return order.getPayments().get(position);
 			}
 
 			@Override
@@ -132,7 +114,7 @@ public class OutstandingPaymentActivity extends Activity {
 				paymentViewHolder.imageButton.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						invoice.getPayments().remove(payment);
+						order.getPayments().remove(payment);
 						adapter.notifyDataSetChanged();
 						listPayment.setAdapter(adapter);
 					}
@@ -144,14 +126,23 @@ public class OutstandingPaymentActivity extends Activity {
 			public void notifyDataSetChanged() {
 				super.notifyDataSetChanged();
 				double sum = 0;
-				for (Payment payment : invoice.getPayments()) {
+				for (Payment payment : order.getPayments()) {
 					sum += payment.getAmount();
+				}
+				if (invoiceTotal < sum) {
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FF8080"));
+					validOrder = false;
+				} else if (invoiceTotal > sum) {
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#FFFF80"));
+					validOrder = true;
+				} else {
+					txtTotallyPaid.setBackgroundColor(Color.parseColor("#80FF80"));
+					validOrder = true;
 				}
 				txtTotallyPaid.setText("Rs " + currencyFormat.format(sum));
 			}
 		};
 		listPayment.setAdapter(adapter);
-
 		btnCashPayment.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -164,12 +155,16 @@ public class OutstandingPaymentActivity extends Activity {
 				btnChequePaymentClicked(view);
 			}
 		});
-		btnPrintInvoice.setOnClickListener(new View.OnClickListener() {
+		btnSavePayment.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				btnPrintInvoiceClicked(view);
+				btnSavePaymentClicked(view);
 			}
 		});
+	}
+
+	private void btnSavePaymentClicked(View view) {
+		throw new UnsupportedOperationException("Plz implement this");
 	}
 
 	private void btnCashPaymentClicked(View view) {
@@ -182,196 +177,27 @@ public class OutstandingPaymentActivity extends Activity {
 		startActivityForResult(chequePaymentActivity, PAYMENT_DONE);
 	}
 
-	private void btnPrintInvoiceClicked(View view) {
-		boolean response = OutletController.addPayment(invoice.getInvoiceId(), OutstandingPaymentActivity.this, invoice.getPayments());
-		if (response) {
-			Intent intent = new Intent();
-			setResult(RESULT_OK, intent);
-			finish();
-		}
-		/*final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(OutstandingPaymentActivity.this);
-		alertBuilder.setTitle("Lucky Lanka Sales Pad");
-		alertBuilder.setMessage("Printer is not connected");
-		alertBuilder.setPositiveButton("Setup Printer", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				btnConnectPrinter.performClick();
-				return;
-			}
-		});
-		alertBuilder.setNegativeButton("Proceed without printing", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				printInvoice();
-			}
-		});
-		if (bluetoothSocket == null) {
-			alertBuilder.show();
-		} else {
-			printInvoice();
-		}*/
-	}
-
-	private void printInvoice() {
-		new Thread() {
-			private ProgressDialog progressDialog;
-			private boolean syncStatus;
-
-			public void run() {
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						progressDialog = ProgressDialogGenerator.generateProgressDialog(OutstandingPaymentActivity.this, "Processing...", false);
-						progressDialog.show();
-					}
-				});
-				try {
-					syncStatus = OutletController.syncOutstandingPayments(OutstandingPaymentActivity.this, invoice);
-					if (bluetoothSocket != null) {
-						OutputStream os = bluetoothSocket.getOutputStream();
-						os.write(getInvoiceIntoByteStream(invoice));
-						os.close();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						if (progressDialog != null && progressDialog.isShowing()) {
-							progressDialog.dismiss();
-						}
-						if (syncStatus) {
-							Toast.makeText(OutstandingPaymentActivity.this, "Payments Synced Successfully", Toast.LENGTH_LONG).show();
-						} else {
-							OutletController.saveOutstandingPayments(OutstandingPaymentActivity.this, invoice);
-							Toast.makeText(OutstandingPaymentActivity.this, "Payments placed in local database", Toast.LENGTH_LONG).show();
-						}
-						setResult(RESULT_OK);
-						finish();
-					}
-				});
-			}
-		}.start();
-	}
-
-	private void btnConnectPrinterClicked(View view) {
-		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (bluetoothAdapter == null) {
-			Toast.makeText(OutstandingPaymentActivity.this, "Bluetooth Not Supported", Toast.LENGTH_LONG).show();
-		} else {
-			if (!bluetoothAdapter.isEnabled()) {
-				Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
-			} else {
-				Intent connectIntent = new Intent(OutstandingPaymentActivity.this, DeviceListActivity.class);
-				startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
-			}
-		}
-	}
-
-	private void btnDisconnectPrinterClicked(View view) {
-		if (bluetoothAdapter != null) {
-			bluetoothAdapter.disable();
-		}
-	}
-
 	@Override
 	public void onBackPressed() {
-		Intent homeActivity = new Intent(OutstandingPaymentActivity.this, HomeActivity.class);
-		startActivity(homeActivity);
+		Intent selectItemActivity = new Intent(OutstandingPaymentActivity.this, SelectItemActivity.class);
+		selectItemActivity.putExtra("order", order);
+		selectItemActivity.putExtra("outlet", outlet);
+		startActivity(selectItemActivity);
+		finish();
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-			case REQUEST_CONNECT_DEVICE:
-				if (resultCode == Activity.RESULT_OK) {
-					Bundle mExtra = data.getExtras();
-					String mDeviceAddress = mExtra.getString("DeviceAddress");
-					bluetoothDevice = bluetoothAdapter.getRemoteDevice(mDeviceAddress);
-					bluetoothConnectProgressDialog = ProgressDialog.show(this, "Connecting...", bluetoothDevice.getName() + " : " + bluetoothDevice.getAddress(), true, false);
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(applicationUUID);
-								bluetoothAdapter.cancelDiscovery();
-								bluetoothSocket.connect();
-								handler.sendEmptyMessage(0);
-							} catch (IOException ex) {
-								ex.printStackTrace();
-								closeSocket(bluetoothSocket);
-								return;
-							}
-						}
-					}).start();
-				}
-				break;
-			case REQUEST_ENABLE_BLUETOOTH:
-				if (resultCode == Activity.RESULT_OK) {
-					Intent connectIntent = new Intent(OutstandingPaymentActivity.this, DeviceListActivity.class);
-					startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
-				} else {
-					Toast.makeText(OutstandingPaymentActivity.this, "Unable to Start Bluetooth", Toast.LENGTH_LONG).show();
-				}
-				break;
 			case PAYMENT_DONE:
 				if (resultCode == RESULT_OK) {
 					Payment payment = (Payment) data.getSerializableExtra("payment");
-					invoice.getPayments().add(payment);
+					order.getPayments().add(payment);
 					adapter.notifyDataSetChanged();
 					listPayment.setAdapter(adapter);
 				}
 				break;
 		}
-	}
-
-	private void closeSocket(BluetoothSocket nOpenSocket) {
-		try {
-			nOpenSocket.close();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	private byte[] getInvoiceIntoByteStream(Invoice invoice) {
-		SimpleDateFormat dateFormatter = new SimpleDateFormat();
-		dateFormatter.applyPattern("dd MMM, yyyy");
-		Date date = new Date();
-		StringBuilder builder = new StringBuilder();
-		builder.append(getPaddedString(getAlignedString("Lucky Lanka Outstanding Payments", 44)));
-		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
-		builder.append(getPaddedString(getAlignedString("Outlet : " + outlet.getOutletName(), 44)));
-		builder.append(getPaddedString(getAlignedString("Date   : " + dateFormatter.format(date), 44)));
-		dateFormatter.applyPattern("hh:mm:ss aa");
-		builder.append(getPaddedString(getAlignedString("Time   : " + dateFormatter.format(date), 44)));
-		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
-		double sum = 0;
-		for (Payment payment : invoice.getPayments()) {
-			sum += payment.getAmount();
-		}
-		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
-		builder.append(getPaddedString(getAlignedString("Total                             ", 34) + "Rs " + sum));
-		builder.append(getPaddedString(getAlignedString("---------------------------------------------", 44)));
-		builder.append("\n\n\n");
-		return builder.toString().getBytes();
-	}
-
-	private String getAlignedString(String snippet, int length) {
-		if (snippet.length() > length) {
-			return snippet.substring(0, length);
-		}
-		for (int i = 0, SNIPPET_LENGTH = (length - snippet.length()); i < SNIPPET_LENGTH; i++) {
-			snippet.concat(" ");
-		}
-		return snippet;
-	}
-
-	private String getPaddedString(String snippet) {
-		return "  " + snippet + "  \n";
 	}
 
 	public static class PaymentViewHolder {

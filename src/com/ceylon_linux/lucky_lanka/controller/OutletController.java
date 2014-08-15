@@ -10,7 +10,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Invoice;
@@ -93,7 +92,7 @@ public class OutletController extends AbstractController {
 			}
 			database.setTransactionSuccessful();
 		} catch (Exception ex) {
-			Log.e("ADDED", ex.getMessage(), ex);
+			ex.printStackTrace();
 		} finally {
 			database.endTransaction();
 			databaseHelper.close();

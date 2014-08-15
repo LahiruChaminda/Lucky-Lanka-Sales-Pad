@@ -275,8 +275,8 @@ public class PaymentActivity extends Activity {
 					public void run() {
 						if (progressDialog != null && progressDialog.isShowing()) {
 							progressDialog.dismiss();
-							OrderController.saveOrderToDb(PaymentActivity.this, order);
 						}
+						OrderController.saveOrderToDb(PaymentActivity.this, order, syncStatus);
 						if (syncStatus) {
 							Toast.makeText(PaymentActivity.this, "Order Synced Successfully", Toast.LENGTH_LONG).show();
 						} else {

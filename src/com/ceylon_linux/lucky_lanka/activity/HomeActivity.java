@@ -64,7 +64,7 @@ public class HomeActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		new AsyncTask<Void, Void, Boolean>() {
+		new AsyncTask<Void, Void, Integer>() {
 			ProgressDialog progressDialog;
 
 			@Override
@@ -78,27 +78,33 @@ public class HomeActivity extends Activity {
 			}
 
 			@Override
-			protected Boolean doInBackground(Void... params) {
+			protected Integer doInBackground(Void... params) {
 				try {
 					return OrderController.syncUnSyncedOrders(HomeActivity.this);
 				} catch (IOException ex) {
 					ex.printStackTrace();
-					return false;
+					return OrderController.UNABLE_TO_SYNC_ORDERS;
 				} catch (JSONException ex) {
 					ex.printStackTrace();
-					return false;
+					return OrderController.UNABLE_TO_SYNC_ORDERS;
 				}
 			}
 
 			@Override
-			protected void onPostExecute(Boolean response) {
+			protected void onPostExecute(Integer response) {
 				if (progressDialog != null && progressDialog.isShowing()) {
 					progressDialog.dismiss();
 				}
-				if (response) {
-					Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
-				} else {
-					Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
+				switch (response) {
+					case OrderController.UNABLE_TO_SYNC_ORDERS:
+						Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
+						break;
+					case OrderController.ORDERS_ALREADY_SYNCED:
+						Toast.makeText(HomeActivity.this, "Already Synced", Toast.LENGTH_LONG).show();
+						break;
+					case OrderController.ORDERS_SYNCED_SUCCESSFULLY:
+						Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
+						break;
 				}
 			}
 		}.execute();
@@ -113,7 +119,7 @@ public class HomeActivity extends Activity {
 		builder.setPositiveButton("Sign out", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				new AsyncTask<Void, Void, Boolean>() {
+				new AsyncTask<Void, Void, Integer>() {
 					ProgressDialog progressDialog;
 
 					@Override
@@ -127,32 +133,38 @@ public class HomeActivity extends Activity {
 					}
 
 					@Override
-					protected Boolean doInBackground(Void... params) {
+					protected Integer doInBackground(Void... params) {
 						try {
 							return OrderController.syncUnSyncedOrders(HomeActivity.this);
 						} catch (IOException ex) {
 							ex.printStackTrace();
-							return false;
+							return OrderController.UNABLE_TO_SYNC_ORDERS;
 						} catch (JSONException ex) {
 							ex.printStackTrace();
-							return false;
+							return OrderController.UNABLE_TO_SYNC_ORDERS;
 						}
 					}
 
 					@Override
-					protected void onPostExecute(Boolean response) {
+					protected void onPostExecute(Integer response) {
 						if (progressDialog != null && progressDialog.isShowing()) {
 							progressDialog.dismiss();
 						}
-						if (response) {
-							Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
-							UserController.clearAuthentication(HomeActivity.this);
-							Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
-							startActivity(loginActivity);
-							finish();
-						} else {
-							Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
+						switch (response) {
+							case OrderController.UNABLE_TO_SYNC_ORDERS:
+								Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
+								return;
+							case OrderController.ORDERS_ALREADY_SYNCED:
+								Toast.makeText(HomeActivity.this, "Already Synced", Toast.LENGTH_LONG).show();
+								break;
+							case OrderController.ORDERS_SYNCED_SUCCESSFULLY:
+								Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
+								break;
 						}
+						UserController.clearAuthentication(HomeActivity.this);
+						Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
+						startActivity(loginActivity);
+						finish();
 					}
 				}.execute();
 			}
