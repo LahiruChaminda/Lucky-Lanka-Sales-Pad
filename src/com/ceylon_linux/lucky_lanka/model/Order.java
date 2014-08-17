@@ -63,17 +63,18 @@ public class Order implements Serializable {
 		HashMap<String, Object> orderJsonParams = new HashMap<String, Object>();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		simpleDateFormat.applyPattern("yyyy-MM-dd");
-		Date invoiceDate = new Date(getInvoiceTime());
+		Date invoiceDate = new Date(invoiceTime);
 		HashMap<String, Object> invoiceParams = new HashMap<String, Object>();
-		invoiceParams.put("outletid", getOutletId());
-		invoiceParams.put("routeid", getRouteId());
+		invoiceParams.put("outletid", outletId);
+		invoiceParams.put("routeid", routeId);
+		invoiceParams.put("discount", discount);
 		invoiceParams.put("invtype", 0);
 		invoiceParams.put("invDate", simpleDateFormat.format(invoiceDate));
 		simpleDateFormat.applyPattern("HH:mm:ss");
 		invoiceParams.put("invtime", simpleDateFormat.format(invoiceDate));
 		invoiceParams.put("lon", String.valueOf(getLongitude()));
 		invoiceParams.put("lat", String.valueOf(getLatitude()));
-		invoiceParams.put("bat", getBatteryLevel());
+		invoiceParams.put("bat", batteryLevel);
 		JSONArray orderDetailsJsonArray = new JSONArray();
 		for (OrderDetail orderDetail : orderDetails) {
 			orderDetailsJsonArray.put(orderDetail.getOrderDetailAsJson());
