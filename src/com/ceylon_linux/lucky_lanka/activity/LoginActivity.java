@@ -10,8 +10,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -76,22 +76,20 @@ public class LoginActivity extends Activity {
 	}
 
 	private void btnLoginClicked(View view) {
-		new AsyncTask<Void, String, User>() {
+		new Thread() {
 			private ProgressDialog progressDialog;
+			private Handler handler = new Handler();
+			private User user;
 
 			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				progressDialog = new ProgressDialog(LoginActivity.this);
-				progressDialog.setCanceledOnTouchOutside(false);
-				progressDialog.setCancelable(false);
-				progressDialog.setMessage("Download Data...");
-				progressDialog.show();
-			}
+			public void run() {
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						progressDialog = ProgressDialog.show(LoginActivity.this, null, "Download Data...");
+					}
+				});
 
-			@Override
-			protected User doInBackground(Void... voids) {
-				User user = null;
 				try {
 					publishProgress("Authenticating...");
 					user = UserController.authenticate(LoginActivity.this, inputUserName.getText().toString().trim(), inputPassword.getText().toString().trim());
@@ -105,47 +103,51 @@ public class LoginActivity extends Activity {
 						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
 						publishProgress("Items Downloaded Successfully");
 					}
-					return user;
 				} catch (IOException e) {
 					e.printStackTrace();
+					user = null;
 					UserController.clearAuthentication(LoginActivity.this);
 				} catch (JSONException e) {
 					e.printStackTrace();
+					user = null;
 					UserController.clearAuthentication(LoginActivity.this);
 				}
-				return null;
+
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						if (progressDialog != null && progressDialog.isShowing()) {
+							progressDialog.dismiss();
+						}
+						if (user == null) {
+							AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+							alertDialogBuilder.setTitle(R.string.app_name);
+							alertDialogBuilder.setMessage("No Active Internet Connection Found");
+							alertDialogBuilder.setPositiveButton("Ok", null);
+							alertDialogBuilder.show();
+						} else if (user.isValidUser()) {
+							Intent homeActivity = new Intent(LoginActivity.this, HomeActivity.class);
+							startActivity(homeActivity);
+							finish();
+						} else {
+							AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+							alertDialogBuilder.setTitle(R.string.app_name);
+							alertDialogBuilder.setMessage("Incorrect UserName Password Combination");
+							alertDialogBuilder.setPositiveButton("Ok", null);
+							alertDialogBuilder.show();
+						}
+					}
+				});
 			}
 
-			@Override
-			protected void onProgressUpdate(String... values) {
-				super.onProgressUpdate(values);
-				Toast.makeText(LoginActivity.this, values[0], Toast.LENGTH_SHORT).show();
+			private void publishProgress(final String message) {
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+					}
+				});
 			}
-
-			@Override
-			protected void onPostExecute(User user) {
-				super.onPostExecute(user);
-				if (progressDialog != null && progressDialog.isShowing()) {
-					progressDialog.dismiss();
-				}
-				if (user == null) {
-					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-					alertDialogBuilder.setTitle(R.string.app_name);
-					alertDialogBuilder.setMessage("No Active Internet Connection Found");
-					alertDialogBuilder.setPositiveButton("Ok", null);
-					alertDialogBuilder.show();
-				} else if (user.isValidUser()) {
-					Intent homeActivity = new Intent(LoginActivity.this, HomeActivity.class);
-					startActivity(homeActivity);
-					finish();
-				} else {
-					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-					alertDialogBuilder.setTitle(R.string.app_name);
-					alertDialogBuilder.setMessage("Incorrect UserName Password Combination");
-					alertDialogBuilder.setPositiveButton("Ok", null);
-					alertDialogBuilder.show();
-				}
-			}
-		}.execute();
+		}.start();
 	}
 }

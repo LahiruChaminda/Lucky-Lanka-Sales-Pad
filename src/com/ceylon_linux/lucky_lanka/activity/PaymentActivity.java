@@ -36,7 +36,6 @@ public class PaymentActivity extends Activity {
 
 
 	private final int PAYMENT_DONE = 3;
-	private final int INVOICE_PREVIEW = 4;
 	private Order order;
 	private Outlet outlet;
 	private Button btnCashPayment;
@@ -58,6 +57,15 @@ public class PaymentActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.payments_page);
 		initialize();
+		switch (outlet.getOutletType()) {
+			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
+			case Outlet.SPECIAL_DISCOUNT_WITH_FREE:
+				inputDiscount.setEnabled(true);
+				break;
+			default:
+				inputDiscount.setEnabled(false);
+				break;
+		}
 	}
 
 	private void initialize() {

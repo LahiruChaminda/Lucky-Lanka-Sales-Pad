@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:weightSum="4.25"
+              android:padding="3dp"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:id="@+id/txtPaymentMethod"
+            android:text="CHEQUE" android:typeface="serif"/>
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.30"
+            android:textSize="20dp"
+            android:text="PL8300457812"
+            android:id="@+id/txtChequeNo" android:typeface="serif"/>
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.90"
+            android:textSize="20dp"
+            android:text="30 July, 2014"
+            android:id="@+id/txtBankingDate" android:typeface="serif"/>
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:text="Rs 1500"
+            android:id="@+id/txtPaidValue" android:typeface="serif"/>
+    <ImageButton
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:id="@+id/imageButton" android:background="@drawable/delete"/>
+</LinearLayout>

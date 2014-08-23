@@ -55,7 +55,6 @@ public class LoadAddInvoiceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.load_add_invoice_page);
 		initialize();
-
 		txtRoutine.setText(Integer.toString(UserController.getAuthorizedUser(LoadAddInvoiceActivity.this).getRoutineId()));
 		routes = OutletController.loadRoutesFromDb(LoadAddInvoiceActivity.this);
 
@@ -78,12 +77,12 @@ public class LoadAddInvoiceActivity extends Activity {
 						Date date = new Date();
 						simpleDateFormat.applyPattern("EEEE, dd MMMM, yyyy");
 						txtDate.setText(simpleDateFormat.format(date));
-						simpleDateFormat.applyPattern("hh:mm:ss aa");
+						simpleDateFormat.applyPattern("hh:mm aa");
 						txtTime.setText(simpleDateFormat.format(date));
 					}
 				});
 			}
-		}, new Date(), 1000);
+		}, new Date(), 60000);
 
 
 	}
@@ -149,6 +148,35 @@ public class LoadAddInvoiceActivity extends Activity {
 
 	private void outletAutoItemClicked(AdapterView<?> adapterView, View view, int position, long id) {
 		outlet = (Outlet) adapterView.getAdapter().getItem(position);
+		String outletType;
+		switch (outlet.getOutletType()) {
+			case Outlet.PHARMACY:
+			case Outlet.RETAIL_OUTLET:
+			case Outlet.CANTEEN:
+			case Outlet.BAKER:
+			case Outlet.HOTEL:
+			case Outlet.WELFARE_SHOPS:
+			case Outlet.OTHER:
+			case Outlet.STORES:
+				outletType = "Normal Outlet";
+				break;
+			case Outlet.WHOLESALE_OUTLET:
+				outletType = "6+1 Outlet";
+				break;
+			case Outlet.SUPER_MARKET:
+				outletType = "Super Market";
+				break;
+			case Outlet.SPECIAL_DISCOUNT_WITH_FREE:
+				outletType = "Discount with free";
+				break;
+			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
+				outletType = "Discount without free";
+				break;
+			default:
+				outletType = "Unknown outlet type";
+				throw new IllegalArgumentException("Unknown outlet type");
+		}
+		Toast.makeText(LoadAddInvoiceActivity.this, outletType, Toast.LENGTH_SHORT).show();
 		pendingDetailsTable.removeAllViews();
 		ArrayList<Invoice> invoices = outlet.getInvoices(LoadAddInvoiceActivity.this);
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);

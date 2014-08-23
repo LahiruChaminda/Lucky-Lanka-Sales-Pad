@@ -131,6 +131,7 @@ public class PrintPreviewActivity extends Activity {
 					}
 				});
 				try {
+					syncStatus = OrderController.syncOrder(PrintPreviewActivity.this, order.getOrderAsJson());
 					if (bluetoothSocket != null) {
 						OutputStream outputStream = bluetoothSocket.getOutputStream();
 						outputStream.write(getOrderIntoByteStream(order));
@@ -140,7 +141,6 @@ public class PrintPreviewActivity extends Activity {
 						outputStream.close();
 						closeSocket(bluetoothSocket);
 					}
-					syncStatus = OrderController.syncOrder(PrintPreviewActivity.this, order.getOrderAsJson());
 				} catch (IOException e) {
 					handler.post(new Runnable() {
 						@Override
@@ -207,10 +207,11 @@ public class PrintPreviewActivity extends Activity {
 		builder.append(getPaddedString(getLeftAlignedString("Bibulewela,Karagoda,Uyangoda.", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("HotLine: 011-7215021", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Outlet : " + outlet.getOutletName(), PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Date   : " + dateFormatter.format(date), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Bill No : " + order.getOrderId(), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Outlet  : " + outlet.getOutletName(), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Date    : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		dateFormatter.applyPattern("hh:mm:ss aa");
-		builder.append(getPaddedString(getLeftAlignedString("Time   : " + dateFormatter.format(date), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Time    : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Qty   Item        Rate Value(Rs)", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
@@ -300,10 +301,11 @@ public class PrintPreviewActivity extends Activity {
 		builder.append(getPaddedString(getLeftAlignedString("Bibulewela,Karagoda,Uyangoda.", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("HotLine: 011-7215021", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Outlet : " + outlet.getOutletName(), PRINTER_LENGTH)));
-		builder.append(getPaddedString(getLeftAlignedString("Date   : " + dateFormatter.format(date), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Bill No : " + order.getOrderId(), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Outlet  : " + outlet.getOutletName(), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Date    : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		dateFormatter.applyPattern("hh:mm:ss aa");
-		builder.append(getPaddedString(getLeftAlignedString("Time   : " + dateFormatter.format(date), PRINTER_LENGTH)));
+		builder.append(getPaddedString(getLeftAlignedString("Time    : " + dateFormatter.format(date), PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("Qty   Item        Rate Value(Rs)", PRINTER_LENGTH)));
 		builder.append(getPaddedString(getLeftAlignedString("---------------------------------------------", PRINTER_LENGTH)));

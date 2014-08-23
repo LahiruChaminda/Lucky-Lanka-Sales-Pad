@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:weightSum="5"
+              android:padding="3dp"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:textSize="25dp"
+            android:layout_weight="1"
+            android:padding="3dp"
+            android:text="Item Description"
+            android:id="@+id/txtItemDescription"
+            android:gravity="center" android:typeface="serif" android:textStyle="bold"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:weightSum="2" android:orientation="horizontal">
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:weightSum="2"
+                android:layout_weight="1"
+                android:padding="3dp"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Qty" android:gravity="center_vertical" android:typeface="serif"/>
+            <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textSize="20dp" android:id="@+id/inputRequestedQuantity" android:inputType="number" android:typeface="serif"/>
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:weightSum="2"
+                android:layout_weight="1"
+                android:padding="3dp"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Return" android:gravity="center_vertical" android:typeface="serif"/>
+            <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textSize="20dp" android:id="@+id/inputReturnQuantity" android:inputType="number" android:typeface="serif"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:weightSum="2" android:orientation="horizontal">
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:weightSum="2"
+                android:layout_weight="1"
+                android:padding="3dp"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Replace" android:gravity="center_vertical" android:typeface="serif"/>
+            <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:textSize="20dp" android:id="@+id/inputReplaceQuantity" android:typeface="serif"
+                    android:focusable="false"/>
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:weightSum="2"
+                android:layout_weight="1"
+                android:padding="3dp"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Sample" android:gravity="center_vertical" android:typeface="serif"/>
+            <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:inputType="number"
+                    android:textSize="20dp" android:id="@+id/inputSampleQuantity" android:typeface="serif"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:weightSum="2" android:orientation="horizontal">
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:padding="3dp"
+                android:layout_weight="1"
+                android:weightSum="2"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Free Qty" android:gravity="center_vertical" android:typeface="serif"/>
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="0" android:id="@+id/txtFreeQuantity" android:gravity="center_vertical" android:typeface="serif"/>
+        </LinearLayout>
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:weightSum="2"
+                android:padding="3dp"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="Discount" android:gravity="center_vertical" android:typeface="serif"/>
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:text="0" android:id="@+id/txtDiscount" android:gravity="center_vertical" android:typeface="serif"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+            android:layout_width="500dp"
+            android:layout_height="0dp"
+            android:weightSum="2"
+            android:layout_weight="1"
+            android:padding="3dp"
+            android:orientation="horizontal" android:layout_gravity="center_horizontal">
+        <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnOk"
+                android:textSize="20dp"
+                android:text="OK"
+                android:layout_weight="1" android:background="@drawable/rounded_button" android:typeface="serif"/>
+        <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnCancel"
+                android:textSize="20dp"
+                android:text="Cancel"
+                android:layout_weight="1" android:background="@drawable/rounded_button" android:typeface="serif"/>
+    </LinearLayout>
+</LinearLayout>

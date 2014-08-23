@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.widget.Toast;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Order;
@@ -31,9 +32,9 @@ import java.util.Date;
  */
 public class OrderController extends AbstractController {
 
-	public static final int ORDERS_SYNCED_SUCCESSFULLY = 0;
-	public static final int UNABLE_TO_SYNC_ORDERS = 1;
-	public static final int ORDERS_ALREADY_SYNCED = 2;
+	public static final byte ORDERS_SYNCED_SUCCESSFULLY = 0;
+	public static final byte UNABLE_TO_SYNC_ORDERS = 1;
+	public static final byte ORDERS_ALREADY_SYNCED = 2;
 
 	private OrderController() {
 	}
@@ -43,14 +44,16 @@ public class OrderController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
 			database.beginTransaction();
-			String orderInsertSQL = "insert into tbl_order(outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude, syncStatus) values(?,?,?,?,?,?,?,?,?)";
+			String orderInsertSQL = "insert into tbl_order(orderId, outletId, routeId, positionId, invoiceTime, total, batteryLevel, longitude, latitude, syncStatus) values(?,?,?,?,?,?,?,?,?,?)";
 			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity, returnQuantity, replaceQuantity, sampleQuantity) values(?,?,?,?,?,?,?,?,?)";
 			String paymentInsertSql = "insert into tbl_current_payment(orderId, paymentDate, amount, chequeDate, chequeNo, branchId) values (?,?,?,?,?,?)";
+			String stockReductionSql = "update tbl_item set availableQuantity=(availableQuantity-?) where itemId=?";
 			double total = 0;
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
 				total += orderDetail.getPrice() * orderDetail.getQuantity();
 			}
 			long orderId = DbHandler.performExecuteInsert(database, orderInsertSQL, new Object[]{
+				order.getOrderId(),
 				order.getOutletId(),
 				order.getRouteId(),
 				order.getPositionId(),
@@ -86,9 +89,23 @@ public class OrderController extends AbstractController {
 					payment.getBranchCode()
 				});
 			}
-			database.setTransactionSuccessful();
+			Toast.makeText(context, "Payment Details Inserted", Toast.LENGTH_LONG).show();
+			SQLiteStatement stockReductionStatement = database.compileStatement(stockReductionSql);
+			for (OrderDetail orderDetail : order.getOrderDetails()) {
+				DbHandler.performExecuteUpdateDelete(stockReductionStatement, new Object[]{
+					orderDetail.getQuantity() + orderDetail.getFreeIssue() + orderDetail.getReplaceQuantity() + orderDetail.getSampleQuantity(),
+					orderDetail.getItemId()
+				});
+			}
+			Toast.makeText(context, "Order Details Reduced", Toast.LENGTH_LONG).show();
+			boolean increaseLatestOrderId = UserController.increaseLatestOrderId(context, order.getOrderId());
+			if (increaseLatestOrderId) {
+				database.setTransactionSuccessful();
+			}
 		} catch (SQLException ex) {
 			ex.printStackTrace();
+			UserController.decreaseLatestOrderId(context);
+			Toast.makeText(context, "Error", Toast.LENGTH_LONG).show();
 		} finally {
 			database.endTransaction();
 		}
@@ -181,83 +198,4 @@ public class OrderController extends AbstractController {
 		}
 		return ORDERS_SYNCED_SUCCESSFULLY;
 	}
-
-	/*public static boolean syncUnSyncedInvoices(Context context) throws IOException, JSONException {
-		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
-		SQLiteDatabase database = databaseHelper.getWritableDatabase();
-		try {
-			String invoiceSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId where tbl_order.syncStatus=0";
-			String paymentSQL = "select paymentId, paymentDate, amount, chequeDate, chequeNo, branchId from tbl_payment where invoiceId=?";
-			Cursor orderCursor = DbHandler.performRawQuery(database, invoiceSelectSql, null);
-			ArrayList<Order> orders = new ArrayList<Order>();
-			for (orderCursor.moveToFirst(); !orderCursor.isAfterLast(); orderCursor.moveToNext()) {
-				long orderId = orderCursor.getLong(0);
-				int outletId = orderCursor.getInt(1);
-				int routeId = orderCursor.getInt(2);
-				int positionId = orderCursor.getInt(3);
-				long invoiceTime = orderCursor.getLong(4);
-				double total = orderCursor.getDouble(5);
-				int batteryLevel = orderCursor.getInt(6);
-				double longitude = orderCursor.getDouble(7);
-				double latitude = orderCursor.getDouble(8);
-				int outletType = orderCursor.getInt(9);
-				ArrayList<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
-				ArrayList<Payment> payments = new ArrayList<Payment>();
-
-				Cursor orderDetailsCursor = DbHandler.performRawQuery(database, orderDetailSelectSql, new Object[]{orderId});
-				for (orderDetailsCursor.moveToFirst(); !orderDetailsCursor.isAfterLast(); orderDetailsCursor.moveToNext()) {
-					int itemId = orderDetailsCursor.getInt(0);
-					double price = orderDetailsCursor.getDouble(1);
-					//double discount = orderDetailsCursor.getDouble(2);
-					int quantity = orderDetailsCursor.getInt(3);
-					int freeQuantity = orderDetailsCursor.getInt(4);
-					String itemDescription = orderDetailsCursor.getString(5);
-					int returnQuantity = orderDetailsCursor.getInt(6);
-					int replaceQuantity = orderDetailsCursor.getInt(7);
-					int sampleQuantity = orderDetailsCursor.getInt(8);
-					String itemShortName = orderDetailsCursor.getString(9);
-					OrderDetail orderDetail;
-					if (outletType == Outlet.SUPER_MARKET) {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, price, returnQuantity, replaceQuantity, sampleQuantity, itemShortName);
-					} else {
-						orderDetail = new OrderDetail(itemId, itemDescription, quantity, freeQuantity, price, returnQuantity, replaceQuantity, sampleQuantity, itemShortName);
-					}
-					orderDetails.add(orderDetail);
-				}
-				orderDetailsCursor.close();
-
-				Order order = new Order(outletId, positionId, routeId, batteryLevel, invoiceTime, longitude, latitude, orderDetails);
-				orders.add(order);
-
-				Cursor paymentDetailsCursor = DbHandler.performRawQuery(database, paymentSelectSql, new Object[]{orderId});
-				for (paymentDetailsCursor.moveToFirst(); !paymentDetailsCursor.isAfterLast(); paymentDetailsCursor.moveToNext()) {
-					Payment payment = new Payment(
-						paymentDetailsCursor.getInt(0),
-						new Date(paymentDetailsCursor.getLong(1)),
-						paymentDetailsCursor.getDouble(2),
-						new Date(paymentDetailsCursor.getLong(3)),
-						paymentDetailsCursor.getString(4),
-						paymentDetailsCursor.getInt(5),
-						paymentDetailsCursor.getInt(6) == 1
-					);
-					payments.add(payment);
-				}
-				order.setPayments(payments);
-			}
-			orderCursor.close();
-			String updateQuery = "update tbl_order set syncStatus=1 where orderId=?";
-			SQLiteStatement deleteStatement = database.compileStatement(updateQuery);
-			for (Order order : orders) {
-				boolean response = syncOrder(context, order.getOrderAsJson());
-				if (response) {
-					DbHandler.performExecuteUpdateDelete(deleteStatement, new Object[]{order.getOrderId()});
-				} else {
-					return false;
-				}
-			}
-		} finally {
-			databaseHelper.close();
-		}
-		return true;
-	}*/
 }

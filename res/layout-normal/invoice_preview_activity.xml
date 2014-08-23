@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:layout_weight="1">
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/txtBillPreview" android:layout_gravity="center_horizontal" android:typeface="monospace"/>
+    </ScrollView>
+    <Button
+            android:layout_width="match_parent"
+            android:background="@drawable/rounded_button"
+            android:layout_height="wrap_content"
+            android:text="Print"
+            android:id="@+id/btnPrint" android:textSize="20dp"/>
+    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/rounded_button"
+            android:text="Cancel" android:id="@+id/btnCancel"
+            android:textSize="20dp"/>
+</LinearLayout>

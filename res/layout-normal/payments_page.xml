@@ -66,12 +66,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/inputDiscount" android:layout_weight="1" android:hint="ASM Discount" android:typeface="serif" android:textSize="20dp"
-                android:inputType="numberDecimal"/>
+                android:inputType="number"/>
         <Button
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Print Invoice"
+                android:text="Preview"
                 android:id="@+id/btnPrintInvoice" android:textSize="20dp" android:background="@drawable/rounded_button" android:typeface="serif"/>
     </LinearLayout>
 </LinearLayout>

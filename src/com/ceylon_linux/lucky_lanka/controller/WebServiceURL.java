@@ -6,6 +6,7 @@
 
 package com.ceylon_linux.lucky_lanka.controller;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -33,7 +34,22 @@ abstract class WebServiceURL {
 			return parameters;
 		}
 
+		public static final HashMap<String, Object> getUnloadingParameters(int positionId, JSONArray unloadingJson) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			parameters.put("data", unloadingJson);
+			return parameters;
+		}
+
+		public static final HashMap<String, Object> getLoadingConfirmParameters(int positionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			return parameters;
+		}
+
 		public static final String GET_ITEMS_AND_CATEGORIES = webServiceURL + "getProducts";
+		public static final String CONFIRM_UNLOADING = webServiceURL + "setStockUnloadConfirm";
+		public static final String CONFIRM_LOADING = webServiceURL + "setStockLoadConfirm";
 	}
 
 	protected static final class UserURLPack {
@@ -45,7 +61,14 @@ abstract class WebServiceURL {
 			return parameters;
 		}
 
+		public static final HashMap<String, Object> getAuthorizationParameters(int positionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			return parameters;
+		}
+
 		public static final String LOGIN = webServiceURL + "login";
+		public static final String AUTHORIZATION = webServiceURL + "authorization";
 
 	}
 

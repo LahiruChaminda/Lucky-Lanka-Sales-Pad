@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -180,6 +181,7 @@ public class SelectItemActivity extends Activity {
 			location.getLatitude(),
 			orderDetails
 		);
+		order.setOrderId(UserController.getInvoiceId(SelectItemActivity.this));
 		Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
 		paymentActivity.putExtra("order", order);
 		paymentActivity.putExtra("outlet", outlet);
@@ -230,7 +232,17 @@ public class SelectItemActivity extends Activity {
 				orderDetails.add(orderDetail);
 				item.setSelected(true);
 			}
-			System.out.println(orderDetail);
+
+			HashMap<Integer, Integer> freeIssues = new HashMap<Integer, Integer>();
+			for (OrderDetail instance : orderDetails) {
+				Integer freeValue = freeIssues.get(instance.getItemId());
+				if (freeValue != null) {
+					freeValue = 5;
+					OrderDetail.getFreeIssueOrderDetail(outlet, item, instance.getQuantity());
+				}
+				freeIssues.put(instance.getItemId(), 5);
+			}
+
 			expandableListAdapter.notifyDataSetChanged();
 			double invoiceTotal = 0;
 			for (OrderDetail instance : orderDetails) {

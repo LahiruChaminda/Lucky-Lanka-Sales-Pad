@@ -23,9 +23,19 @@ import java.util.ArrayList;
  */
 public class Outlet implements Serializable {
 
-	public static final int NORMAL_OUTLET = 3;
-	public static final int SIX_PLUS_ONE_OUTLET = 0;
 	public static final int SUPER_MARKET = 1;
+	public static final int PHARMACY = 2;
+	public static final int RETAIL_OUTLET = 3;
+	public static final int CANTEEN = 4;
+	public static final int BAKER = 5;
+	public static final int HOTEL = 6;
+	public static final int WELFARE_SHOPS = 7;
+	public static final int WHOLESALE_OUTLET = 8;
+	public static final int OTHER = 9;
+	public static final int STORES = 10;
+	public static final int SPECIAL_DISCOUNT_WITH_FREE = 11;
+	public static final int SPECIAL_DISCOUNT_WITHOUT_FREE = 12;
+
 	private int outletId;
 	private int routeId;
 	private String outletName;
@@ -57,19 +67,6 @@ public class Outlet implements Serializable {
 		if (outletJsonInstance == null) {
 			return null;
 		}
-		int outletType = 0;
-		switch (outletJsonInstance.getInt("plus")) {
-			case 0:
-				outletType = Outlet.SIX_PLUS_ONE_OUTLET;
-				break;
-			case 1:
-				if (outletJsonInstance.getInt("idoutlet_category") == Outlet.SUPER_MARKET) {
-					outletType = Outlet.SUPER_MARKET;
-				} else {
-					outletType = Outlet.NORMAL_OUTLET;
-				}
-				break;
-		}
 		ArrayList<Invoice> invoices = new ArrayList<Invoice>();
 		JSONArray invoicesJson = outletJsonInstance.getJSONArray("invs");
 		for (int i = 0; i < invoicesJson.length(); i++) {
@@ -84,7 +81,7 @@ public class Outlet implements Serializable {
 			outletJsonInstance.getInt("routeId"),
 			outletJsonInstance.getString("outlet"),
 			outletJsonInstance.getString("o_address"),
-			outletType,
+			outletJsonInstance.getInt("idoutlet_category"),
 			outletJsonInstance.getDouble("dis_pre"),
 			invoices
 		);

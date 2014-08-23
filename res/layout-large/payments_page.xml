@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" android:gravity="right" android:weightSum="1" android:padding="5dp">
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:weightSum="4" android:gravity="right">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Invoice Amount"
+                android:layout_weight="1"
+                android:textSize="20dp" android:typeface="serif" android:textStyle="bold|italic"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/txtInvoiceTotal"
+                android:textSize="25dp" android:typeface="serif" android:textStyle="bold" android:gravity="left"/>
+        <Space
+                android:layout_width="30px"
+                android:layout_height="20px"
+                />
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Totally   Paid"
+                android:layout_weight="1"
+                android:textSize="20dp" android:typeface="serif" android:textStyle="bold|italic"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/txtTotalPaid"
+                android:textSize="25dp" android:typeface="serif" android:textStyle="bold" android:gravity="left"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="287dp"
+            android:layout_height="wrap_content" android:weightSum="2" android:gravity="right">
+        <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Cash"
+                android:id="@+id/btnCashPayment" android:layout_weight="1" android:textSize="20dp" android:background="@drawable/rounded_button"
+                android:typeface="serif"/>
+        <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Cheque"
+                android:id="@+id/btnChequePayment" android:textSize="20dp" android:background="@drawable/rounded_button" android:layout_weight="1"
+                android:typeface="serif"/>
+    </LinearLayout>
+    <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/listPayment" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:weightSum="2" android:gravity="right">
+        <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/inputDiscount" android:layout_weight="1" android:hint="ASM Discount" android:typeface="serif" android:textSize="20dp"
+                android:inputType="number"/>
+        <Button
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnPrintInvoice" android:textSize="20dp" android:background="@drawable/rounded_button" android:typeface="serif"
+                android:text="Preview"/>
+    </LinearLayout>
+</LinearLayout>

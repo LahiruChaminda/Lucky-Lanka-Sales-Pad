@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
@@ -129,6 +130,11 @@ public class UserController extends AbstractController {
 		return User.parseUser(userJson);
 	}
 
+	public static boolean checkStockAvailability(Context context, int positionId) throws IOException, JSONException {
+		JSONObject stockJson = getJsonObject(UserURLPack.AUTHORIZATION, UserURLPack.getAuthorizationParameters(positionId), context);
+		return stockJson != null && stockJson.getBoolean("result");
+	}
+
 	public static String getPastAuthorizedUserName(Context context) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
 		String userName;
@@ -140,11 +146,63 @@ public class UserController extends AbstractController {
 
 	public static boolean isLoadingConfirmed(Context context) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		long loginTime;
+		if ((loginTime = userData.getLong("loginTime", -1)) == -1) {
+			return false;
+		}
+		Date lastLoginDate = new Date(loginTime);
+		Date currentDate = new Date();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		if (!simpleDateFormat.format(lastLoginDate).equalsIgnoreCase(simpleDateFormat.format(currentDate))) {
+			return false;
+		}
 		return userData.getBoolean("loading", false);
 	}
 
 	public static boolean isUnloadingConfirmed(Context context) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		long loginTime;
+		if ((loginTime = userData.getLong("loginTime", -1)) == -1) {
+			return false;
+		}
+		Date lastLoginDate = new Date(loginTime);
+		Date currentDate = new Date();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		if (!simpleDateFormat.format(lastLoginDate).equalsIgnoreCase(simpleDateFormat.format(currentDate))) {
+			return false;
+		}
 		return userData.getBoolean("unloading", false);
+	}
+
+	public static long getInvoiceId(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		long nextInvoiceId = userData.getLong("lastOrderId", 0) + 1;
+		if (nextInvoiceId == 1) {
+			NumberFormat numberFormat = NumberFormat.getInstance();
+			numberFormat.setMaximumIntegerDigits(7);
+			numberFormat.setGroupingUsed(false);
+			numberFormat.setMinimumIntegerDigits(7);
+			nextInvoiceId = Long.parseLong(userData.getInt("userId", 0) + "" + numberFormat.format(nextInvoiceId));
+			SharedPreferences.Editor editor = userData.edit();
+			editor.putLong("lastOrderId", nextInvoiceId);
+			editor.commit();
+			return nextInvoiceId;
+		} else {
+			return nextInvoiceId;
+		}
+	}
+
+	public static boolean increaseLatestOrderId(Context context, long invoiceId) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = userData.edit();
+		editor.putLong("lastOrderId", invoiceId);
+		return editor.commit();
+	}
+
+	public static void decreaseLatestOrderId(Context context) {
+		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = userData.edit();
+		editor.putLong("lastOrderId", userData.getLong("lastOrderId", 0) - 1);
+		editor.commit();
 	}
 }

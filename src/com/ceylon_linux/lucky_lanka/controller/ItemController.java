@@ -15,8 +15,10 @@ import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Category;
 import com.ceylon_linux.lucky_lanka.model.Item;
+import com.ceylon_linux.lucky_lanka.model.UnloadingItem;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +29,11 @@ import java.util.ArrayList;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class ItemController extends AbstractController {
+
+	public static final byte UNLOADING_CONFIRMED = 0;
+	public static final byte UNABLE_TO_CONFIRM_UNLOADING = 1;
+	public static final byte LOADING_CONFIRMED = 2;
+	public static final byte UNABLE_TO_CONFIRM_LOADING = 3;
 
 	private ItemController() {
 	}
@@ -109,7 +116,9 @@ public class ItemController extends AbstractController {
 					(itemCursor.getInt(7) == 1),
 					itemCursor.getInt(8),
 					itemCursor.getInt(9),
-					itemCursor.getString(10)
+					itemCursor.getString(10),
+					12,
+					"Free Issue"
 				));
 			}
 			itemCursor.close();
@@ -118,6 +127,38 @@ public class ItemController extends AbstractController {
 		categoryCursor.close();
 		databaseHelper.close();
 		return categories;
+	}
+
+	public static ArrayList<UnloadingItem> getUnLoadingStock(Context context) throws IOException, JSONException {
+		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+		String itemSql = "select itemId,availableQuantity,wholeSalePrice from tbl_item where availableQuantity>0";
+		ArrayList<UnloadingItem> unloadingItems = new ArrayList<UnloadingItem>();
+		Cursor itemCursor = DbHandler.performRawQuery(database, itemSql, null);
+		for (itemCursor.moveToFirst(); !itemCursor.isAfterLast(); itemCursor.moveToNext()) {
+			unloadingItems.add(new UnloadingItem(
+				itemCursor.getInt(0),
+				itemCursor.getInt(1),
+				itemCursor.getDouble(2)
+			));
+		}
+		itemCursor.close();
+		databaseHelper.close();
+		return unloadingItems;
+	}
+
+	public static int syncUnloading(Context context, JSONArray unloadingStock, int positionId) throws IOException, JSONException {
+		JSONObject responseJson = getJsonObject(CategoryURLPack.CONFIRM_UNLOADING, CategoryURLPack.getUnloadingParameters(positionId, unloadingStock), context);
+		return responseJson != null && responseJson.getBoolean("result") ? UNLOADING_CONFIRMED : UNABLE_TO_CONFIRM_UNLOADING;
+	}
+
+	public static int confirmLoading(Context context, int positionId) throws IOException, JSONException {
+		JSONObject jsonResponse = getJsonObject(CategoryURLPack.CONFIRM_LOADING, CategoryURLPack.getLoadingConfirmParameters(positionId), context);
+		if (jsonResponse != null && jsonResponse.getBoolean("result")) {
+			return LOADING_CONFIRMED;
+		} else {
+			return UNABLE_TO_CONFIRM_LOADING;
+		}
 	}
 
 }

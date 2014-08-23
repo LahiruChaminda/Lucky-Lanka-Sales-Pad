@@ -80,28 +80,65 @@ public class OrderDetail implements Serializable {
 		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
 		int freeIssueRatio = item.getFreeIssueQuantity();
 		switch (outlet.getOutletType()) {
-			case Outlet.NORMAL_OUTLET:
-				if (quantity >= minimumFreeIssueQuantity) {
-					freeIssue = ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
+			case Outlet.PHARMACY:
+			case Outlet.RETAIL_OUTLET:
+			case Outlet.CANTEEN:
+			case Outlet.BAKER:
+			case Outlet.HOTEL:
+			case Outlet.WELFARE_SHOPS:
+			case Outlet.OTHER:
+			case Outlet.STORES:
+				if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
+					freeIssue = (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
 				}
-				break;
-			case Outlet.SIX_PLUS_ONE_OUTLET:
+				return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
+			case Outlet.WHOLESALE_OUTLET:
 				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
-					freeIssue = ((int) (quantity / 216)) * 36;
-				} else if (quantity >= minimumFreeIssueQuantity) {
-					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : ((int) (quantity / minimumFreeIssueQuantity)) * freeIssueRatio;
+					freeIssue = (quantity / 216) * 36;
+				} else if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
+					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
 				}
-				break;
+				return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
 			case Outlet.SUPER_MARKET:
+			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
 				discountPercentage = outlet.getOutletDiscount();
-				break;
+				return new OrderDetail(item, quantity, discountPercentage, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
+			default:
+				throw new IllegalArgumentException("Unknown outlet type");
 		}
-		if (outlet.getOutletType() == Outlet.SUPER_MARKET) {
-			System.out.println("free" + freeIssue);
-			return new OrderDetail(item, quantity, discountPercentage, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
-		} else {
-			System.out.println("free" + freeIssue);
-			return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
+	}
+
+	public static final OrderDetail getFreeIssueOrderDetail(Outlet outlet, Item item, int quantity) {
+		int freeIssue = 0;
+		double discountPercentage = 0;
+		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
+		int freeIssueRatio = item.getFreeIssueQuantity();
+		switch (outlet.getOutletType()) {
+			case Outlet.PHARMACY:
+			case Outlet.RETAIL_OUTLET:
+			case Outlet.CANTEEN:
+			case Outlet.BAKER:
+			case Outlet.HOTEL:
+			case Outlet.WELFARE_SHOPS:
+			case Outlet.OTHER:
+			case Outlet.STORES:
+				if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
+					freeIssue = (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
+				}
+				return new OrderDetail(item, quantity, freeIssue, 0, 0, 0, item.getItemShortName());
+			case Outlet.WHOLESALE_OUTLET:
+				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
+					freeIssue = (quantity / 216) * 36;
+				} else if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
+					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
+				}
+				return new OrderDetail(item, quantity, freeIssue, 0, 0, 0, item.getItemShortName());
+			case Outlet.SUPER_MARKET:
+			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
+				discountPercentage = outlet.getOutletDiscount();
+				return new OrderDetail(item, quantity, discountPercentage, 0, 0, 0, item.getItemShortName());
+			default:
+				throw new IllegalArgumentException("Unknown outlet type");
 		}
 	}
 

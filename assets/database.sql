@@ -90,7 +90,6 @@ create table tbl_payment(
 create table tbl_current_payment(
    paymentId INTEGER NOT NULL primary key AUTOINCREMENT,
    orderId int not null references tbl_order(orderId) ON UPDATE CASCADE ON DELETE CASCADE,
-   invoiceId int not null references tbl_invoice(invoiceId) ON UPDATE CASCADE ON DELETE CASCADE,
    paymentDate long not null,
    amount decimal(20,2) not null check(amount > 0),
    chequeDate long default 0,

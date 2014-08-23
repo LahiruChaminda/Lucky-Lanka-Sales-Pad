@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="Sync" android:id="@+id/sync"/>
+    <item android:title="Sync Orders / UnProductive Calls" android:id="@+id/sync"/>
+    <item android:title="Available Stock" android:id="@+id/stock"/>
 </menu>

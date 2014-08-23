@@ -98,24 +98,12 @@
                     android:textSize="20dp"
                     android:layout_height="wrap_content" android:background="@drawable/rounded_button" android:typeface="serif"/>
         </LinearLayout>
-        <LinearLayout android:layout_width="match_parent"
-                      android:weightSum="2"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal">
-            <Button
-                    android:layout_width="0dp"
-                    android:text="Confirm Loading"
-                    android:layout_weight="1"
-                    android:id="@+id/btnLoad"
-                    android:textSize="20dp"
-                    android:layout_height="wrap_content" android:background="@drawable/rounded_button" android:typeface="serif" android:visibility="invisible"/>
-            <Button
-                    android:layout_width="0dp"
-                    android:text="Stock Unloading"
-                    android:id="@+id/btnUnload"
-                    android:layout_weight="1"
-                    android:textSize="20dp"
-                    android:layout_height="wrap_content" android:background="@drawable/rounded_button" android:typeface="serif" android:visibility="invisible"/>
-        </LinearLayout>
+        <Button
+                android:layout_width="match_parent"
+                android:text="Available Stock"
+                android:id="@+id/btnAvailableStock"
+                android:layout_weight="1"
+                android:textSize="20dp"
+                android:layout_height="wrap_content" android:background="@drawable/rounded_button" android:typeface="serif"/>
     </LinearLayout>
 </ScrollView>

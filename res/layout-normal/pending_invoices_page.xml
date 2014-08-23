@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" android:padding="5dp">
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="Outlet Name"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:textSize="25dp"/>
+        <AutoCompleteTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/outletAuto"
+                android:layout_weight="3"
+                android:textSize="25dp"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Pending Invoices"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center" android:textSize="25dp" android:background="#FF4F82B4"/>
+    <ExpandableListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/invoiceList" android:layout_gravity="center_horizontal" android:layout_weight="1"/>
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ok"
+            android:id="@+id/btnOk"/>
+    <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/btnCancel"/>
+</LinearLayout>
