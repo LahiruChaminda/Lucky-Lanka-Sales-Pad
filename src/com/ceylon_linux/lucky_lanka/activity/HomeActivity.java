@@ -13,9 +13,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -59,108 +56,33 @@ public class HomeActivity extends Activity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		MenuInflater menuInflater = getMenuInflater();
-		menuInflater.inflate(R.menu.my_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.sync:
-				new Thread() {
-					private ProgressDialog progressDialog;
-					private Handler handler = new Handler();
-					private int response;
-
-					@Override
-					public void run() {
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								progressDialog = ProgressDialog.show(HomeActivity.this, null, "Syncing Orders");
-							}
-						});
-						try {
-							ArrayList<UnloadingItem> unLoadingStock = ItemController.getUnLoadingStock(HomeActivity.this);
-							JSONArray unLoadingStockJson = new JSONArray();
-							for (UnloadingItem unloadingItem : unLoadingStock) {
-								unLoadingStockJson.put(unloadingItem.getUnLoadingItemAsJson());
-							}
-							response = ItemController.syncUnloading(HomeActivity.this, unLoadingStockJson, UserController.getAuthorizedUser(HomeActivity.this).getPositionId());
-							if (response == ItemController.UNLOADING_CONFIRMED) {
-								publishProgress("Unloading Confirmed");
-								UserController.confirmUnloading(HomeActivity.this);
-								OutletController.syncOutstandingPayments(HomeActivity.this);
-								response = OrderController.syncUnSyncedOrders(HomeActivity.this);
-							}
-						} catch (IOException ex) {
-							ex.printStackTrace();
-							response = OrderController.UNABLE_TO_SYNC_ORDERS;
-						} catch (JSONException ex) {
-							ex.printStackTrace();
-							response = OrderController.UNABLE_TO_SYNC_ORDERS;
-						}
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								if (progressDialog != null && progressDialog.isShowing()) {
-									progressDialog.dismiss();
-								}
-								switch (response) {
-									case OrderController.UNABLE_TO_SYNC_ORDERS:
-										Toast.makeText(HomeActivity.this, "Unable to Sync Orders", Toast.LENGTH_LONG).show();
-										break;
-									case OrderController.ORDERS_ALREADY_SYNCED:
-										Toast.makeText(HomeActivity.this, "Already Synced", Toast.LENGTH_LONG).show();
-										break;
-									case OrderController.ORDERS_SYNCED_SUCCESSFULLY:
-										Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
-										break;
-								}
-							}
-						});
-					}
-
-					private void publishProgress(final String progress) {
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(HomeActivity.this, progress, Toast.LENGTH_LONG).show();
-							}
-						});
-					}
-				}.start();
-				return true;
-			case R.id.stock:
-				//
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	@Override
 	public void onBackPressed() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
 		builder.setTitle(R.string.app_name);
-		builder.setMessage("You are about to sign out from sales pad\nIf you continue your un-synced data will be lost");
-		builder.setPositiveButton("Sign out", new DialogInterface.OnClickListener() {
+		builder.setMessage("You are about to sign out and confirm unloading");
+		builder.setPositiveButton("Sign Out", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				new Thread() {
 					private ProgressDialog progressDialog;
-					private int response;
+					private String message;
 					private Handler handler = new Handler();
+
+					private void publishProgress(final String message) {
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								Toast.makeText(HomeActivity.this, message, Toast.LENGTH_LONG).show();
+							}
+						});
+					}
 
 					@Override
 					public void run() {
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								progressDialog = ProgressDialog.show(HomeActivity.this, null, "Syncing Orders");
+								progressDialog = ProgressDialog.show(HomeActivity.this, null, "Signing Out");
 							}
 						});
 						try {
@@ -169,41 +91,48 @@ public class HomeActivity extends Activity {
 							for (UnloadingItem unloadingItem : unLoadingStock) {
 								unLoadingStockJson.put(unloadingItem.getUnLoadingItemAsJson());
 							}
-							response = ItemController.syncUnloading(HomeActivity.this, unLoadingStockJson, UserController.getAuthorizedUser(HomeActivity.this).getPositionId());
-							if (response == ItemController.UNLOADING_CONFIRMED) {
-								UserController.confirmUnloading(HomeActivity.this);
-								response = OrderController.syncUnSyncedOrders(HomeActivity.this);
+							int response;
+							response = ItemController.syncUnloading(HomeActivity.this, unLoadingStockJson, UserController.getAuthorizedUser(HomeActivity.this).getPositionId(), UserController.getAuthorizedUser(HomeActivity.this).getRoutineId());
+							if (response == ItemController.UNABLE_TO_CONFIRM_UNLOADING) {
+								message = "Unable to confirm unloading";
+								return;
 							}
+							publishProgress("Unloading confirmed");
+							response = OutletController.syncOutstandingPayments(HomeActivity.this);
+							publishProgress("Outstanding Payments synced");
+							if (response == OutletController.UNABLE_TO_SYNC_OUTSTANDING_PAYMENTS) {
+								message = "Unable to sync outstanding payments";
+								return;
+							}
+							UserController.confirmUnloading(HomeActivity.this);
+							response = OrderController.syncUnSyncedOrders(HomeActivity.this);
+							if (response == OrderController.UNABLE_TO_SYNC_ORDERS) {
+								message = "Unable to sync invoices";
+								return;
+							}
+							publishProgress("Invoices Uploaded");
+
 						} catch (IOException ex) {
 							ex.printStackTrace();
-							response = OrderController.UNABLE_TO_SYNC_ORDERS;
 						} catch (JSONException ex) {
 							ex.printStackTrace();
-							response = OrderController.UNABLE_TO_SYNC_ORDERS;
+						} finally {
+							handler.post(new Runnable() {
+								@Override
+								public void run() {
+									if (progressDialog != null && progressDialog.isShowing()) {
+										progressDialog.dismiss();
+									}
+									if (message != null) {
+										Toast.makeText(HomeActivity.this, message, Toast.LENGTH_LONG).show();
+										UserController.clearAuthentication(HomeActivity.this);
+										Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
+										startActivity(loginActivity);
+										finish();
+									}
+								}
+							});
 						}
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								if (progressDialog != null && progressDialog.isShowing()) {
-									progressDialog.dismiss();
-								}
-								switch (response) {
-									case OrderController.UNABLE_TO_SYNC_ORDERS:
-										Toast.makeText(HomeActivity.this, "Unable to Sync Orders/UnProductive Calls", Toast.LENGTH_LONG).show();
-										return;
-									case OrderController.ORDERS_ALREADY_SYNCED:
-										Toast.makeText(HomeActivity.this, "Already Synced", Toast.LENGTH_LONG).show();
-										break;
-									case OrderController.ORDERS_SYNCED_SUCCESSFULLY:
-										Toast.makeText(HomeActivity.this, "Orders Synced Successfully", Toast.LENGTH_LONG).show();
-										break;
-								}
-								UserController.clearAuthentication(HomeActivity.this);
-								Intent loginActivity = new Intent(HomeActivity.this, LoginActivity.class);
-								startActivity(loginActivity);
-								finish();
-							}
-						});
 					}
 				}.start();
 			}

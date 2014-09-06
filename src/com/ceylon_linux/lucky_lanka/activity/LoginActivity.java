@@ -21,6 +21,7 @@ import com.ceylon_linux.lucky_lanka.controller.BankController;
 import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import com.ceylon_linux.lucky_lanka.controller.OutletController;
 import com.ceylon_linux.lucky_lanka.controller.UserController;
+import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.User;
 import org.json.JSONException;
 
@@ -94,14 +95,20 @@ public class LoginActivity extends Activity {
 					publishProgress("Authenticating...");
 					user = UserController.authenticate(LoginActivity.this, inputUserName.getText().toString().trim(), inputPassword.getText().toString().trim());
 					if (user != null && user.isValidUser()) {
+						int positionId = user.getPositionId();
+						int routineId = user.getRoutineId();
+						SQLiteDatabaseHelper.dropDatabase(LoginActivity.this);
 						UserController.setAuthorizedUser(LoginActivity.this, user);
 						publishProgress("Authenticated");
-						BankController.downloadBanks(LoginActivity.this, user.getPositionId());
+						BankController.downloadBanks(LoginActivity.this, positionId);
 						publishProgress("Banks Downloaded Successfully");
-						OutletController.downloadOutlets(LoginActivity.this, user.getPositionId());
+						OutletController.downloadOutlets(LoginActivity.this, positionId);
 						publishProgress("Outlets Downloaded Successfully");
-						ItemController.downloadItems(LoginActivity.this, user.getPositionId());
+						ItemController.downloadItems(LoginActivity.this, positionId, routineId);
 						publishProgress("Items Downloaded Successfully");
+						ItemController.downloadPosmItems(LoginActivity.this, positionId, routineId);
+						publishProgress("POSM details Downloaded Successfully");
+						ItemController.downloadAndSaveFreeIssueCalculationData(LoginActivity.this, positionId, routineId);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -132,7 +139,7 @@ public class LoginActivity extends Activity {
 						} else {
 							AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
 							alertDialogBuilder.setTitle(R.string.app_name);
-							alertDialogBuilder.setMessage("Incorrect UserName Password Combination");
+							alertDialogBuilder.setMessage("Incorrect UserName Password Combination or Loading Unavailable");
 							alertDialogBuilder.setPositiveButton("Ok", null);
 							alertDialogBuilder.show();
 						}

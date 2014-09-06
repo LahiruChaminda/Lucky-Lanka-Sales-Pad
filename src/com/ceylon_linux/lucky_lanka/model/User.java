@@ -25,18 +25,14 @@ public class User implements Serializable {
 	private String userName;
 	private Long loginTime;
 	private int routineId;
+	private long lastOrderId;
 	private boolean validUser;
 
 	private User(boolean validUser) {
 		this.validUser = validUser;
 	}
 
-	public User(int positionId) {
-		this.setPositionId(positionId);
-		this.validUser = true;
-	}
-
-	public User(int positionId, String name, String address, String userName, Long loginTime, int routineId) {
+	public User(int positionId, String name, String address, String userName, Long loginTime, int routineId, long lastOrderId) {
 		this.positionId = positionId;
 		this.name = name;
 		this.address = address;
@@ -44,6 +40,7 @@ public class User implements Serializable {
 		this.loginTime = loginTime;
 		this.routineId = routineId;
 		this.validUser = true;
+		this.lastOrderId = lastOrderId;
 	}
 
 	public static User parseUser(JSONObject userJsonInstance) throws JSONException {
@@ -58,7 +55,8 @@ public class User implements Serializable {
 			userJsonInstance.getString("postal_address"),
 			userJsonInstance.getString("login_name"),
 			new Date().getTime(),
-			userJsonInstance.getInt("session_id")
+			userJsonInstance.getInt("session_id"),
+			userJsonInstance.getLong("orderId")
 		);
 	}
 

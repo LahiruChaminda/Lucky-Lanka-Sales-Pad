@@ -41,5 +41,9 @@
         </activity>
         <activity android:name=".activity.PrintPreviewActivity" android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".activity.PosmSelectionActivity" android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".activity.EnterPosmDetailActivity" android:screenOrientation="landscape">
+        </activity>
     </application>
 </manifest>

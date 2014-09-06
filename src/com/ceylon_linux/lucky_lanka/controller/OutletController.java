@@ -82,13 +82,13 @@ public class OutletController extends AbstractController {
 							invoice.getAmount()
 						});
 						for (Payment payment : invoice.getPayments()) {
-							DbHandler.performExecuteInsert(paymentInsertSqlStatement, new Object[]{
+							long l = DbHandler.performExecuteInsert(paymentInsertSqlStatement, new Object[]{
 								invoice.getInvoiceId(),
 								(payment.getPaymentDate() != null) ? payment.getPaymentDate().getTime() : 0,
 								payment.getAmount(),
 								(payment.getChequeDate() != null) ? payment.getChequeDate().getTime() : 0,
 								payment.getChequeNo(),
-								payment.isSynced() ? 1 : 0
+								payment.getPaymentStatus()
 							});
 						}
 					}
@@ -152,7 +152,7 @@ public class OutletController extends AbstractController {
 						paymentCursor.getInt(0),
 						new Date(paymentCursor.getLong(1)),
 						paymentCursor.getDouble(2),
-						paymentCursor.getInt(5) == 1
+						(byte) paymentCursor.getInt(5)
 					));
 				} else {
 					payments.add(new Payment(
@@ -162,7 +162,7 @@ public class OutletController extends AbstractController {
 						new Date(paymentCursor.getLong(3)),
 						paymentCursor.getString(4),
 						paymentCursor.getString(6),
-						paymentCursor.getInt(5) == 1
+						(byte) paymentCursor.getInt(5)
 					));
 				}
 			}
@@ -173,27 +173,36 @@ public class OutletController extends AbstractController {
 		return invoices;
 	}
 
-	public static void syncOutstandingPayments(Context context) throws IOException, JSONException {
+	public static int syncOutstandingPayments(Context context) throws IOException, JSONException {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		try {
 			SQLiteDatabase database = databaseHelper.getWritableDatabase();
 			String sql = "select outletId from tbl_outlet";
-			SQLiteStatement updateStatement = database.compileStatement("update tbl_payment set status=1 where paymentId=?");
+			SQLiteStatement updateStatement = database.compileStatement("update tbl_payment set status=? where paymentId=?");
 			Cursor cursor = DbHandler.performRawQuery(database, sql, null);
+			int outstandingPaymentCount = 0;
 			for (cursor.moveToFirst(); cursor.isAfterLast(); cursor.moveToNext()) {
 				ArrayList<Invoice> invoices = loadInvoicesFromDb(context, cursor.getInt(0));
 				for (Invoice invoice : invoices) {
-					JSONObject responseJson = getJsonObject(PaymentURLPack.PAYMENT_SYNC, PaymentURLPack.getParameters(invoice.getInvoiceAsJson(), UserController.getAuthorizedUser(context).getPositionId()), context);
+					JSONObject responseJson = getJsonObject(PaymentURLPack.PAYMENT_SYNC, PaymentURLPack.getParameters(invoice.getInvoiceAsJson(), UserController.getAuthorizedUser(context).getPositionId(), UserController.getAuthorizedUser(context).getRoutineId()), context);
 					if ((responseJson != null) && responseJson.getBoolean("result")) {
 						for (Payment payment : invoice.getPayments()) {
 							DbHandler.performExecuteUpdateDelete(updateStatement, new Object[]{
+								Payment.PENDING_PAYMENT,
 								payment.getPaymentId()
 							});
+							outstandingPaymentCount++;
 						}
+					} else {
+						return UNABLE_TO_SYNC_OUTSTANDING_PAYMENTS;
 					}
 				}
 			}
 			cursor.close();
+			if (outstandingPaymentCount == 0) {
+				return OUTSTANDING_PAYMENTS_ALREADY_SYNCED;
+			}
+			return OUTSTANDING_PAYMENTS_SYNCED_SUCCESSFULLY;
 		} finally {
 			databaseHelper.close();
 		}
@@ -202,10 +211,11 @@ public class OutletController extends AbstractController {
 	public static void saveOutstandingPayments(Context context, Invoice invoice) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
-		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate,amount, chequeDate, chequeNo, bank, status) values (?,?,?,?,?,?,0);";
+		String paymentInsertSql = "insert into tbl_payment(invoiceId, paymentDate,amount, chequeDate, chequeNo, bank, status) values (?,?,?,?,?,?,?);";
 		SQLiteStatement paymentInsertStatement = database.compileStatement(paymentInsertSql);
+
 		for (Payment payment : invoice.getPayments()) {
-			if (payment.isSynced()) {
+			if (payment.getPaymentStatus() != Payment.FRESH_PAYMENT) {
 				continue;
 			}
 			DbHandler.performExecuteInsert(paymentInsertStatement, new Object[]{
@@ -213,7 +223,8 @@ public class OutletController extends AbstractController {
 				(payment.getPaymentDate() != null) ? payment.getPaymentDate().getTime() : 0,
 				payment.getAmount(),
 				(payment.getChequeDate() != null) ? payment.getChequeDate().getTime() : 0,
-				payment.getChequeNo()
+				payment.getChequeNo(),
+				Payment.AGED_PAYMENT
 			});
 
 		}

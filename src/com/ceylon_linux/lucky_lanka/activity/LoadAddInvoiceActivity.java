@@ -82,9 +82,7 @@ public class LoadAddInvoiceActivity extends Activity {
 					}
 				});
 			}
-		}, new Date(), 60000);
-
-
+		}, new Date(), 60000L);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Initialize">
@@ -126,7 +124,6 @@ public class LoadAddInvoiceActivity extends Activity {
 		});
 	}
 	// </editor-fold>
-
 
 	@Override
 	public void onBackPressed() {
@@ -194,14 +191,14 @@ public class LoadAddInvoiceActivity extends Activity {
 			txtAmount.setText(String.valueOf(invoice.getAmount()));
 			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
 			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
-			/*pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
+			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent outstandingPaymentActivity = new Intent(LoadAddInvoiceActivity.this, OutstandingPaymentActivity.class);
 					outstandingPaymentActivity.putExtra("invoice", invoice);
 					startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
 				}
-			});*/
+			});
 			pendingDetailsTable.addView(pendingDetailsItemView);
 		}
 	}
@@ -236,7 +233,6 @@ public class LoadAddInvoiceActivity extends Activity {
 		switch (requestCode) {
 			case REQUEST_OUTSTANDING_PAYMENTS:
 				if (resultCode == RESULT_OK) {
-					//
 				}
 				break;
 		}

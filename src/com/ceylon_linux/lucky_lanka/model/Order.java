@@ -34,8 +34,9 @@ public class Order implements Serializable {
 	private double discount;
 	private ArrayList<OrderDetail> orderDetails;
 	private ArrayList<Payment> payments;
+	private ArrayList<PosmDetail> posmDetails;
 
-	public Order(int outletId, int positionId, int routeId, int batteryLevel, long invoiceTime, double longitude, double latitude, ArrayList<OrderDetail> orderDetails) {
+	public Order(int outletId, int positionId, int routeId, int batteryLevel, long invoiceTime, double longitude, double latitude, ArrayList<OrderDetail> orderDetails, ArrayList<PosmDetail> posmDetails) {
 		this.setOutletId(outletId);
 		this.setPositionId(positionId);
 		this.setRouteId(routeId);
@@ -44,9 +45,10 @@ public class Order implements Serializable {
 		this.setLongitude(longitude);
 		this.setLatitude(latitude);
 		this.setOrderDetails(orderDetails);
+		this.posmDetails = posmDetails;
 	}
 
-	public Order(long orderId, int outletId, String outletDescription, int positionId, int routeId, long invoiceTime, double longitude, double latitude, int batteryLevel, ArrayList<OrderDetail> orderDetails) {
+	public Order(long orderId, int outletId, String outletDescription, int positionId, int routeId, long invoiceTime, double longitude, double latitude, int batteryLevel, ArrayList<OrderDetail> orderDetails, ArrayList<PosmDetail> posmDetails) {
 		this.setOrderId(orderId);
 		this.setOutletId(outletId);
 		this.setOutletDescription(outletDescription);
@@ -57,6 +59,7 @@ public class Order implements Serializable {
 		this.setLatitude(latitude);
 		this.setBatteryLevel(batteryLevel);
 		this.setOrderDetails(orderDetails);
+		this.posmDetails = posmDetails;
 	}
 
 	public JSONObject getOrderAsJson() {
@@ -66,6 +69,7 @@ public class Order implements Serializable {
 		Date invoiceDate = new Date(invoiceTime);
 		HashMap<String, Object> invoiceParams = new HashMap<String, Object>();
 		invoiceParams.put("outletid", outletId);
+		invoiceParams.put("orderId", orderId);
 		invoiceParams.put("routeid", routeId);
 		invoiceParams.put("discount", discount);
 		invoiceParams.put("invtype", 0);
@@ -83,8 +87,13 @@ public class Order implements Serializable {
 		for (Payment payment : payments) {
 			paymentsJsonArray.put(payment.getPaymentAsJson());
 		}
+		JSONArray posmJsonArray = new JSONArray();
+		for (PosmDetail posmDetail : posmDetails) {
+			posmJsonArray.put(posmDetail.getPosmDetailsAsJson());
+		}
 		orderJsonParams.put("invitems", orderDetailsJsonArray);
 		orderJsonParams.put("Payment", paymentsJsonArray);
+		orderJsonParams.put("posm", posmJsonArray);
 		orderJsonParams.put("Invoice", new JSONObject(invoiceParams));
 		return new JSONObject(orderJsonParams);
 	}
@@ -198,6 +207,14 @@ public class Order implements Serializable {
 
 	public void setPayments(ArrayList<Payment> payments) {
 		this.payments = payments;
+	}
+
+	public ArrayList<PosmDetail> getPosmDetails() {
+		return posmDetails;
+	}
+
+	public void setPosmDetails(ArrayList<PosmDetail> posmDetails) {
+		this.posmDetails = posmDetails;
 	}
 
 	@Override

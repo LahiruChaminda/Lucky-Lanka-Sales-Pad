@@ -41,6 +41,7 @@ public class UserController extends AbstractController {
 		String name;
 		String address;
 		long loginTime;
+		long lastOrderId;
 		if ((loginTime = userData.getLong("loginTime", -1)) == -1) {
 			return null;
 		}
@@ -65,7 +66,8 @@ public class UserController extends AbstractController {
 		if ((address = userData.getString("address", "")).isEmpty()) {
 			return null;
 		}
-		return new User(positionId, name, address, userName, loginTime, routineId);
+		lastOrderId = userData.getLong("orderId", getInvoiceId(context));
+		return new User(positionId, name, address, userName, loginTime, routineId, lastOrderId);
 	}
 
 	public static boolean setAuthorizedUser(Context context, User user) {

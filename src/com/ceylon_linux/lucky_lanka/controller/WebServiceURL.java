@@ -20,36 +20,62 @@ import java.util.HashMap;
  */
 abstract class WebServiceURL {
 
-	//private static final String webServiceURL = "http://gateway.ceylonlinux.com/CL_DISTRIBUTOR/android_service/";
-	private static final String webServiceURL = "http://222.165.133.139/CL_DISTRIBUTOR/android_service/";
+//	getProducts
+//		insert_order
+//	outstandingPayment
+//		insert_session_stock_unload
+//	setStockLoadConfirm
+//		setStockUnloadConfirm
+
+	private static final String webServiceURL = "http://gateway.ceylonlinux.com/CL_DISTRIBUTOR/android_service/";
+//	private static final String webServiceURL = "http://222.165.133.139/CL_DISTRIBUTOR/android_service/";
 
 	protected WebServiceURL() {
 	}
 
 	protected static final class CategoryURLPack {
 
-		public static final HashMap<String, Object> getParameters(int positionId) {
+		public static final HashMap<String, Object> getParameters(int positionId, int sessionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
 			return parameters;
 		}
 
-		public static final HashMap<String, Object> getUnloadingParameters(int positionId, JSONArray unloadingJson) {
+		public static final HashMap<String, Object> getUnloadingParameters(int positionId, JSONArray unloadingJson, int sessionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
 			parameters.put("data", unloadingJson);
 			return parameters;
 		}
 
-		public static final HashMap<String, Object> getLoadingConfirmParameters(int positionId) {
+		public static final HashMap<String, Object> getLoadingConfirmParameters(int positionId, int sessionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
 			return parameters;
 		}
 
-		public static final String GET_ITEMS_AND_CATEGORIES = webServiceURL + "getProducts";
+		public static final HashMap<String, Object> getPOSMParameters(int positionId, int sessionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
+			return parameters;
+		}
+
+		public static final HashMap<String, Object> getFreeIssueCalculationParameters(int positionId, int sessionId) {
+			HashMap<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
+			return parameters;
+		}
+
+		public static final String GET_ITEMS_AND_CATEGORIES = webServiceURL + "getProducts2";
 		public static final String CONFIRM_UNLOADING = webServiceURL + "setStockUnloadConfirm";
 		public static final String CONFIRM_LOADING = webServiceURL + "setStockLoadConfirm";
+		public static final String POSM_DETAILS = webServiceURL + "getPOSMItems";
+		public static final String FREE_ISSUE_CALCULATION_DETAILS = webServiceURL + "getAgainFreeItems";
 	}
 
 	protected static final class UserURLPack {
@@ -85,10 +111,11 @@ abstract class WebServiceURL {
 
 	protected static final class OrderURLPack {
 
-		public static final HashMap<String, Object> getParameters(JSONObject orderJson, int positionId) {
+		public static final HashMap<String, Object> getParameters(JSONObject orderJson, int positionId, int sessionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("jsonString", orderJson);
 			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
 			return parameters;
 		}
 
@@ -96,10 +123,11 @@ abstract class WebServiceURL {
 	}
 
 	protected static final class PaymentURLPack {
-		public static final HashMap<String, Object> getParameters(JSONObject invoiceJson, int positionId) {
+		public static final HashMap<String, Object> getParameters(JSONObject invoiceJson, int positionId, int sessionId) {
 			HashMap<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("jsonString", invoiceJson);
 			parameters.put("position_id", positionId);
+			parameters.put("session_id", sessionId);
 			return parameters;
 		}
 

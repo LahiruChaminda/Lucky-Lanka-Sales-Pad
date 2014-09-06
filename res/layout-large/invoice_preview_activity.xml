@@ -8,16 +8,16 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/txtBillPreview" android:layout_gravity="center_horizontal" android:typeface="monospace"/>
+                android:id="@+id/txtBillPreview" android:layout_gravity="center_horizontal" android:typeface="monospace" android:textSize="25dp"/>
     </ScrollView>
     <Button
             android:layout_width="match_parent"
             android:background="@drawable/rounded_button"
             android:layout_height="wrap_content"
             android:text="Print"
-            android:id="@+id/btnPrint" android:textSize="20dp"/>
+            android:id="@+id/btnPrint" android:textSize="25dp"/>
     <Button android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@drawable/rounded_button"
             android:text="Cancel" android:id="@+id/btnCancel"
-            android:textSize="20dp"/>
+            android:textSize="25dp"/>
 </LinearLayout>

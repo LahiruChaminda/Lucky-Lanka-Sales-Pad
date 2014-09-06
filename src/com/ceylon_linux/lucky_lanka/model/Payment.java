@@ -22,6 +22,12 @@ import java.util.HashMap;
  */
 public class Payment implements Serializable {
 
+	public static final byte ACCEPTED_PAYMENT = 0;
+	public static final byte REJECTED_PAYMENT = 1;
+	public static final byte PENDING_PAYMENT = 2;
+	public static final byte AGED_PAYMENT = 3;
+	public static final byte FRESH_PAYMENT = 4;
+
 	private int paymentId;
 	private Date paymentDate;
 	private double amount;
@@ -29,48 +35,49 @@ public class Payment implements Serializable {
 	private String chequeNo;
 	private String bank;
 	private int branchCode;
-	private boolean synced;
+	private byte paymentStatus;
 
-	public Payment(double amount) {
+	public Payment(double amount, byte paymentStatus) {
 		this.amount = amount;
 		this.paymentDate = new Date();
-		this.synced = false;
+		this.paymentStatus = paymentStatus;
 	}
 
-	public Payment(double amount, Date chequeDate, String chequeNo, String bank, int branchCode) {
+	public Payment(double amount, Date chequeDate, String chequeNo, String bank, int branchCode, byte paymentStatus) {
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
 		this.paymentDate = new Date();
 		this.bank = bank;
 		this.branchCode = branchCode;
-		this.synced = false;
+		this.paymentStatus = paymentStatus;
 	}
 
-	public Payment(int paymentId, Date paymentDate, double amount, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, byte paymentStatus) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
+		this.paymentStatus = paymentStatus;
 	}
 
-	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, String bank, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, String bank, byte paymentStatus) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
 		this.bank = bank;
-		this.synced = synced;
+		this.paymentStatus = paymentStatus;
 	}
 
-	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, int branchCode, boolean synced) {
+	public Payment(int paymentId, Date paymentDate, double amount, Date chequeDate, String chequeNo, int branchCode, byte paymentStatus) {
 		this.paymentId = paymentId;
 		this.paymentDate = paymentDate;
 		this.amount = amount;
 		this.chequeDate = chequeDate;
 		this.chequeNo = chequeNo;
 		this.branchCode = branchCode;
-		this.synced = synced;
+		this.paymentStatus = paymentStatus;
 	}
 
 	public static Payment parseChequePayment(JSONObject jsonInstance) throws JSONException, ParseException {
@@ -82,7 +89,7 @@ public class Payment implements Serializable {
 			simpleDateFormat.parse(jsonInstance.getString("pc_date")),
 			jsonInstance.getString("pc_no"),
 			jsonInstance.getString("b_name"),
-			true
+			ACCEPTED_PAYMENT
 		);
 	}
 
@@ -92,7 +99,7 @@ public class Payment implements Serializable {
 			jsonInstance.getInt("idpayment"),
 			simpleDateFormat.parse(jsonInstance.getString("pm_date")),
 			jsonInstance.getDouble("pm_amount"),
-			true
+			ACCEPTED_PAYMENT
 		);
 	}
 
@@ -144,12 +151,12 @@ public class Payment implements Serializable {
 		this.bank = bank;
 	}
 
-	public boolean isSynced() {
-		return synced;
+	public byte getPaymentStatus() {
+		return paymentStatus;
 	}
 
-	public void setSynced(boolean synced) {
-		this.synced = synced;
+	public void setPaymentStatus(byte paymentStatus) {
+		this.paymentStatus = paymentStatus;
 	}
 
 	public int getBranchCode() {

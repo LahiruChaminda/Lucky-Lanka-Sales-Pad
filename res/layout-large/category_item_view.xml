@@ -11,5 +11,5 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Category"
             android:id="@+id/txtCategory"
-            android:layout_marginLeft="40dp" android:textSize="25dp"/>
+            android:layout_marginLeft="40dp" android:textSize="35dp"/>
 </LinearLayout>

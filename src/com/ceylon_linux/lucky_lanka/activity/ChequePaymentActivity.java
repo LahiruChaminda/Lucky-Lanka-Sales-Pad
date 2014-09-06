@@ -92,7 +92,7 @@ public class ChequePaymentActivity extends Activity {
 			return;
 		}
 		Intent intent = new Intent();
-		Payment payment = new Payment(amount, new Date(datePicker.getCalendarView().getDate()), inputChequeNo.getText().toString(), bankCombo.getSelectedItem().toString(), ((Bank.BankBranch) branchCombo.getSelectedItem()).getBranchId());
+		Payment payment = new Payment(amount, new Date(datePicker.getCalendarView().getDate()), inputChequeNo.getText().toString(), bankCombo.getSelectedItem().toString(), ((Bank.BankBranch) branchCombo.getSelectedItem()).getBranchId(), Payment.FRESH_PAYMENT);
 		intent.putExtra("payment", payment);
 		setResult(RESULT_OK, intent);
 		finish();

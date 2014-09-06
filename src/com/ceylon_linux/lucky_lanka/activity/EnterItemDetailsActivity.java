@@ -25,6 +25,7 @@ import com.ceylon_linux.lucky_lanka.model.Outlet;
  * @email supunlakshan.xfinity@gmail.com
  */
 public class EnterItemDetailsActivity extends Activity {
+
 	private Item item;
 	private Outlet outlet;
 	private OrderDetail orderDetail;
@@ -88,12 +89,11 @@ public class EnterItemDetailsActivity extends Activity {
 				String returnQuantityString = inputReturnQuantity.getText().toString();
 				String replaceQuantityString = inputReplaceQuantity.getText().toString();
 				String sampleQuantityString = inputSampleQuantity.getText().toString();
-				int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-				int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
-				int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
-				int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
-				OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
-				System.out.println(orderDetail.getFreeIssue());
+				int requestedQuantity = requestedQuantityString.isEmpty() ? 0 : Integer.parseInt(requestedQuantityString);
+				int returnQuantity = returnQuantityString.isEmpty() ? 0 : Integer.parseInt(returnQuantityString);
+				int replaceQuantity = replaceQuantityString.isEmpty() ? 0 : Integer.parseInt(replaceQuantityString);
+				int sampleQuantity = sampleQuantityString.isEmpty() ? 0 : Integer.parseInt(sampleQuantityString);
+				OrderDetail orderDetail = OrderDetail.getOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity, EnterItemDetailsActivity.this);
 				txtFreeQuantity.setText(Integer.toString(orderDetail.getFreeIssue()));
 				txtDiscount.setText(Double.toString(outlet.getOutletDiscount()));
 			}
@@ -133,11 +133,12 @@ public class EnterItemDetailsActivity extends Activity {
 		String returnQuantityString = inputReturnQuantity.getText().toString();
 		String replaceQuantityString = inputReplaceQuantity.getText().toString();
 		String sampleQuantityString = inputSampleQuantity.getText().toString();
-		int requestedQuantity = Integer.parseInt((requestedQuantityString.isEmpty()) ? "0" : requestedQuantityString);
-		int returnQuantity = Integer.parseInt((returnQuantityString.isEmpty()) ? "0" : returnQuantityString);
-		int replaceQuantity = Integer.parseInt((replaceQuantityString.isEmpty()) ? "0" : replaceQuantityString);
-		int sampleQuantity = Integer.parseInt((sampleQuantityString.isEmpty()) ? "0" : sampleQuantityString);
-		OrderDetail orderDetail = OrderDetail.getFreeIssueCalculatedOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity);
+		int requestedQuantity = requestedQuantityString.isEmpty() ? 0 : Integer.parseInt(requestedQuantityString);
+		int returnQuantity = returnQuantityString.isEmpty() ? 0 : Integer.parseInt(returnQuantityString);
+		int replaceQuantity = replaceQuantityString.isEmpty() ? 0 : Integer.parseInt(replaceQuantityString);
+		int sampleQuantity = sampleQuantityString.isEmpty() ? 0 : Integer.parseInt(sampleQuantityString);
+		OrderDetail orderDetail = OrderDetail.getOrderDetail(outlet, item, requestedQuantity, returnQuantity, replaceQuantity, sampleQuantity, EnterItemDetailsActivity.this);
+		orderDetail.setFreeIssue(0);
 		Intent intent = new Intent();
 		intent.putExtra("orderDetail", orderDetail);
 		setResult(RESULT_OK, intent);

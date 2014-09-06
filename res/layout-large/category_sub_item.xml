@@ -11,7 +11,7 @@
             android:layout_weight="5.64"
             android:text="Item Description"
             android:id="@+id/txtItemDescription"
-            android:textSize="15dp" android:paddingLeft="10dp" android:gravity="center_vertical"/>
+            android:textSize="25dp" android:paddingLeft="10dp" android:gravity="center_vertical"/>
 
     <TextView
             android:layout_width="0dp"
@@ -20,7 +20,7 @@
             android:gravity="center_vertical|right"
             android:layout_weight="0.69"
             android:id="@+id/txtQuantity"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -28,7 +28,7 @@
             android:gravity="center_vertical|right"
             android:layout_weight="0.69"
             android:id="@+id/txtFreeIssue"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -36,7 +36,7 @@
             android:text="0"
             android:layout_weight="0.69"
             android:id="@+id/txtEachDiscount"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -44,7 +44,7 @@
             android:text="0"
             android:layout_weight="0.69"
             android:id="@+id/txtReturnQuantity"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -52,7 +52,7 @@
             android:text="0"
             android:layout_weight="0.69"
             android:id="@+id/txtReplaceQuantity"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -60,5 +60,5 @@
             android:text="0"
             android:layout_weight="0.69"
             android:id="@+id/txtSampleQuantity"
-            android:textSize="15dp"/>
+            android:textSize="25dp"/>
 </LinearLayout>

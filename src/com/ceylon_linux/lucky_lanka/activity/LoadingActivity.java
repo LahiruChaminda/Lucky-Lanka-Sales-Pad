@@ -100,9 +100,20 @@ public class LoadingActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		Intent homeActivity = new Intent(LoadingActivity.this, HomeActivity.class);
-		startActivity(homeActivity);
-		finish();
+		switch (option) {
+			case CONFIRM_LOADING:
+				//should act as cancel button
+				UserController.clearAuthentication(LoadingActivity.this);
+				Toast.makeText(LoadingActivity.this, "Please che the loading and log in again", Toast.LENGTH_LONG).show();
+				finish();
+				break;
+			case VIEW_CURRENT_STOCK:
+				//should act as ok button
+				Intent homeActivity = new Intent(LoadingActivity.this, HomeActivity.class);
+				startActivity(homeActivity);
+				finish();
+				break;
+		}
 	}
 
 	private void initialize() {
@@ -127,18 +138,7 @@ public class LoadingActivity extends Activity {
 	}
 
 	private void btnOptionClicked(View view) {
-		switch (option) {
-			case CONFIRM_LOADING:
-				//should act as cancel button
-				UserController.clearAuthentication(LoadingActivity.this);
-				finish();
-				System.exit(0);
-				break;
-			case VIEW_CURRENT_STOCK:
-				//should act as ok button
-				onBackPressed();
-				break;
-		}
+		onBackPressed();
 	}
 
 	private void btnLoadingConfirmClicked(View view) {
@@ -149,7 +149,7 @@ public class LoadingActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					confirmLoadingResponse = ItemController.confirmLoading(LoadingActivity.this, UserController.getAuthorizedUser(LoadingActivity.this).getPositionId());
+					confirmLoadingResponse = ItemController.confirmLoading(LoadingActivity.this, UserController.getAuthorizedUser(LoadingActivity.this).getPositionId(), UserController.getAuthorizedUser(LoadingActivity.this).getRoutineId());
 					handler.post(new Runnable() {
 						@Override
 						public void run() {

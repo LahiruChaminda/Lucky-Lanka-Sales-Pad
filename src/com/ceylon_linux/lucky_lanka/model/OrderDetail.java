@@ -6,6 +6,8 @@
 
 package com.ceylon_linux.lucky_lanka.model;
 
+import android.content.Context;
+import com.ceylon_linux.lucky_lanka.controller.ItemController;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -34,6 +36,17 @@ public class OrderDetail implements Serializable {
 		this.quantity = quantity;
 		this.freeIssue = freeIssue;
 		this.price = item.getWholeSalePrice();
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
+	}
+
+	private OrderDetail(String itemDescription, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName, int itemId) {
+		this.itemId = itemId;
+		this.itemDescription = itemDescription;
+		this.quantity = quantity;
+		this.freeIssue = freeIssue;
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
@@ -74,11 +87,9 @@ public class OrderDetail implements Serializable {
 		this.itemShortName = itemShortName;
 	}
 
-	public static final OrderDetail getFreeIssueCalculatedOrderDetail(Outlet outlet, Item item, int quantity, int returnQuantity, int replaceQuantity, int sampleQuantity) {
-		int freeIssue = 0;
-		double discountPercentage = 0;
-		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
-		int freeIssueRatio = item.getFreeIssueQuantity();
+	public static final OrderDetail getOrderDetail(Outlet outlet, Item item, int quantity, int returnQuantity, int replaceQuantity, int sampleQuantity, Context context) {
+		int freeIssue;
+		double discountPercentage;
 		switch (outlet.getOutletType()) {
 			case Outlet.PHARMACY:
 			case Outlet.RETAIL_OUTLET:
@@ -88,16 +99,10 @@ public class OrderDetail implements Serializable {
 			case Outlet.WELFARE_SHOPS:
 			case Outlet.OTHER:
 			case Outlet.STORES:
-				if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
-					freeIssue = (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
-				}
+				freeIssue = (item.getFreeItemId() == item.getItemId()) ? ItemController.getFreeIssue(item.getItemId(), quantity, false, context) : 0;
 				return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
 			case Outlet.WHOLESALE_OUTLET:
-				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
-					freeIssue = (quantity / 216) * 36;
-				} else if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
-					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
-				}
+				freeIssue = (item.getFreeItemId() == item.getItemId()) ? ItemController.getFreeIssue(item.getItemId(), quantity, true, context) : 0;
 				return new OrderDetail(item, quantity, freeIssue, returnQuantity, replaceQuantity, sampleQuantity, item.getItemShortName());
 			case Outlet.SUPER_MARKET:
 			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
@@ -108,11 +113,9 @@ public class OrderDetail implements Serializable {
 		}
 	}
 
-	public static final OrderDetail getFreeIssueOrderDetail(Outlet outlet, Item item, int quantity) {
-		int freeIssue = 0;
-		double discountPercentage = 0;
-		int minimumFreeIssueQuantity = item.getMinimumFreeIssueQuantity();
-		int freeIssueRatio = item.getFreeIssueQuantity();
+	public static final OrderDetail getFreeIssueDetail(Outlet outlet, Item item, int quantity, Context context) {
+		int freeIssue;
+		double discountPercentage;
 		switch (outlet.getOutletType()) {
 			case Outlet.PHARMACY:
 			case Outlet.RETAIL_OUTLET:
@@ -122,16 +125,10 @@ public class OrderDetail implements Serializable {
 			case Outlet.WELFARE_SHOPS:
 			case Outlet.OTHER:
 			case Outlet.STORES:
-				if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
-					freeIssue = (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
-				}
+				freeIssue = ItemController.getFreeIssue(item.getItemId(), quantity, false, context);
 				return new OrderDetail(item, quantity, freeIssue, 0, 0, 0, item.getItemShortName());
 			case Outlet.WHOLESALE_OUTLET:
-				if (quantity >= 216 && item.isSixPlusOneAvailability()) {
-					freeIssue = (quantity / 216) * 36;
-				} else if (quantity >= minimumFreeIssueQuantity && minimumFreeIssueQuantity != 0) {
-					freeIssue = (minimumFreeIssueQuantity == 0) ? 0 : (quantity / minimumFreeIssueQuantity) * freeIssueRatio;
-				}
+				freeIssue = ItemController.getFreeIssue(item.getItemId(), quantity, true, context);
 				return new OrderDetail(item, quantity, freeIssue, 0, 0, 0, item.getItemShortName());
 			case Outlet.SUPER_MARKET:
 			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:

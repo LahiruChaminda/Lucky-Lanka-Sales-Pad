@@ -1,7 +1,7 @@
 /*
  * Intellectual properties of Supun Lakshan Wanigarathna Dissanayake
  * Copyright (c) 2014, Supun Lakshan Wanigarathna Dissanayake. All rights reserved.
- * Created on : Jul 09, 2014, 2:18 PM
+ * Created on : Aug 28, 2014, 8:55:32 AM
  */
 package com.ceylon_linux.lucky_lanka.activity;
 
@@ -12,31 +12,34 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import com.ceylon_linux.lucky_lanka.R;
-import com.ceylon_linux.lucky_lanka.model.Payment;
+import com.ceylon_linux.lucky_lanka.model.PosmDetail;
+import com.ceylon_linux.lucky_lanka.model.PosmItem;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class CashPaymentActivity extends Activity {
+public class EnterPosmDetailActivity extends Activity {
 
-	private EditText inputAmount;
+	private PosmItem posmItem;
+	private EditText inputRequestedQuantity;
 	private Button btnOk;
 	private Button btnCancel;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.cash_data_input_dialog_page);
+		setContentView(R.layout.posm_insert_page);
 		initialize();
 	}
 
 	private void initialize() {
-		inputAmount = (EditText) findViewById(R.id.inputAmount);
+		posmItem = (PosmItem) getIntent().getSerializableExtra("posm");
+		inputRequestedQuantity = (EditText) findViewById(R.id.inputRequestedQuantity);
+		inputRequestedQuantity.setText(String.valueOf(getIntent().getIntExtra("quantity", 0)));
 		btnOk = (Button) findViewById(R.id.btnOk);
 		btnCancel = (Button) findViewById(R.id.btnCancel);
-
 		btnOk.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -51,22 +54,17 @@ public class CashPaymentActivity extends Activity {
 		});
 	}
 
-	private void btnCancelClicked(View view) {
-		Intent intent = new Intent();
-		setResult(RESULT_CANCELED, intent);
+	private void btnOkClicked(View view) {
+		String inputString = inputRequestedQuantity.getText().toString();
+		PosmDetail posmDetail = new PosmDetail(posmItem.getPosmDetailId(), posmItem.getPosmDescription(), inputString.isEmpty() ? 0 : Integer.parseInt(inputString));
+		Intent data = new Intent();
+		data.putExtra("posm", posmDetail);
+		setResult(RESULT_OK, data);
 		finish();
 	}
 
-	private void btnOkClicked(View view) {
-		String amountString = inputAmount.getText().toString();
-		double amount = amountString.isEmpty() ? 0 : Double.parseDouble(amountString);
-		if (amount <= 0) {
-			return;
-		}
-		Intent intent = new Intent();
-		Payment payment = new Payment(amount, Payment.FRESH_PAYMENT);
-		intent.putExtra("payment", payment);
-		setResult(RESULT_OK, intent);
+	private void btnCancelClicked(View view) {
+		setResult(RESULT_CANCELED);
 		finish();
 	}
 }

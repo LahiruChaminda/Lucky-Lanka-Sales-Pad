@@ -27,6 +27,7 @@ import com.ceylon_linux.lucky_lanka.util.GpsReceiver;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,24 +38,26 @@ import java.util.HashMap;
  * @mobile +94711290392
  * @email supunlakshan.xfinity@gmail.com
  */
-public class SelectItemActivity extends Activity {
+public class SelectItemActivity extends Activity implements Serializable {
 
-	private final int ENTER_ITEM_DETAILS = 0;
-	private ExpandableListView itemList;
-	private MyExpandableListAdapter expandableListAdapter;
-	private Button finishButton;
-	private Outlet outlet;
-	private ArrayList<Category> categories;
-	private ArrayList<OrderDetail> orderDetails;
-	private volatile Item item;
-	private Location location;
-	private ArrayList<Item> availableStock = new ArrayList<Item>();
-	private ArrayList<Item> unAvailableStock = new ArrayList<Item>();
-	private GpsReceiver gpsReceiver;
-	private Thread GPS_RECEIVER;
-	private ProgressDialog progressDialog;
-	private TextView txtInvoiceAmount;
-	private NumberFormat currencyFormat;
+	private transient final int ENTER_ITEM_DETAILS = 0;
+	private transient ExpandableListView itemList;
+	private transient MyExpandableListAdapter expandableListAdapter;
+	private transient Button finishButton;
+	private transient Outlet outlet;
+	private transient ArrayList<Category> categories;
+	private transient ArrayList<OrderDetail> orderDetails;
+	private transient ArrayList<OrderDetail> freeIssues;
+	private transient volatile Item item;
+	private transient Location location;
+	private transient ArrayList<Item> availableStock = new ArrayList<Item>();
+	private transient ArrayList<Item> unAvailableStock = new ArrayList<Item>();
+	private transient GpsReceiver gpsReceiver;
+	private transient Thread GPS_RECEIVER;
+	private transient ProgressDialog progressDialog;
+	private transient TextView txtInvoiceAmount;
+	private transient NumberFormat currencyFormat;
+	private transient Order order;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +66,7 @@ public class SelectItemActivity extends Activity {
 		initialize();
 		Intent intent = getIntent();
 		if (intent.hasExtra("order")) {
-			Order order = (Order) intent.getSerializableExtra("order");
+			order = (Order) intent.getSerializableExtra("order");
 			orderDetails = order.getOrderDetails();
 			double invoiceTotal = 0;
 			for (OrderDetail instance : orderDetails) {
@@ -150,7 +153,23 @@ public class SelectItemActivity extends Activity {
 		itemList = (ExpandableListView) findViewById(R.id.itemList);
 		finishButton = (Button) findViewById(R.id.finishButton);
 		txtInvoiceAmount = (TextView) findViewById(R.id.txtInvoiceAmount);
-		orderDetails = new ArrayList<OrderDetail>();
+		orderDetails = new ArrayList<OrderDetail>() {
+			@Override
+			public boolean add(OrderDetail object) {
+				int index;
+				if ((index = super.indexOf(object)) != -1) {
+					if (object.getQuantity() != 0) {
+						super.set(index, object);
+					} else {
+						super.remove(index);
+					}
+					return true;
+				}
+				return super.add(object);
+			}
+		};
+
+		freeIssues = new ArrayList<OrderDetail>();
 		currencyFormat = NumberFormat.getInstance();
 		currencyFormat.setGroupingUsed(true);
 		currencyFormat.setMaximumFractionDigits(2);
@@ -171,21 +190,26 @@ public class SelectItemActivity extends Activity {
 			progressDialog = ProgressDialog.show(SelectItemActivity.this, null, "Waiting For GPS...", false);
 			return;
 		}
-		Order order = new Order(
-			outlet.getOutletId(),
-			UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(),
-			outlet.getRouteId(),
-			BatteryUtility.getBatteryLevel(SelectItemActivity.this),
-			new Date().getTime(),
-			location.getLongitude(),
-			location.getLatitude(),
-			orderDetails
-		);
+		if (order == null) {
+			order = new Order(
+				outlet.getOutletId(),
+				UserController.getAuthorizedUser(SelectItemActivity.this).getPositionId(),
+				outlet.getRouteId(),
+				BatteryUtility.getBatteryLevel(SelectItemActivity.this),
+				new Date().getTime(),
+				location.getLongitude(),
+				location.getLatitude(),
+				orderDetails,
+				new ArrayList<PosmDetail>()
+			);
+		} else {
+			order.setOrderDetails(orderDetails);
+		}
 		order.setOrderId(UserController.getInvoiceId(SelectItemActivity.this));
-		Intent paymentActivity = new Intent(SelectItemActivity.this, PaymentActivity.class);
-		paymentActivity.putExtra("order", order);
-		paymentActivity.putExtra("outlet", outlet);
-		startActivity(paymentActivity);
+		Intent posmSelectionActivity = new Intent(SelectItemActivity.this, PosmSelectionActivity.class);
+		posmSelectionActivity.putExtra("order", order);
+		posmSelectionActivity.putExtra("outlet", outlet);
+		startActivity(posmSelectionActivity);
 		finish();
 	}
 
@@ -196,53 +220,12 @@ public class SelectItemActivity extends Activity {
 		finish();
 	}
 
-	private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item, View view) {
-		for (OrderDetail orderDetail : orderDetails) {
-			if (orderDetail.getItemId() == item.getItemId()) {
-				childViewHolder.txtFreeIssue.setText(Integer.toString(orderDetail.getFreeIssue()));
-				childViewHolder.txtQuantity.setText(Integer.toString(orderDetail.getQuantity()));
-				childViewHolder.txtReturnQuantity.setText(Integer.toString(orderDetail.getReturnQuantity()));
-				childViewHolder.txtReplaceQuantity.setText(Integer.toString(orderDetail.getReplaceQuantity()));
-				childViewHolder.txtSampleQuantity.setText(Integer.toString(orderDetail.getSampleQuantity()));
-				view.setBackgroundColor(Color.parseColor("#FFEFACFF"));
-				return childViewHolder;
-			}
-		}
-		childViewHolder.txtFreeIssue.setText("0");
-		childViewHolder.txtQuantity.setText("0");
-		view.setBackgroundColor(Color.TRANSPARENT);
-		childViewHolder.txtReturnQuantity.setText("0");
-		childViewHolder.txtReplaceQuantity.setText("0");
-		childViewHolder.txtSampleQuantity.setText("0");
-		return childViewHolder;
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == ENTER_ITEM_DETAILS && resultCode == RESULT_OK) {
 			OrderDetail orderDetail = (OrderDetail) data.getSerializableExtra("orderDetail");
-			int index;
-			if ((index = orderDetails.indexOf(orderDetail)) != -1) {
-				if (orderDetail.getQuantity() != 0) {
-					orderDetails.set(index, orderDetail);
-				} else {
-					orderDetails.remove(index);
-				}
-			} else {
-				orderDetails.add(orderDetail);
-				item.setSelected(true);
-			}
-
-			HashMap<Integer, Integer> freeIssues = new HashMap<Integer, Integer>();
-			for (OrderDetail instance : orderDetails) {
-				Integer freeValue = freeIssues.get(instance.getItemId());
-				if (freeValue != null) {
-					freeValue = 5;
-					OrderDetail.getFreeIssueOrderDetail(outlet, item, instance.getQuantity());
-				}
-				freeIssues.put(instance.getItemId(), 5);
-			}
-
+			orderDetails.add(orderDetail);
+			calculateFreeIssues();
 			expandableListAdapter.notifyDataSetChanged();
 			double invoiceTotal = 0;
 			for (OrderDetail instance : orderDetails) {
@@ -250,6 +233,31 @@ public class SelectItemActivity extends Activity {
 			}
 			txtInvoiceAmount.setText("Rs " + currencyFormat.format(invoiceTotal));
 		}
+	}
+
+	private void calculateFreeIssues() {
+		switch (outlet.getOutletType()) {
+
+		}
+		HashMap<Integer, OrderDetail> freeIssuesMap = new HashMap<Integer, OrderDetail>() {
+			@Override
+			public OrderDetail put(Integer key, OrderDetail value) {
+				if (super.containsKey(key)) {
+					OrderDetail orderDetail = super.get(key);
+					orderDetail.setFreeIssue(orderDetail.getFreeIssue() + value.getFreeIssue());
+					return super.put(key, orderDetail);
+				} else {
+					return super.put(key, value);
+				}
+			}
+		};
+		for (OrderDetail instance : orderDetails) {
+			OrderDetail freeIssueDetail = OrderDetail.getFreeIssueDetail(outlet, item, instance.getQuantity(), SelectItemActivity.this);
+			freeIssuesMap.put(instance.getItemId(), freeIssueDetail);
+		}
+		freeIssues.clear();
+		freeIssues.addAll(freeIssuesMap.values());
+		expandableListAdapter.notifyDataSetChanged();
 	}
 
 	private static class GroupViewHolder {
@@ -269,6 +277,19 @@ public class SelectItemActivity extends Activity {
 	}
 
 	private class MyExpandableListAdapter extends BaseExpandableListAdapter {
+		private final ArrayList<OrderDetail> combinedOrderDetails = new ArrayList<OrderDetail>() {
+			@Override
+			public boolean add(OrderDetail orderDetail) {
+				int index;
+				if ((index = super.indexOf(orderDetail)) != -1) {
+					OrderDetail obsoleteDetail = super.get(index);
+					obsoleteDetail.setFreeIssue(obsoleteDetail.getFreeIssue() + orderDetail.getFreeIssue());
+					super.set(index, obsoleteDetail);
+				}
+				return super.add(orderDetail);
+			}
+		};
+
 		@Override
 		public int getGroupCount() {
 			return 1;
@@ -350,6 +371,37 @@ public class SelectItemActivity extends Activity {
 		@Override
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
 			return true;
+		}
+
+		@Override
+		public void notifyDataSetChanged() {
+			combinedOrderDetails.clear();
+			combinedOrderDetails.addAll(orderDetails);
+			for (OrderDetail orderDetail : freeIssues) {
+				combinedOrderDetails.add(orderDetail);
+			}
+			super.notifyDataSetChanged();
+		}
+
+		private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item, View view) {
+			for (OrderDetail orderDetail : combinedOrderDetails) {
+				if (orderDetail.getItemId() == item.getItemId()) {
+					childViewHolder.txtFreeIssue.setText(Integer.toString(orderDetail.getFreeIssue()));
+					childViewHolder.txtQuantity.setText(Integer.toString(orderDetail.getQuantity()));
+					childViewHolder.txtReturnQuantity.setText(Integer.toString(orderDetail.getReturnQuantity()));
+					childViewHolder.txtReplaceQuantity.setText(Integer.toString(orderDetail.getReplaceQuantity()));
+					childViewHolder.txtSampleQuantity.setText(Integer.toString(orderDetail.getSampleQuantity()));
+					view.setBackgroundColor(Color.parseColor("#FFEFACFF"));
+					return childViewHolder;
+				}
+			}
+			childViewHolder.txtFreeIssue.setText("0");
+			childViewHolder.txtQuantity.setText("0");
+			view.setBackgroundColor(Color.TRANSPARENT);
+			childViewHolder.txtReturnQuantity.setText("0");
+			childViewHolder.txtReplaceQuantity.setText("0");
+			childViewHolder.txtSampleQuantity.setText("0");
+			return childViewHolder;
 		}
 	}
 }

@@ -114,7 +114,22 @@ public class OutstandingPaymentActivity extends Activity {
 						listPayment.setAdapter(adapter);
 					}
 				});
-				paymentViewHolder.imageButton.setVisibility(payment.isSynced() ? View.INVISIBLE : View.VISIBLE);
+				paymentViewHolder.imageButton.setVisibility(payment.getPaymentStatus() != Payment.FRESH_PAYMENT ? View.INVISIBLE : View.VISIBLE);
+				switch (payment.getPaymentStatus()) {
+					case Payment.FRESH_PAYMENT:
+					case Payment.AGED_PAYMENT:
+						convertView.setBackgroundColor(Color.parseColor("#B2B2FF"));
+						break;
+					case Payment.ACCEPTED_PAYMENT:
+						convertView.setBackgroundColor(Color.parseColor("#B2FFB2"));
+						break;
+					case Payment.REJECTED_PAYMENT:
+						convertView.setBackgroundColor(Color.parseColor("#FFB2B2"));
+						break;
+					case Payment.PENDING_PAYMENT:
+						convertView.setBackgroundColor(Color.parseColor("#FFFFB2"));
+						break;
+				}
 				return convertView;
 			}
 

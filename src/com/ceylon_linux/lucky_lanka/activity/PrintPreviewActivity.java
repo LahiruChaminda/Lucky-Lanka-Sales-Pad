@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -118,6 +119,73 @@ public class PrintPreviewActivity extends Activity {
 	}
 
 	private void printInvoice() {
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<?> future = executor.submit(new Runnable() {
+			private ProgressDialog progressDialog;
+			private boolean syncStatus;
+
+			public void run() {
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						progressDialog = ProgressDialogGenerator.generateProgressDialog(PrintPreviewActivity.this, "Processing...", false);
+						progressDialog.show();
+					}
+				});
+				try {
+					syncStatus = OrderController.syncOrder(PrintPreviewActivity.this, order.getOrderAsJson());
+					if (bluetoothSocket != null) {
+						OutputStream outputStream = bluetoothSocket.getOutputStream();
+						outputStream.write(getOrderIntoByteStream(order));
+						if (order.isCreditBill()) {
+							outputStream.write(getOrderCopyIntoByteStream(order));
+						}
+						outputStream.close();
+						closeSocket(bluetoothSocket);
+					}
+				} catch (IOException e) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							connectPrinter();
+						}
+					});
+					e.printStackTrace();
+					return;
+				} catch (JSONException e) {
+					e.printStackTrace();
+				} finally {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							if (progressDialog != null && progressDialog.isShowing()) {
+								progressDialog.dismiss();
+							}
+							OrderController.saveOrderToDb(PrintPreviewActivity.this, order, syncStatus);
+							if (syncStatus) {
+								Toast.makeText(PrintPreviewActivity.this, "Order Synced Successfully", Toast.LENGTH_LONG).show();
+							} else {
+								Toast.makeText(PrintPreviewActivity.this, "Order placed in local database", Toast.LENGTH_LONG).show();
+							}
+							Intent loadAddInvoiceActivity = new Intent(PrintPreviewActivity.this, LoadAddInvoiceActivity.class);
+							startActivity(loadAddInvoiceActivity);
+							finish();
+						}
+					});
+				}
+			}
+		});
+		try {
+			future.get(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			e.printStackTrace();
+		}
+
+		/*
 		new Thread() {
 			private ProgressDialog progressDialog;
 			private boolean syncStatus;
@@ -171,7 +239,7 @@ public class PrintPreviewActivity extends Activity {
 					}
 				});
 			}
-		}.start();
+		}.start();*/
 	}
 
 	private void connectPrinter() {

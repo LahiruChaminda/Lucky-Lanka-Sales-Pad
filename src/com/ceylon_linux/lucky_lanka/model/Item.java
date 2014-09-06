@@ -30,10 +30,8 @@ public class Item implements Serializable {
 	private boolean sixPlusOneAvailability;
 	private int minimumFreeIssueQuantity;
 	private int freeIssueQuantity;
-	private boolean selected;
 	private String itemShortName;
 	private int freeItemId;
-	private String freeItemShortName;
 
 	public Item(int itemId, String itemCode, String itemDescription, int availableQuantity, int loadedQuantity, double wholeSalePrice, double retailSalePrice, boolean sixPlusOneAvailability, int minimumFreeIssueQuantity, int freeIssueQuantity, String shortName, int freeItemId) {
 		this.itemId = itemId;
@@ -48,22 +46,6 @@ public class Item implements Serializable {
 		this.freeIssueQuantity = freeIssueQuantity;
 		this.itemShortName = shortName;
 		this.freeItemId = freeItemId;
-	}
-
-	public Item(int itemId, String itemCode, String itemDescription, int availableQuantity, int loadedQuantity, double wholeSalePrice, double retailSalePrice, boolean sixPlusOneAvailability, int minimumFreeIssueQuantity, int freeIssueQuantity, String shortName, int freeItemId, String freeItemShortName) {
-		this.itemId = itemId;
-		this.itemCode = itemCode;
-		this.itemDescription = itemDescription;
-		this.availableQuantity = availableQuantity;
-		this.loadedQuantity = loadedQuantity;
-		this.wholeSalePrice = wholeSalePrice;
-		this.retailSalePrice = retailSalePrice;
-		this.sixPlusOneAvailability = sixPlusOneAvailability;
-		this.minimumFreeIssueQuantity = minimumFreeIssueQuantity;
-		this.freeIssueQuantity = freeIssueQuantity;
-		this.itemShortName = shortName;
-		this.freeItemId = freeItemId;
-		this.freeItemShortName = freeItemShortName;
 	}
 
 	public static final Item parseItem(JSONObject itemJsonInstance) throws JSONException {
@@ -166,14 +148,6 @@ public class Item implements Serializable {
 		this.freeIssueQuantity = freeIssueQuantity;
 	}
 
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
-
 	public String getItemShortName() {
 		return itemShortName;
 	}
@@ -186,9 +160,6 @@ public class Item implements Serializable {
 		return freeItemId;
 	}
 
-	public String getFreeItemShortName() {
-		return freeItemShortName;
-	}
 
 	@Override
 	public String toString() {

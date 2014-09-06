@@ -229,10 +229,10 @@ public class PaymentActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		Intent selectItemActivity = new Intent(PaymentActivity.this, SelectItemActivity.class);
-		selectItemActivity.putExtra("order", order);
-		selectItemActivity.putExtra("outlet", outlet);
-		startActivity(selectItemActivity);
+		Intent posmSelectionActivity = new Intent(PaymentActivity.this, PosmSelectionActivity.class);
+		posmSelectionActivity.putExtra("order", order);
+		posmSelectionActivity.putExtra("outlet", outlet);
+		startActivity(posmSelectionActivity);
 		finish();
 	}
 

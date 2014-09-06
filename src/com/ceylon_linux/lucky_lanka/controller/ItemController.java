@@ -15,6 +15,7 @@ import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
 import com.ceylon_linux.lucky_lanka.model.Category;
 import com.ceylon_linux.lucky_lanka.model.Item;
+import com.ceylon_linux.lucky_lanka.model.PosmItem;
 import com.ceylon_linux.lucky_lanka.model.UnloadingItem;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,8 +39,8 @@ public class ItemController extends AbstractController {
 	private ItemController() {
 	}
 
-	public static void downloadItems(Context context, int positionId) throws IOException, JSONException {
-		JSONArray categoryJson = getJsonArray(CategoryURLPack.GET_ITEMS_AND_CATEGORIES, CategoryURLPack.getParameters(positionId), context);
+	public static void downloadItems(Context context, int positionId, int sessionId) throws IOException, JSONException {
+		JSONArray categoryJson = getJsonArray(CategoryURLPack.GET_ITEMS_AND_CATEGORIES, CategoryURLPack.getParameters(positionId, sessionId), context);
 		ArrayList<Category> categories = new ArrayList<Category>();
 		final int CATEGORY_LENGTH = categoryJson.length();
 		for (int i = 0; i < CATEGORY_LENGTH; i++) {
@@ -51,14 +52,90 @@ public class ItemController extends AbstractController {
 		saveCategoriesToDb(categories, context);
 	}
 
+	public static void downloadPosmItems(Context context, int positionId, int sessionId) throws IOException, JSONException {
+		JSONArray posmJson = getJsonArray(CategoryURLPack.POSM_DETAILS, CategoryURLPack.getPOSMParameters(positionId, sessionId), context);
+		ArrayList<PosmItem> posmItems = new ArrayList<PosmItem>();
+		for (int i = 0, POSM_LENGTH = posmJson.length(); i < POSM_LENGTH; i++) {
+			PosmItem posmItem;
+			if ((posmItem = PosmItem.parsePosmItem(posmJson.getJSONObject(i))) != null) {
+				posmItems.add(posmItem);
+			}
+		}
+		savePosmToDb(posmItems, context);
+	}
+
+	public static void downloadAndSaveFreeIssueCalculationData(Context context, int positionId, int sessionId) throws IOException, JSONException {
+		JSONObject freeCalculationDataJson = getJsonObject(CategoryURLPack.FREE_ISSUE_CALCULATION_DETAILS, CategoryURLPack.getFreeIssueCalculationParameters(positionId, sessionId), context);
+		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseInstance.getWritableDatabase();
+
+		SQLiteStatement tbl_assort_item_issue_Statement = database.compileStatement("insert into tbl_assort_item_issue(tbl_assort_free_idassort_free, tbl_item_iditem, idassort_item_issue, afi_qty) values(?,?,?,?)");
+		SQLiteStatement tbl_assort_free_Statement = database.compileStatement("insert into tbl_assort_free(idassort_free, af_date, af_time, af_status, af_type, af_qty, af_sixone_status, free_user_type) values(?,?,?,?,?,?,?,?)");
+		SQLiteStatement tbl_assort_item_Statement = database.compileStatement("insert into tbl_assort_item(tbl_item_iditem, idassort_free, idassort_item) values(?,?,?)");
+
+		JSONArray tbl_assort_item_issue = freeCalculationDataJson.getJSONArray("tbl_assort_item_issue");
+		for (int i = 0, tbl_assort_item_issues_length = tbl_assort_item_issue.length(); i < tbl_assort_item_issues_length; i++) {
+			JSONObject json_instance = tbl_assort_item_issue.getJSONObject(i);
+			DbHandler.performExecuteInsert(tbl_assort_item_issue_Statement, new Object[]{
+				json_instance.getInt("tbl_assort_free_idassort_free"),
+				json_instance.getInt("tbl_item_iditem"),
+				json_instance.getInt("idassort_item_issue"),
+				json_instance.getInt("afi_qty")
+			});
+		}
+
+		JSONArray tbl_assort_free = freeCalculationDataJson.getJSONArray("tbl_assort_free");
+		for (int i = 0, tbl_assort_item_issues_length = tbl_assort_free.length(); i < tbl_assort_item_issues_length; i++) {
+			JSONObject json_instance = tbl_assort_free.getJSONObject(i);
+			DbHandler.performExecuteInsert(tbl_assort_free_Statement, new Object[]{
+				json_instance.getInt("idassort_free"),
+				json_instance.getString("af_date"),
+				json_instance.getString("af_time"),
+				json_instance.getInt("af_status"),
+				json_instance.getString("af_type"),
+				json_instance.getInt("af_qty"),
+				json_instance.getInt("af_sixone_status"),
+				json_instance.getInt("free_user_type")
+			});
+		}
+
+		JSONArray tbl_assort_item = freeCalculationDataJson.getJSONArray("tbl_assort_item");
+		for (int i = 0, tbl_assort_item_issues_length = tbl_assort_item.length(); i < tbl_assort_item_issues_length; i++) {
+			JSONObject json_instance = tbl_assort_item.getJSONObject(i);
+			DbHandler.performExecuteInsert(tbl_assort_item_Statement, new Object[]{
+				json_instance.getInt("tbl_item_iditem"),
+				json_instance.getInt("idassort_free"),
+				json_instance.getInt("idassort_item")
+			});
+		}
+
+		databaseInstance.close();
+	}
+
+	private static void savePosmToDb(ArrayList<PosmItem> posmItems, Context context) {
+		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseInstance.getWritableDatabase();
+		SQLiteStatement statement = database.compileStatement("insert into tbl_posm_detail (posmDetailId,posmDescription,quantity) values (?,?,?)");
+		try {
+			for (PosmItem posmItem : posmItems) {
+				DbHandler.performExecute(statement, new Object[]{
+					posmItem.getPosmDetailId(),
+					posmItem.getPosmDescription(),
+					posmItem.getQuantity()
+				});
+			}
+		} finally {
+			databaseInstance.close();
+		}
+	}
+
 	private static void saveCategoriesToDb(ArrayList<Category> categories, Context context) {
 		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		try {
 			database.beginTransaction();
 			SQLiteStatement categoryStatement = database.compileStatement("replace into tbl_category(categoryId,categoryDescription) values (?,?)");
-			SQLiteStatement itemStatement = database.compileStatement("replace into tbl_item(itemId,categoryId,itemCode,itemDescription,wholeSalePrice,retailPrice,availableQuantity,loadedQuantity,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName) values (?,?,?,?,?,?,?,?,?,?,?,?)");
-			SQLiteStatement updateStatement = database.compileStatement("update tbl_item set availableQuantity= (availableQuantity-?) where ");
+			SQLiteStatement itemStatement = database.compileStatement("replace into tbl_item(itemId,categoryId,itemCode,itemDescription,wholeSalePrice,retailPrice,availableQuantity,loadedQuantity,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName, freeIssueItemId) values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			for (Category category : categories) {
 				Object[] categoryParameters = {
 					category.getCategoryId(),
@@ -78,7 +155,8 @@ public class ItemController extends AbstractController {
 						(item.isSixPlusOneAvailability()) ? 1 : 0,
 						item.getMinimumFreeIssueQuantity(),
 						item.getFreeIssueQuantity(),
-						item.getItemShortName()
+						item.getItemShortName(),
+						item.getFreeItemId()
 					};
 					DbHandler.performExecuteInsert(itemStatement, itemParameters);
 				}
@@ -97,7 +175,7 @@ public class ItemController extends AbstractController {
 		SQLiteDatabase database = databaseHelper.getWritableDatabase();
 		ArrayList<Category> categories = new ArrayList<Category>();
 		String categorySql = "select categoryId,categoryDescription from tbl_category";
-		String itemSql = "select itemId,itemCode,itemDescription,availableQuantity,loadedQuantity,wholeSalePrice,retailPrice,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName from tbl_item where categoryId=?";
+		String itemSql = "select itemId,itemCode,itemDescription,availableQuantity,loadedQuantity,wholeSalePrice,retailPrice,sixPlusOneAvailability,minimumFreeIssueQuantity,freeIssueQuantity,itemShortName, freeIssueItemId from tbl_item where categoryId=? group by itemId";
 		Cursor categoryCursor = DbHandler.performRawQuery(database, categorySql, null);
 		for (categoryCursor.moveToFirst(); !categoryCursor.isAfterLast(); categoryCursor.moveToNext()) {
 			int categoryId = categoryCursor.getInt(0);
@@ -117,8 +195,7 @@ public class ItemController extends AbstractController {
 					itemCursor.getInt(8),
 					itemCursor.getInt(9),
 					itemCursor.getString(10),
-					12,
-					"Free Issue"
+					itemCursor.getInt(11)
 				));
 			}
 			itemCursor.close();
@@ -147,18 +224,70 @@ public class ItemController extends AbstractController {
 		return unloadingItems;
 	}
 
-	public static int syncUnloading(Context context, JSONArray unloadingStock, int positionId) throws IOException, JSONException {
-		JSONObject responseJson = getJsonObject(CategoryURLPack.CONFIRM_UNLOADING, CategoryURLPack.getUnloadingParameters(positionId, unloadingStock), context);
-		return responseJson != null && responseJson.getBoolean("result") ? UNLOADING_CONFIRMED : UNABLE_TO_CONFIRM_UNLOADING;
+	public static int syncUnloading(Context context, JSONArray unloadingStock, int positionId, int sessionId) throws IOException, JSONException {
+		System.out.println(unloadingStock);
+		JSONObject responseJson = getJsonObject(CategoryURLPack.CONFIRM_UNLOADING, CategoryURLPack.getUnloadingParameters(positionId, unloadingStock, sessionId), context);
+		return responseJson != null && responseJson.getInt("result") == 1 ? UNLOADING_CONFIRMED : UNABLE_TO_CONFIRM_UNLOADING;
 	}
 
-	public static int confirmLoading(Context context, int positionId) throws IOException, JSONException {
-		JSONObject jsonResponse = getJsonObject(CategoryURLPack.CONFIRM_LOADING, CategoryURLPack.getLoadingConfirmParameters(positionId), context);
-		if (jsonResponse != null && jsonResponse.getBoolean("result")) {
+	public static int confirmLoading(Context context, int positionId, int sessionId) throws IOException, JSONException {
+		JSONObject jsonResponse = getJsonObject(CategoryURLPack.CONFIRM_LOADING, CategoryURLPack.getLoadingConfirmParameters(positionId, sessionId), context);
+		if (jsonResponse != null && jsonResponse.getInt("result") == 1) {
 			return LOADING_CONFIRMED;
 		} else {
 			return UNABLE_TO_CONFIRM_LOADING;
 		}
 	}
+
+	public static synchronized int getFreeIssue(int itemId, int quantity, boolean sixPlusOneOutlet, Context context) {
+		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseInstance.getWritableDatabase();
+		String query;
+		if (sixPlusOneOutlet) {
+			query = "select freeIssueQuantity * cast( ? / minimumFreeIssueQuantity as int) as freeIssue from tbl_item where itemId=? and minimumFreeIssueQuantity<=? order by minimumFreeIssueQuantity desc limit 1";
+		} else {
+			query = "select freeIssueQuantity * cast( ? / minimumFreeIssueQuantity as int) as freeIssue from tbl_item where itemId=? and minimumFreeIssueQuantity<=? and sixPlusOneAvailability=0 order by minimumFreeIssueQuantity desc limit 1";
+		}
+		Cursor cursor = DbHandler.performRawQuery(database, query, new Object[]{quantity, itemId, quantity});
+		for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+			return cursor.getInt(0);
+		}
+		return 0;
+	}
+
+	public static ArrayList<PosmItem> getPosmItems(Context context) {
+		SQLiteDatabaseHelper databaseHelper = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseHelper.getWritableDatabase();
+		String posmSql = "select posmDetailId,posmDescription,quantity from tbl_posm_detail";
+		ArrayList<PosmItem> posmItems = new ArrayList<PosmItem>();
+		Cursor posmCursor = DbHandler.performRawQuery(database, posmSql, null);
+		for (posmCursor.moveToFirst(); !posmCursor.isAfterLast(); posmCursor.moveToNext()) {
+			posmItems.add(new PosmItem(
+				posmCursor.getInt(0),
+				posmCursor.getString(1),
+				posmCursor.getInt(2)
+			));
+		}
+		posmCursor.close();
+		databaseHelper.close();
+		return posmItems;
+	}
+/*
+	public static void a(){
+		/*$free_Items = array();
+		if (true) {
+			$this->loadModel('invoice', 'invoice/');
+			$this->loadModel('free_item', 'registration/');
+			$data = $_POST;
+			$rowcount = $data['tbl_product_row_count'];
+			$idoutlet = $data['ai_outlet'];
+			$this->loadModel("outlet", "registration/");
+			$issixone = 0;
+			$outlet = $this->outlet->getoutletbystore($idoutlet);
+			if (count($outlet) > 0)
+				$issixone = $outlet[0]->o_free;
+			$j = 1;
+		int idOutlet = "";
+	}*/
 
 }

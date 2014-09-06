@@ -11,13 +11,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.widget.Toast;
+import android.util.Log;
 import com.ceylon_linux.lucky_lanka.db.DbHandler;
 import com.ceylon_linux.lucky_lanka.db.SQLiteDatabaseHelper;
-import com.ceylon_linux.lucky_lanka.model.Order;
-import com.ceylon_linux.lucky_lanka.model.OrderDetail;
-import com.ceylon_linux.lucky_lanka.model.Outlet;
-import com.ceylon_linux.lucky_lanka.model.Payment;
+import com.ceylon_linux.lucky_lanka.model.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,6 +45,7 @@ public class OrderController extends AbstractController {
 			String orderDetailInsertSQL = "insert into tbl_order_detail(orderId, itemId, price, discount, quantity, freeQuantity, returnQuantity, replaceQuantity, sampleQuantity) values(?,?,?,?,?,?,?,?,?)";
 			String paymentInsertSql = "insert into tbl_current_payment(orderId, paymentDate, amount, chequeDate, chequeNo, branchId) values (?,?,?,?,?,?)";
 			String stockReductionSql = "update tbl_item set availableQuantity=(availableQuantity-?) where itemId=?";
+			String posmSql = "insert into tbl_posm_order_detail(posmDetailId,orderId,quantity) values (?,?,?)";
 			double total = 0;
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
 				total += orderDetail.getPrice() * orderDetail.getQuantity();
@@ -89,7 +87,6 @@ public class OrderController extends AbstractController {
 					payment.getBranchCode()
 				});
 			}
-			Toast.makeText(context, "Payment Details Inserted", Toast.LENGTH_LONG).show();
 			SQLiteStatement stockReductionStatement = database.compileStatement(stockReductionSql);
 			for (OrderDetail orderDetail : order.getOrderDetails()) {
 				DbHandler.performExecuteUpdateDelete(stockReductionStatement, new Object[]{
@@ -97,7 +94,14 @@ public class OrderController extends AbstractController {
 					orderDetail.getItemId()
 				});
 			}
-			Toast.makeText(context, "Order Details Reduced", Toast.LENGTH_LONG).show();
+			SQLiteStatement posmStatement = database.compileStatement(posmSql);
+			for (PosmDetail posmDetail : order.getPosmDetails()) {
+				DbHandler.performExecuteUpdateDelete(posmStatement, new Object[]{
+					posmDetail.getPosmDetailId(),
+					orderId,
+					posmDetail.getQuantity()
+				});
+			}
 			boolean increaseLatestOrderId = UserController.increaseLatestOrderId(context, order.getOrderId());
 			if (increaseLatestOrderId) {
 				database.setTransactionSuccessful();
@@ -105,7 +109,6 @@ public class OrderController extends AbstractController {
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			UserController.decreaseLatestOrderId(context);
-			Toast.makeText(context, "Error", Toast.LENGTH_LONG).show();
 		} finally {
 			database.endTransaction();
 		}
@@ -113,7 +116,8 @@ public class OrderController extends AbstractController {
 	}
 
 	public static boolean syncOrder(Context context, JSONObject orderJson) throws IOException, JSONException {
-		JSONObject responseJson = getJsonObject(OrderURLPack.INSERT_ORDER, OrderURLPack.getParameters(orderJson, UserController.getAuthorizedUser(context).getPositionId()), context);
+		Log.i("order", orderJson.toString());
+		JSONObject responseJson = getJsonObject(OrderURLPack.INSERT_ORDER, OrderURLPack.getParameters(orderJson, UserController.getAuthorizedUser(context).getPositionId(), UserController.getAuthorizedUser(context).getRoutineId()), context);
 		return (responseJson != null) && responseJson.getBoolean("result");
 	}
 
@@ -124,6 +128,7 @@ public class OrderController extends AbstractController {
 			String orderSelectSql = "select tbl_order.orderId, tbl_order.outletId, tbl_order.routeId, tbl_order.positionId, tbl_order.invoiceTime, tbl_order.total, tbl_order.batteryLevel, tbl_order.longitude, tbl_order.latitude, tbl_outlet.outletType from tbl_order inner join tbl_outlet on tbl_outlet.outletId=tbl_order.outletId where tbl_order.syncStatus=0";
 			String orderDetailSelectSql = "select tbl_order_detail.itemId, tbl_order_detail.price, tbl_order_detail.discount, tbl_order_detail.quantity, tbl_order_detail.freeQuantity, tbl_item.itemDescription, tbl_order_detail.returnQuantity, tbl_order_detail.replaceQuantity, tbl_order_detail.sampleQuantity, tbl_item.itemShortName from tbl_order_detail inner join tbl_item on tbl_item.itemId=tbl_order_detail.itemId where orderId=?";
 			String paymentSelectSql = "select paymentId, paymentDate, amount, chequeDate, chequeNo, branchId from tbl_current_payment where orderId=?";
+			String posmSelectSql = "select pod.posmOrderDetailId, pd.posmDescription, pod.posmDetailId, pod.quantity tbl_posm_detail as pd inner join tbl_posm_order_detail as pod on pd.posmDetailId=pd.posmDetailId where orderId=?";
 			Cursor orderCursor = DbHandler.performRawQuery(database, orderSelectSql, null);
 			ArrayList<Order> orders = new ArrayList<Order>();
 			for (orderCursor.moveToFirst(); !orderCursor.isAfterLast(); orderCursor.moveToNext()) {
@@ -138,8 +143,8 @@ public class OrderController extends AbstractController {
 				double latitude = orderCursor.getDouble(8);
 				int outletType = orderCursor.getInt(9);
 				ArrayList<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
+				ArrayList<PosmDetail> posmDetails = new ArrayList<PosmDetail>();
 				ArrayList<Payment> payments = new ArrayList<Payment>();
-
 				Cursor orderDetailsCursor = DbHandler.performRawQuery(database, orderDetailSelectSql, new Object[]{orderId});
 				for (orderDetailsCursor.moveToFirst(); !orderDetailsCursor.isAfterLast(); orderDetailsCursor.moveToNext()) {
 					int itemId = orderDetailsCursor.getInt(0);
@@ -161,7 +166,19 @@ public class OrderController extends AbstractController {
 					orderDetails.add(orderDetail);
 				}
 				orderDetailsCursor.close();
-				Order order = new Order(orderId, outletId, null, positionId, routeId, invoiceTime, longitude, latitude, batteryLevel, orderDetails);
+
+				Cursor posmCursor = DbHandler.performRawQuery(database, posmSelectSql, new Object[]{orderId});
+				for (posmCursor.moveToFirst(); !posmCursor.isAfterLast(); posmCursor.moveToNext()) {
+					posmDetails.add(new PosmDetail(
+						posmCursor.getInt(0),
+						posmCursor.getInt(2),
+						posmCursor.getString(1),
+						posmCursor.getInt(3)
+					));
+				}
+				posmCursor.close();
+
+				Order order = new Order(orderId, outletId, null, positionId, routeId, invoiceTime, longitude, latitude, batteryLevel, orderDetails, posmDetails);
 				orders.add(order);
 
 				Cursor paymentDetailsCursor = DbHandler.performRawQuery(database, paymentSelectSql, new Object[]{orderId});
@@ -173,7 +190,7 @@ public class OrderController extends AbstractController {
 						new Date(paymentDetailsCursor.getLong(3)),
 						paymentDetailsCursor.getString(4),
 						paymentDetailsCursor.getInt(5),
-						paymentDetailsCursor.getInt(6) == 1
+						(byte) paymentDetailsCursor.getInt(6)
 					);
 					payments.add(payment);
 				}
