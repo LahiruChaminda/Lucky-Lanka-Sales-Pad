@@ -111,4 +111,12 @@ public class User implements Serializable {
 	public boolean isValidUser() {
 		return validUser;
 	}
+
+	public long getLastOrderId() {
+		return lastOrderId;
+	}
+
+	public void setLastOrderId(long lastOrderId) {
+		this.lastOrderId = lastOrderId;
+	}
 }

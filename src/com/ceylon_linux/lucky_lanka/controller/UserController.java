@@ -81,6 +81,7 @@ public class UserController extends AbstractController {
 		editor.putLong("loginTime", user.getLoginTime());
 		editor.putBoolean("loading", false);
 		editor.putBoolean("unloading", false);
+		editor.putLong("orderId", user.getLastOrderId());
 		return editor.commit();
 	}
 
@@ -178,7 +179,7 @@ public class UserController extends AbstractController {
 
 	public static long getInvoiceId(Context context) {
 		SharedPreferences userData = context.getSharedPreferences("userData", Context.MODE_PRIVATE);
-		long nextInvoiceId = userData.getLong("lastOrderId", 0) + 1;
+		long nextInvoiceId = userData.getLong("orderId", 0) + 1;
 		if (nextInvoiceId == 1) {
 			NumberFormat numberFormat = NumberFormat.getInstance();
 			numberFormat.setMaximumIntegerDigits(7);
@@ -186,7 +187,7 @@ public class UserController extends AbstractController {
 			numberFormat.setMinimumIntegerDigits(7);
 			nextInvoiceId = Long.parseLong(userData.getInt("userId", 0) + "" + numberFormat.format(nextInvoiceId));
 			SharedPreferences.Editor editor = userData.edit();
-			editor.putLong("lastOrderId", nextInvoiceId);
+			editor.putLong("orderId", nextInvoiceId);
 			editor.commit();
 			return nextInvoiceId;
 		} else {

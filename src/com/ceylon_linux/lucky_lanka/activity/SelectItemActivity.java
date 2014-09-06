@@ -236,9 +236,9 @@ public class SelectItemActivity extends Activity implements Serializable {
 	}
 
 	private void calculateFreeIssues() {
-		switch (outlet.getOutletType()) {
+		/*switch (outlet.getOutletType()) {
 
-		}
+		}*/
 		HashMap<Integer, OrderDetail> freeIssuesMap = new HashMap<Integer, OrderDetail>() {
 			@Override
 			public OrderDetail put(Integer key, OrderDetail value) {

@@ -170,7 +170,6 @@ public class LoadAddInvoiceActivity extends Activity {
 				outletType = "Discount without free";
 				break;
 			default:
-				outletType = "Unknown outlet type";
 				throw new IllegalArgumentException("Unknown outlet type");
 		}
 		Toast.makeText(LoadAddInvoiceActivity.this, outletType, Toast.LENGTH_SHORT).show();
@@ -179,27 +178,31 @@ public class LoadAddInvoiceActivity extends Activity {
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd");
 		for (final Invoice invoice : invoices) {
-			View pendingDetailsItemView = layoutInflater.inflate(R.layout.pending_details_item, null);
-			TextView txtInvoiceNo = (TextView) pendingDetailsItemView.findViewById(R.id.txtInvoiceNo);
-			TextView txtDate = (TextView) pendingDetailsItemView.findViewById(R.id.txtDate);
-			TextView txtAmount = (TextView) pendingDetailsItemView.findViewById(R.id.txtAmount);
-			TextView txtPaid = (TextView) pendingDetailsItemView.findViewById(R.id.txtPaid);
-			TextView txtBalance = (TextView) pendingDetailsItemView.findViewById(R.id.txtBalance);
+			double invoiceBalanceValue;
+			if ((invoiceBalanceValue = invoice.getBalanceValue()) != 0) {
+				View pendingDetailsItemView = layoutInflater.inflate(R.layout.pending_details_item, null);
+				TextView txtInvoiceNo = (TextView) pendingDetailsItemView.findViewById(R.id.txtInvoiceNo);
+				TextView txtDate = (TextView) pendingDetailsItemView.findViewById(R.id.txtDate);
+				TextView txtAmount = (TextView) pendingDetailsItemView.findViewById(R.id.txtAmount);
+				TextView txtPaid = (TextView) pendingDetailsItemView.findViewById(R.id.txtPaid);
+				TextView txtBalance = (TextView) pendingDetailsItemView.findViewById(R.id.txtBalance);
 
-			txtInvoiceNo.setText(String.valueOf(invoice.getInvoiceId()));
-			txtDate.setText(dateFormat.format(invoice.getDate()));
-			txtAmount.setText(String.valueOf(invoice.getAmount()));
-			txtPaid.setText(String.valueOf(invoice.getPaidValue()));
-			txtBalance.setText(String.valueOf(invoice.getBalanceValue()));
-			pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent outstandingPaymentActivity = new Intent(LoadAddInvoiceActivity.this, OutstandingPaymentActivity.class);
-					outstandingPaymentActivity.putExtra("invoice", invoice);
-					startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
-				}
-			});
-			pendingDetailsTable.addView(pendingDetailsItemView);
+				txtInvoiceNo.setText(String.valueOf(invoice.getInvoiceId()));
+				txtDate.setText(dateFormat.format(invoice.getDate()));
+				txtAmount.setText(String.valueOf(invoice.getAmount()));
+				txtPaid.setText(String.valueOf(invoice.getPaidValue()));
+				txtBalance.setText(String.valueOf(invoiceBalanceValue));
+
+				pendingDetailsItemView.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent outstandingPaymentActivity = new Intent(LoadAddInvoiceActivity.this, OutstandingPaymentActivity.class);
+						outstandingPaymentActivity.putExtra("invoice", invoice);
+						startActivityForResult(outstandingPaymentActivity, REQUEST_OUTSTANDING_PAYMENTS);
+					}
+				});
+				pendingDetailsTable.addView(pendingDetailsItemView);
+			}
 		}
 	}
 
