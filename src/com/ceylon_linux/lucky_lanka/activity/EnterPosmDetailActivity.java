@@ -37,7 +37,10 @@ public class EnterPosmDetailActivity extends Activity {
 	private void initialize() {
 		posmItem = (PosmItem) getIntent().getSerializableExtra("posm");
 		inputRequestedQuantity = (EditText) findViewById(R.id.inputRequestedQuantity);
-		inputRequestedQuantity.setText(String.valueOf(getIntent().getIntExtra("quantity", 0)));
+		int requestedQuantity;
+		if ((requestedQuantity = getIntent().getIntExtra("quantity", 0)) != 0) {
+			inputRequestedQuantity.setText(String.valueOf(requestedQuantity));
+		}
 		btnOk = (Button) findViewById(R.id.btnOk);
 		btnCancel = (Button) findViewById(R.id.btnCancel);
 		btnOk.setOnClickListener(new View.OnClickListener() {

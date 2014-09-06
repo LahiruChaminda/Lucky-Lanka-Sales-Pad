@@ -48,7 +48,6 @@ public class SelectItemActivity extends Activity implements Serializable {
 	private transient ArrayList<Category> categories;
 	private transient ArrayList<OrderDetail> orderDetails;
 	private transient ArrayList<OrderDetail> freeIssues;
-	private transient volatile Item item;
 	private transient Location location;
 	private transient ArrayList<Item> availableStock = new ArrayList<Item>();
 	private transient ArrayList<Item> unAvailableStock = new ArrayList<Item>();
@@ -134,7 +133,7 @@ public class SelectItemActivity extends Activity implements Serializable {
 	}
 
 	private boolean itemListOnChildClicked(ExpandableListView expandableListView, View view, final int groupPosition, int childPosition, long id) {
-		this.item = (groupPosition == 0) ? availableStock.get(childPosition) : unAvailableStock.get(childPosition);
+		Item item = (groupPosition == 0) ? availableStock.get(childPosition) : unAvailableStock.get(childPosition);
 		Intent enterItemDetailsActivity = new Intent(SelectItemActivity.this, EnterItemDetailsActivity.class);
 		enterItemDetailsActivity.putExtra("item", item);
 		enterItemDetailsActivity.putExtra("outlet", outlet);
@@ -224,6 +223,7 @@ public class SelectItemActivity extends Activity implements Serializable {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == ENTER_ITEM_DETAILS && resultCode == RESULT_OK) {
 			OrderDetail orderDetail = (OrderDetail) data.getSerializableExtra("orderDetail");
+			orderDetail.setFreeIssue(0);
 			orderDetails.add(orderDetail);
 			calculateFreeIssues();
 			expandableListAdapter.notifyDataSetChanged();
@@ -236,28 +236,23 @@ public class SelectItemActivity extends Activity implements Serializable {
 	}
 
 	private void calculateFreeIssues() {
-		/*switch (outlet.getOutletType()) {
-
-		}*/
 		HashMap<Integer, OrderDetail> freeIssuesMap = new HashMap<Integer, OrderDetail>() {
 			@Override
 			public OrderDetail put(Integer key, OrderDetail value) {
 				if (super.containsKey(key)) {
 					OrderDetail orderDetail = super.get(key);
 					orderDetail.setFreeIssue(orderDetail.getFreeIssue() + value.getFreeIssue());
-					return super.put(key, orderDetail);
-				} else {
-					return super.put(key, value);
+					value = orderDetail;
 				}
+				return super.put(key, value);
 			}
 		};
 		for (OrderDetail instance : orderDetails) {
-			OrderDetail freeIssueDetail = OrderDetail.getFreeIssueDetail(outlet, item, instance.getQuantity(), SelectItemActivity.this);
+			OrderDetail freeIssueDetail = OrderDetail.getFreeIssueDetail(outlet, instance, instance.getQuantity(), SelectItemActivity.this);
 			freeIssuesMap.put(instance.getItemId(), freeIssueDetail);
 		}
 		freeIssues.clear();
 		freeIssues.addAll(freeIssuesMap.values());
-		expandableListAdapter.notifyDataSetChanged();
 	}
 
 	private static class GroupViewHolder {
@@ -285,6 +280,7 @@ public class SelectItemActivity extends Activity implements Serializable {
 					OrderDetail obsoleteDetail = super.get(index);
 					obsoleteDetail.setFreeIssue(obsoleteDetail.getFreeIssue() + orderDetail.getFreeIssue());
 					super.set(index, obsoleteDetail);
+					return true;
 				}
 				return super.add(orderDetail);
 			}
@@ -375,12 +371,14 @@ public class SelectItemActivity extends Activity implements Serializable {
 
 		@Override
 		public void notifyDataSetChanged() {
-			combinedOrderDetails.clear();
-			combinedOrderDetails.addAll(orderDetails);
-			for (OrderDetail orderDetail : freeIssues) {
-				combinedOrderDetails.add(orderDetail);
+			synchronized (SelectItemActivity.this) {
+				combinedOrderDetails.clear();
+				combinedOrderDetails.addAll(orderDetails);
+				for (OrderDetail orderDetail : freeIssues) {
+					combinedOrderDetails.add(orderDetail);
+				}
+				super.notifyDataSetChanged();
 			}
-			super.notifyDataSetChanged();
 		}
 
 		private ChildViewHolder updateView(ChildViewHolder childViewHolder, Item item, View view) {

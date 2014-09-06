@@ -42,6 +42,18 @@ public class OrderDetail implements Serializable {
 		this.itemShortName = itemShortName;
 	}
 
+	private OrderDetail(OrderDetail orderDetail, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
+		this.itemId = orderDetail.getItemId();
+		this.itemDescription = orderDetail.getItemDescription();
+		this.quantity = quantity;
+		this.freeIssue = freeIssue;
+		this.price = orderDetail.getPrice();
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
+	}
+
 	private OrderDetail(String itemDescription, int quantity, int freeIssue, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName, int itemId) {
 		this.itemId = itemId;
 		this.itemDescription = itemDescription;
@@ -58,6 +70,17 @@ public class OrderDetail implements Serializable {
 		this.itemDescription = item.getItemDescription();
 		this.quantity = quantity;
 		this.price = item.getRetailSalePrice() * (100 - discountPercentage) / 100;
+		this.returnQuantity = returnQuantity;
+		this.replaceQuantity = replaceQuantity;
+		this.sampleQuantity = sampleQuantity;
+		this.itemShortName = itemShortName;
+	}
+
+	private OrderDetail(OrderDetail orderDetail, int quantity, double discountPercentage, int returnQuantity, int replaceQuantity, int sampleQuantity, String itemShortName) {
+		this.itemId = orderDetail.getItemId();
+		this.itemDescription = orderDetail.getItemDescription();
+		this.quantity = quantity;
+		this.price = orderDetail.getPrice() * (100 - discountPercentage) / 100;
 		this.returnQuantity = returnQuantity;
 		this.replaceQuantity = replaceQuantity;
 		this.sampleQuantity = sampleQuantity;
@@ -134,6 +157,32 @@ public class OrderDetail implements Serializable {
 			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
 				discountPercentage = outlet.getOutletDiscount();
 				return new OrderDetail(item, quantity, discountPercentage, 0, 0, 0, item.getItemShortName());
+			default:
+				throw new IllegalArgumentException("Unknown outlet type");
+		}
+	}
+
+	public static final OrderDetail getFreeIssueDetail(Outlet outlet, OrderDetail orderDetail, int quantity, Context context) {
+		int freeIssue;
+		double discountPercentage;
+		switch (outlet.getOutletType()) {
+			case Outlet.PHARMACY:
+			case Outlet.RETAIL_OUTLET:
+			case Outlet.CANTEEN:
+			case Outlet.BAKER:
+			case Outlet.HOTEL:
+			case Outlet.WELFARE_SHOPS:
+			case Outlet.OTHER:
+			case Outlet.STORES:
+				freeIssue = ItemController.getFreeIssue(orderDetail.getItemId(), quantity, false, context);
+				return new OrderDetail(orderDetail, quantity, freeIssue, 0, 0, 0, orderDetail.getItemShortName());
+			case Outlet.WHOLESALE_OUTLET:
+				freeIssue = ItemController.getFreeIssue(orderDetail.getItemId(), quantity, true, context);
+				return new OrderDetail(orderDetail, quantity, freeIssue, 0, 0, 0, orderDetail.getItemShortName());
+			case Outlet.SUPER_MARKET:
+			case Outlet.SPECIAL_DISCOUNT_WITHOUT_FREE:
+				discountPercentage = outlet.getOutletDiscount();
+				return new OrderDetail(orderDetail, quantity, discountPercentage, 0, 0, 0, orderDetail.getItemShortName());
 			default:
 				throw new IllegalArgumentException("Unknown outlet type");
 		}
