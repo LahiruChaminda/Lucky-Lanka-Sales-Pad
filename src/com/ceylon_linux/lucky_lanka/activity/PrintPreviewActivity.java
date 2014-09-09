@@ -25,7 +25,6 @@ import com.ceylon_linux.lucky_lanka.model.Order;
 import com.ceylon_linux.lucky_lanka.model.OrderDetail;
 import com.ceylon_linux.lucky_lanka.model.Outlet;
 import com.ceylon_linux.lucky_lanka.model.Payment;
-import com.ceylon_linux.lucky_lanka.util.ProgressDialogGenerator;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class PrintPreviewActivity extends Activity {
 	private void btnPrintClicked(View view) {
 		if (bluetoothSocket == null) {
 			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PrintPreviewActivity.this);
-			alertBuilder.setTitle("Lucky Lanka Sales Pad");
+			alertBuilder.setTitle(R.string.app_name);
 			alertBuilder.setMessage("Printer is not connected");
 			alertBuilder.setPositiveButton("Setup Printer", new DialogInterface.OnClickListener() {
 				@Override
@@ -128,8 +127,7 @@ public class PrintPreviewActivity extends Activity {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						progressDialog = ProgressDialogGenerator.generateProgressDialog(PrintPreviewActivity.this, "Processing...", false);
-						progressDialog.show();
+						progressDialog = ProgressDialog.show(PrintPreviewActivity.this, null, "Processing...");
 					}
 				});
 				try {
