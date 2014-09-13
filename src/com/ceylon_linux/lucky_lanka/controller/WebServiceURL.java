@@ -107,6 +107,7 @@ abstract class WebServiceURL {
 		}
 
 		public static final String GET_OUTLETS = webServiceURL + "getRouteAndOutlets";
+		public static final String REGISTER_OUTLET = webServiceURL + "reg_outlet";
 	}
 
 	protected static final class OrderURLPack {

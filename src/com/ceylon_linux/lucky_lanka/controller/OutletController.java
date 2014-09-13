@@ -20,9 +20,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -229,5 +231,14 @@ public class OutletController extends AbstractController {
 
 		}
 		database.close();
+	}
+
+	public static boolean registerNewOutlet(Context context, File image, JSONObject json) throws IOException, JSONException {
+		HashMap<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("image", image);
+		parameters.put("data", json);
+		parameters.put("position_id", UserController.getAuthorizedUser(context).getPositionId());
+		JSONObject response = getJsonObject(OutletURLPack.REGISTER_OUTLET, parameters, context);
+		return response != null && response.getInt("result") == 1;
 	}
 }

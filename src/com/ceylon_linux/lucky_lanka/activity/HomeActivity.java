@@ -42,6 +42,7 @@ public class HomeActivity extends Activity {
 	private TextView txtUserName;
 	private Button btnSignOut;
 	private Button btnStart;
+	private Button btnOutletAdd;
 	private Button btnAvailableStock;
 
 	@Override
@@ -145,6 +146,7 @@ public class HomeActivity extends Activity {
 	private void initialize() {
 		btnStart = (Button) findViewById(R.id.btnStart);
 		btnSignOut = (Button) findViewById(R.id.btnSignOut);
+		btnOutletAdd = (Button) findViewById(R.id.btnOutletAdd);
 		txtName = (TextView) findViewById(R.id.txtName);
 		txtAddress = (TextView) findViewById(R.id.txtAddress);
 		btnAvailableStock = (Button) findViewById(R.id.btnAvailableStock);
@@ -153,6 +155,12 @@ public class HomeActivity extends Activity {
 			@Override
 			public void onClick(View view) {
 				btnStartClicked(view);
+			}
+		});
+		btnOutletAdd.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnOutletAddClicked(v);
 			}
 		});
 		btnSignOut.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +177,12 @@ public class HomeActivity extends Activity {
 		});
 	}
 	// </editor-fold>
+
+	private void btnOutletAddClicked(View view) {
+		Intent addOutletActivity = new Intent(HomeActivity.this, AddOutletActivity.class);
+		startActivity(addOutletActivity);
+		finish();
+	}
 
 	private void btnAvailableStockClicked(View view) {
 		if (UserController.isLoadingConfirmed(HomeActivity.this)) {

@@ -272,22 +272,6 @@ public class ItemController extends AbstractController {
 		databaseHelper.close();
 		return posmItems;
 	}
-/*
-	public static void a(){
-		/*$free_Items = array();
-		if (true) {
-			$this->loadModel('invoice', 'invoice/');
-			$this->loadModel('free_item', 'registration/');
-			$data = $_POST;
-			$rowcount = $data['tbl_product_row_count'];
-			$idoutlet = $data['ai_outlet'];
-			$this->loadModel("outlet", "registration/");
-			$issixone = 0;
-			$outlet = $this->outlet->getoutletbystore($idoutlet);
-			if (count($outlet) > 0)
-				$issixone = $outlet[0]->o_free;
-			$j = 1;
-		int idOutlet = "";
-	}*/
+
 
 }
