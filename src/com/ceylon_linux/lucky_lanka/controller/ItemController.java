@@ -23,6 +23,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -273,5 +275,43 @@ public class ItemController extends AbstractController {
 		return posmItems;
 	}
 
+	public static HashMap<Integer, Integer> getAssociativeFreeIssue(Context context, String itemIds) {
+		String sql = "SELECT tai.idassort_free, tai.tbl_item_iditem, taf.af_qty FROM (select distinct stai.idassort_free from tbl_assort_item as stai inner join tbl_assort_free staf ON stai.idassort_free = staf.idassort_free where stai.tbl_item_iditem in (?) nd staf.af_status = 1 and staf.af_sixone_status = 0 and staf.af_type = 'assort') tmp inner join tbl_assort_free taf ON tmp.idassort_free = taf.idassort_free inner join tbl_assort_item tai ON taf.idassort_free = tai.idassort_free order by tai.idassort_free";
+		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
+		SQLiteDatabase database = databaseInstance.getWritableDatabase();
+		Cursor cursor = DbHandler.performRawQuery(database, sql, new Object[]{itemIds});
+		HashSet<Assort> assortSet = new HashSet<Assort>();
+		for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+			Assort assort = new Assort();
+			assort.idassort_free = cursor.getInt(0);
+			assort.tbl_item_iditem = cursor.getInt(1);
+			assort.af_qty = cursor.getInt(2);
+			assortSet.add(assort);
+			//assortSet.
+		}
+		return null;
+	}
 
+	private static class Assort {
+		int idassort_free;
+		int tbl_item_iditem;
+		int af_qty;
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Assort assort = (Assort) o;
+
+			if (idassort_free != assort.idassort_free) return false;
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return idassort_free;
+		}
+	}
 }

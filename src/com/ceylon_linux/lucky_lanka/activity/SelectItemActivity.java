@@ -32,6 +32,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * @author Supun Lakshan Wanigarathna Dissanayake
@@ -251,6 +252,19 @@ public class SelectItemActivity extends Activity implements Serializable {
 			OrderDetail freeIssueDetail = OrderDetail.getFreeIssueDetail(outlet, instance, instance.getQuantity(), SelectItemActivity.this);
 			freeIssuesMap.put(instance.getItemId(), freeIssueDetail);
 		}
+		//--
+		HashMap<Integer, Integer> items_details = new HashMap<Integer, Integer>();
+		for (OrderDetail orderDetail : orderDetails) {
+			items_details.put(orderDetail.getItemId(), orderDetail.getQuantity());
+		}
+		Set<Integer> itemIdSet = items_details.keySet();
+		StringBuilder itemIdsStringBuilder = new StringBuilder();
+		for (Integer itemId : itemIdSet) {
+			itemIdsStringBuilder.append(itemId + ",");
+		}
+		String itemIds = itemIdsStringBuilder.toString();
+		itemIds = itemIds.substring(0, itemIds.lastIndexOf(','));
+		ItemController.getAssociativeFreeIssue(SelectItemActivity.this, itemIds);
 		freeIssues.clear();
 		freeIssues.addAll(freeIssuesMap.values());
 	}
