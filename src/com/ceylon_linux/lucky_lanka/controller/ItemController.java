@@ -275,37 +275,82 @@ public class ItemController extends AbstractController {
 		return posmItems;
 	}
 
-	public static HashMap<Integer, Integer> getAssociativeFreeIssue(Context context, String itemIds) {
+	public static HashMap<Integer, Integer> getAssociativeFreeIssue(Context context, String itemIds, HashMap<Integer, Integer> data) {
 		String sql = "SELECT tai.idassort_free, tai.tbl_item_iditem, taf.af_qty FROM (select distinct stai.idassort_free from tbl_assort_item as stai inner join tbl_assort_free staf ON stai.idassort_free = staf.idassort_free where stai.tbl_item_iditem in (?) nd staf.af_status = 1 and staf.af_sixone_status = 0 and staf.af_type = 'assort') tmp inner join tbl_assort_free taf ON tmp.idassort_free = taf.idassort_free inner join tbl_assort_item tai ON taf.idassort_free = tai.idassort_free order by tai.idassort_free";
 		SQLiteDatabaseHelper databaseInstance = SQLiteDatabaseHelper.getDatabaseInstance(context);
 		SQLiteDatabase database = databaseInstance.getWritableDatabase();
 		Cursor cursor = DbHandler.performRawQuery(database, sql, new Object[]{itemIds});
 		HashSet<Assort> assortSet = new HashSet<Assort>();
+		ArrayList<Assort> assortArrayList = null;
 		for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 			Assort assort = new Assort();
 			assort.idassort_free = cursor.getInt(0);
-			assort.tbl_item_iditem = cursor.getInt(1);
 			assort.af_qty = cursor.getInt(2);
+			assortArrayList = new ArrayList<Assort>(assortSet);
 			assortSet.add(assort);
-			//assortSet.
+			Assort oldAssort = assortArrayList.get(assortArrayList.indexOf(assort));
+			oldAssort.tbl_item_iditem.add(cursor.getInt(1));
+		}
+		cursor.close();
+		ArrayList<Free> freeList = new ArrayList();
+		if (assortArrayList != null) {
+			for (Assort assort : assortArrayList) {
+				boolean exists = true;
+				double thisTurnTotal = 0;
+				for (Integer integer : assort.tbl_item_iditem) {
+					if (data.containsKey(integer)) {
+						thisTurnTotal += data.get(integer);
+					} else {
+						exists = false;
+						break;
+					}
+				}
+				if (exists && thisTurnTotal >= assort.af_qty) {
+					freeList.add(new Free(assort.idassort_free, (int) Math.floor(thisTurnTotal / assort.af_qty)));
+				}
+			}
+			ArrayList<AssortIssue> a = new ArrayList();
+			for (Free free : freeList) {
+				Cursor cursor1 = DbHandler.performRawQuery(database, "SELECT tbl_item_iditem, afi_qty * ? as afi_qty FROM tbl_assort_item_issue tafi where tafi.idassort_item_issue = ?", new Object[]{free.multiply, free.idassort_free});
+				for (cursor1.moveToFirst(); !cursor1.isAfterLast(); cursor1.moveToNext()) {
+					a.add(new AssortIssue(cursor1.getInt(0), cursor1.getInt(1)));
+				}
+			}
 		}
 		return null;
 	}
 
+	private static class AssortIssue {
+		int tbl_item_iditem;
+		int afi_qty;
+
+		private AssortIssue(int tbl_item_iditem, int afi_qty) {
+			this.tbl_item_iditem = tbl_item_iditem;
+			this.afi_qty = afi_qty;
+		}
+	}
+
+	private static class Free {
+		int idassort_free;
+		int multiply;
+
+		private Free(int idassort_free, int multiply) {
+			this.idassort_free = idassort_free;
+			this.multiply = multiply;
+		}
+	}
+
 	private static class Assort {
 		int idassort_free;
-		int tbl_item_iditem;
+		ArrayList<Integer> tbl_item_iditem;
 		int af_qty;
 
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
-
 			Assort assort = (Assort) o;
-
 			if (idassort_free != assort.idassort_free) return false;
-
 			return true;
 		}
 
