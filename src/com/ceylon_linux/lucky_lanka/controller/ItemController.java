@@ -293,6 +293,7 @@ public class ItemController extends AbstractController {
 		}
 		cursor.close();
 		ArrayList<Free> freeList = new ArrayList();
+		ArrayList<AssortIssue> assortIssues = new ArrayList();
 		if (assortArrayList != null) {
 			for (Assort assort : assortArrayList) {
 				boolean exists = true;
@@ -309,15 +310,19 @@ public class ItemController extends AbstractController {
 					freeList.add(new Free(assort.idassort_free, (int) Math.floor(thisTurnTotal / assort.af_qty)));
 				}
 			}
-			ArrayList<AssortIssue> a = new ArrayList();
 			for (Free free : freeList) {
 				Cursor cursor1 = DbHandler.performRawQuery(database, "SELECT tbl_item_iditem, afi_qty * ? as afi_qty FROM tbl_assort_item_issue tafi where tafi.idassort_item_issue = ?", new Object[]{free.multiply, free.idassort_free});
 				for (cursor1.moveToFirst(); !cursor1.isAfterLast(); cursor1.moveToNext()) {
-					a.add(new AssortIssue(cursor1.getInt(0), cursor1.getInt(1)));
+					assortIssues.add(new AssortIssue(cursor1.getInt(0), cursor1.getInt(1)));
 				}
+				cursor1.close();
 			}
 		}
-		return null;
+		HashMap<Integer, Integer> result = new HashMap<Integer, Integer>();
+		for (AssortIssue assortIssue : assortIssues) {
+			result.put(assortIssue.tbl_item_iditem, assortIssue.afi_qty);
+		}
+		return result;
 	}
 
 	private static class AssortIssue {

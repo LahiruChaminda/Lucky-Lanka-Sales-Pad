@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -260,11 +261,15 @@ public class SelectItemActivity extends Activity implements Serializable {
 		Set<Integer> itemIdSet = items_details.keySet();
 		StringBuilder itemIdsStringBuilder = new StringBuilder();
 		for (Integer itemId : itemIdSet) {
-			itemIdsStringBuilder.append(itemId + ",");
+			itemIdsStringBuilder.append(itemId + ',');
 		}
 		String itemIds = itemIdsStringBuilder.toString();
 		itemIds = itemIds.substring(0, itemIds.lastIndexOf(','));
-		ItemController.getAssociativeFreeIssue(SelectItemActivity.this, itemIds);
+		HashMap<Integer, Integer> associativeFreeIssue = ItemController.getAssociativeFreeIssue(SelectItemActivity.this, itemIds, items_details);
+		for (Integer key : associativeFreeIssue.keySet()) {
+			Integer value = associativeFreeIssue.get(key);
+			Log.i("key is " + key, " value is " + value);
+		}
 		freeIssues.clear();
 		freeIssues.addAll(freeIssuesMap.values());
 	}
